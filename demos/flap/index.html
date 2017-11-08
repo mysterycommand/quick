@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script src="../../src/quick.js"></script>
+
+		<style>
+			#assets {
+				height: 1px;
+				overflow: hidden;
+				visibility: hidden;
+				width: 1px;
+			}
+
+			body {
+				background-color: Black;
+				margin: 0;
+				overflow: hidden;
+				padding: 0;
+			}
+
+			canvas {
+				cursor: none;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div align="center">
+			<canvas id="canvas" width="256" height="192"></canvas>
+		</div>
+
+		<div id="assets">
+			<img id="birdSprite0" src="sprites/bird0.png" width="16" height="16" />
+			<img id="birdSprite1" src="sprites/bird1.png" width="16" height="16" />
+			<img id="birdSprite2" src="sprites/bird2.png" width="16" height="16" />
+
+			<img id="cloudSprite" src="sprites/cloud.png" width="175" height="42" />
+
+			<img id="fogSprite0" src="sprites/fog0.png" width="512" height="192" />
+			<img id="fogSprite1" src="sprites/fog1.png" width="512" height="192" />
+
+			<audio id="fallSound" src="sounds/fall.ogg"></audio>
+			<audio id="flapSound" src="sounds/flap.ogg"></audio>
+		</div>
+
+		<script src="main.js"></script>
+	</body>
+</html>
