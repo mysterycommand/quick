@@ -871,7 +871,7 @@
 
 		Scene.prototype.add = function (gameObject) {
 			gameObject.setScene(this);
-			gameObject.init();
+			gameObject.init(this);
 			this.nextObjects.push(gameObject);
 			gameObject.move(gameObject.getSpeedX() * -1, gameObject.getSpeedY() * -1);
 		};
@@ -1735,8 +1735,8 @@
 			return this.tags[tag]
 		};
 
-		GameObject.prototype.init = function () {
-			this.delegate && this.delegate.init && this.delegate.init();
+		GameObject.prototype.init = function (scene) {
+			this.delegate && this.delegate.init && this.delegate.init(scene);
 		};
 
 		GameObject.prototype.onCollision = function (gameObject) {
