@@ -1805,22 +1805,22 @@
 		return GameObject;
 	})();
 
-	var Text = (function () {
+	var TextObject = (function () {
 		var SPACE = 4;
 		var SPACING = 0;
 
-		function Text(string) {
+		function TextObject(string) {
 			GameObject.call(this);
 			this.setString(string || "");
 		}
 
-		Text.prototype = Object.create(GameObject.prototype);
+		TextObject.prototype = Object.create(GameObject.prototype);
 
-		Text.prototype.getString = function () {
+		TextObject.prototype.getString = function () {
 			return this.string;
 		};
 
-		Text.prototype.parse = function (context) {
+		TextObject.prototype.parse = function (context) {
 			var height = 0;
 			var width = 0;
 			var x = 0;
@@ -1857,16 +1857,16 @@
 			this.setHeight(y + height);
 		};
 
-		Text.prototype.render = function (context) {
+		TextObject.prototype.render = function (context) {
 			this.parse(context);
 		};
 
-		Text.prototype.setString = function (string) {
+		TextObject.prototype.setString = function (string) {
 			this.string = string;
 			this.parse();
 		};
 
-		return Text;
+		return TextObject;
 	})();
 
 	var BaseTile = (function () {
@@ -1930,7 +1930,7 @@
 			"Rect": Rect,
 			"Scene": Scene,
 			"Sprite": Sprite,
-			"Text": Text
+			"TextObject": TextObject
 		};
 	}
 
