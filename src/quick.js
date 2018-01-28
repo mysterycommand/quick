@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, 2017 Diogo Schneider
+ * Copyright (c) 2014, 2018 Diogo Schneider
  *
  * Released under The MIT License (MIT)
  *
@@ -10,10 +10,8 @@
   'use strict';
 
   const ANALOG_THRESHOLD = 0.5;
-  const DEFAULT_FRAME_TIME = 30;
-  const DEFAULT_KEEP_ASPECT = false;
+  const DEFAULT_FRAME_TIME = 16;
   const DEFAULT_SOUND_EFFECTS_VOLUME = 0.3;
-
 
   const AxisEnum = {
     LEFT_X: 0,
@@ -117,12 +115,13 @@
 
   let autoScale = true;
   let canvas;
+  let context;
   let everyOther = true;
-  let frameTime;
-  let keepAspect = DEFAULT_KEEP_ASPECT;
+  let frameTime = DEFAULT_FRAME_TIME;
+  let keepAspect = false;
   let input;
-  let isRunning;
   let isTransitioning = false;
+  let lastRender;
   let name = 'Quick Game';
   let numberOfLayers = 1;
   let realWidth = 0;
@@ -138,17 +137,17 @@
     static init(firstSceneFactory, canvasElement) {
       sceneFactory = firstSceneFactory;
       canvas = canvasElement || document.getElementsByTagName('canvas')[0];
+      context = canvas.getContext('2d');
       width = canvas.width;
       height = canvas.height;
       realWidth = width;
       realHeight = height;
       input = new Input();
-      isRunning = true;
+      lastRender = Date.now();
       sound = new Sound();
       addEventListener('resize', scale, false);
       autoScale && scale();
       polyfill();
-      this.setFrameTime();
 
       for (let i = 0; i < numberOfLayers; ++i) {
         renderableLists.push(new RenderableList());
@@ -162,8 +161,7 @@
     }
 
     static clear() {
-      const CONTEXT = canvas.getContext('2d');
-      CONTEXT.clearRect(0, 0, width, height);
+      context.clearRect(0, 0, width, height);
     }
 
     static fadeOut() {
@@ -274,7 +272,7 @@
     }
 
     static setKeepAspect(customKeepAspect) {
-      keepAspect = customKeepAspect || DEFAULT_KEEP_ASPECT;
+      keepAspect = customKeepAspect == undefined || customKeepAspect;
     }
 
     static setName(customName) {
@@ -1749,8 +1747,6 @@
   }
 
   function loop() {
-    const START_TIME = Date.now();
-    const CONTEXT = canvas.getContext('2d');
     everyOther = !everyOther;
     input.update();
 
@@ -1773,17 +1769,7 @@
     }
 
     sound.update();
-
-    for (let i = 0; i < renderableLists.length; ++i) {
-      renderableLists[i].render(CONTEXT);
-    }
-
-    const ELAPSED_TIME = Date.now() - START_TIME;
-    const INTERVAL = frameTime - ELAPSED_TIME;
-
-    setTimeout(() => {
-      isRunning && requestAnimationFrame(loop);
-    }, INTERVAL);
+    requestAnimationFrame(render);
   }
 
   function polyfill() {
@@ -1792,6 +1778,15 @@
         callback();
       };
     }
+  }
+
+  function render() {
+    for (let i = 0; i < renderableLists.length; ++i) {
+      renderableLists[i].render(context);
+    }
+
+    setTimeout(loop, frameTime + lastRender - Date.now());
+    lastRender = Date.now();
   }
 
   function scale() {
