@@ -7,606 +7,538 @@
  */
 
 (function () {
-	"use strict";
+	'use strict';
 
-	var CommandEnum = {
-		"UP": 0,
-		"DOWN": 1,
-		"LEFT": 2,
-		"RIGHT": 3,
-		"A": 4,
-		"B": 5,
-		"X": 6,
-		"Y": 7,
-		"SELECT": 8,
-		"START": 9
+	const ANALOG_THRESHOLD = 0.5;
+	const DEFAULT_FRAME_TIME = 30;
+	const DEFAULT_KEEP_ASPECT = false;
+	const DEFAULT_SOUND_EFFECTS_VOLUME = 0.3;
+
+
+	const AxisEnum = {
+		LEFT_X: 0,
+		LEFT_Y: 1,
+		RIGHT_X: 2,
+		RIGHT_Y: 3
 	};
 
-	var Quick  = (function () {
-		var DEFAULT_FRAME_TIME = 30;
-		var DEFAULT_KEEP_ASPECT = false;
-		var LOADING_TIMEOUT = 100;
+	const ButtonEnum = {
+		A: 0,
+		B: 1,
+		X: 2,
+		Y: 3,
+		L1: 4,
+		R1: 5,
+		L2: 6,
+		R2: 7,
+		SELECT: 8,
+		START: 9,
+		L3: 10,
+		R3: 11,
+		UP: 12,
+		DOWN: 13,
+		LEFT: 14,
+		RIGHT: 15
+	};
 
-		var autoScale = true;
-		var canvas;
-		var everyOther = true;
-		var frameTime;
-		var keepAspect = DEFAULT_KEEP_ASPECT;
-		var images;
-		var input;
-		var isRunning;
-		var isTransitioning = false;
-		var name = "Quick Game";
-		var numberOfLayers = 1;
-		var realWidth = 0;
-		var realHeight = 0;
-		var renderableLists = [];
-		var scene;
-		var sceneFactory;
-		var sound;
-		var transition;
-		var width = 0, height = 0;
-		var Quick = {};
+	const CommandEnum = {
+		UP: 0,
+		DOWN: 1,
+		LEFT: 2,
+		RIGHT: 3,
+		A: 4,
+		B: 5,
+		X: 6,
+		Y: 7,
+		SELECT: 8,
+		START: 9
+	};
 
-		Quick.init = function (firstSceneFactory, canvasElement) {
+	const KeyEnum = {
+		ENTER: 13,
+		SHIFT: 16,
+		CTRL: 17,
+		ALT: 18,
+		ESC: 27,
+		SPACE: 32,
+		LEFT: 37,
+		UP: 38,
+		RIGHT: 39,
+		DOWN: 40,
+		D: 68,
+		E: 69,
+		F: 70,
+		I: 73,
+		J: 74,
+		K: 75,
+		L: 76,
+		S: 83,
+		F5: 116,
+		F11: 122,
+		F12: 123
+	};
+
+	const ButtonToCommandMap = {};
+		ButtonToCommandMap[ButtonEnum.UP] = CommandEnum.UP;
+		ButtonToCommandMap[ButtonEnum.DOWN] = CommandEnum.DOWN;
+		ButtonToCommandMap[ButtonEnum.LEFT] = CommandEnum.LEFT;
+		ButtonToCommandMap[ButtonEnum.RIGHT] = CommandEnum.RIGHT;
+		ButtonToCommandMap[ButtonEnum.A] = CommandEnum.A;
+		ButtonToCommandMap[ButtonEnum.B] = CommandEnum.B;
+		ButtonToCommandMap[ButtonEnum.X] = CommandEnum.X;
+		ButtonToCommandMap[ButtonEnum.Y] = CommandEnum.Y;
+		ButtonToCommandMap[ButtonEnum.START] = CommandEnum.START;
+		ButtonToCommandMap[ButtonEnum.SELECT] = CommandEnum.SELECT;
+
+	const KeyToCommandMap = {};
+		KeyToCommandMap[KeyEnum.UP] = CommandEnum.UP;
+		KeyToCommandMap[KeyEnum.E] = CommandEnum.UP;
+		KeyToCommandMap[KeyEnum.I] = CommandEnum.UP;
+		KeyToCommandMap[KeyEnum.DOWN] = CommandEnum.DOWN;
+		KeyToCommandMap[KeyEnum.D] = CommandEnum.DOWN;
+		KeyToCommandMap[KeyEnum.K] = CommandEnum.DOWN;
+		KeyToCommandMap[KeyEnum.LEFT] = CommandEnum.LEFT;
+		KeyToCommandMap[KeyEnum.S] = CommandEnum.LEFT;
+		KeyToCommandMap[KeyEnum.J] = CommandEnum.LEFT;
+		KeyToCommandMap[KeyEnum.RIGHT] = CommandEnum.RIGHT;
+		KeyToCommandMap[KeyEnum.F] = CommandEnum.RIGHT;
+		KeyToCommandMap[KeyEnum.L] = CommandEnum.RIGHT;
+		KeyToCommandMap[KeyEnum.SPACE] = CommandEnum.A;
+		KeyToCommandMap[KeyEnum.ALT] = CommandEnum.B;
+		KeyToCommandMap[KeyEnum.CTRL] = CommandEnum.X;
+		KeyToCommandMap[KeyEnum.SHIFT] = CommandEnum.Y;
+		KeyToCommandMap[KeyEnum.ENTER] = CommandEnum.START;
+		KeyToCommandMap[KeyEnum.ESC] = CommandEnum.SELECT;
+
+	const PassThrough = [];
+		PassThrough[KeyEnum.F5] = true;
+		PassThrough[KeyEnum.F11] = true;
+		PassThrough[KeyEnum.F12] = true;
+
+	let autoScale = true;
+	let canvas;
+	let everyOther = true;
+	let frameTime;
+	let keepAspect = DEFAULT_KEEP_ASPECT;
+	let input;
+	let isRunning;
+	let isTransitioning = false;
+	let name = 'Quick Game';
+	let numberOfLayers = 1;
+	let realWidth = 0;
+	let realHeight = 0;
+	let renderableLists = [];
+	let scene;
+	let sceneFactory;
+	let sound;
+	let transition;
+	let width = 0, height = 0;
+
+	class Quick {
+		static init(firstSceneFactory, canvasElement) {
 			sceneFactory = firstSceneFactory;
-			canvas = canvasElement || document.getElementsByTagName("canvas")[0];
+			canvas = canvasElement || document.getElementsByTagName('canvas')[0];
 			width = canvas.width;
 			height = canvas.height;
 			realWidth = width;
 			realHeight = height;
-			images = document.getElementsByTagName("img");
 			input = new Input();
 			isRunning = true;
 			sound = new Sound();
-			addEventListener("resize", scale, false);
+			addEventListener('resize', scale, false);
 			autoScale && scale();
 			polyfill();
 			this.setFrameTime();
 
-			for (var i = 0; i < numberOfLayers; ++i) {
+			for (let i = 0; i < numberOfLayers; ++i) {
 				renderableLists.push(new RenderableList());
 			}
 
-			load();
-		};
+			boot();
+		}
 
-		Quick.addControllerDevice = function (device) {
+		static addControllerDevice(device) {
 			input.addController(device);
-		};
+		}
 
-		Quick.clear = function () {
-			var context = canvas.getContext("2d");
-			context.clearRect(0, 0, width, height);
-		};
+		static clear() {
+			const CONTEXT = canvas.getContext('2d');
+			CONTEXT.clearRect(0, 0, width, height);
+		}
 
-		Quick.fadeOut = function () {
+		static fadeOut() {
 			sound.fadeOut();
-		};
+		}
 
-		Quick.getBoundary = function () {
+		static getBoundary() {
 			return new Rect(0, 0, Quick.getWidth(), Quick.getHeight());
-		};
+		}
 
-		Quick.getBottom = function () {
+		static getBottom() {
 			return height - 1;
-		};
+		}
 
-		Quick.getCenter = function () {
+		static getCenter() {
 			return new Point(this.getCenterX(), this.getCenterY());
-		};
+		}
 
-		Quick.getCenterX = function () {
+		static getCenterX() {
 			return Math.floor(this.getWidth() / 2);
-		};
+		}
 
-		Quick.getCenterY = function () {
+		static getCenterY() {
 			return Math.floor(this.getHeight() / 2);
-		};
+		}
 
-		Quick.getHeight = function () {
+		static getHeight() {
 			return height;
-		};
+		}
 
-		Quick.getOffsetLeft = function () {
+		static getOffsetLeft() {
 			return canvas.offsetLeft;
-		};
+		}
 
-		Quick.getOffsetTop = function () {
+		static getOffsetTop() {
 			return canvas.offsetTop;
-		};
+		}
 
-		Quick.getRight = function () {
+		static getRight() {
 			return width - 1;
-		};
+		}
 
-		Quick.getController = function (id) {
+		static getController(id) {
 			return input.getController(id);
-		};
+		}
 
-		Quick.getEveryOther = function () {
+		static getEveryOther() {
 			return everyOther;
-		};
+		}
 
-		Quick.getFrameTime = function () {
+		static getFrameTime() {
 			return frameTime;
-		};
+		}
 
-		Quick.getPointer = function (id) {
+		static getPointer(id) {
 			return input.getPointer(id);
-		};
+		}
 
-		Quick.getRealHeight = function () {
+		static getRealHeight() {
 			return realHeight;
-		};
+		}
 
-		Quick.getRealWidth = function () {
+		static getRealWidth() {
 			return realWidth;
-		};
+		}
 
-		Quick.getWidth = function () {
+		static getWidth() {
 			return width;
-		};
+		}
 
-		Quick.load = function () {
+		static load() {
 			return localStorage.saveData && JSON.parse(localStorage.saveData);
-		};
+		}
 
-		Quick.mute = function () {
+		static mute() {
 			sound.mute();
-		};
+		}
 
-		Quick.paint = function (renderable, index) {
-			var layer = renderableLists[index || 0];
+		static paint(renderable, index) {
+			const layer = renderableLists[index || 0];
 			layer.add(renderable);
-		};
+		}
 
-		Quick.play = function (id) {
+		static play(id) {
 			sound.play(id);
-		};
+		}
 
-		Quick.playTheme = function (name) {
+		static playTheme(name) {
 			sound.playTheme(name);
-		};
+		}
 
-		Quick.random = function (ceil) {
-			var random = Math.random();
-			var raw = random * (ceil + 1);
+		static random(ceil) {
+			const random = Math.random();
+			const raw = random * (ceil + 1);
 			return Math.floor(raw);
-		};
+		}
 
-		Quick.save = function (data) {
+		static save(data) {
 			localStorage.saveData = JSON.stringify(data);
-		};
+		}
 
-		Quick.setAutoScale = function (customAutoScale) {
+		static setAutoScale(customAutoScale) {
 			autoScale = customAutoScale == undefined || customAutoScale;
-		};
+		}
 
-		Quick.setFrameTime = function (customFrameTime) {
+		static setFrameTime(customFrameTime) {
 			frameTime = customFrameTime || DEFAULT_FRAME_TIME;
-		};
+		}
 
-		Quick.setKeepAspect = function (customKeepAspect) {
+		static setKeepAspect(customKeepAspect) {
 			keepAspect = customKeepAspect || DEFAULT_KEEP_ASPECT;
-		};
+		}
 
-		Quick.setName = function (customName) {
+		static setName(customName) {
 			name = customName;
 			document.title = name;
-		};
+		}
 
-		Quick.setNumberOfLayers = function (customNumberOfLayers) {
+		static setNumberOfLayers(customNumberOfLayers) {
 			numberOfLayers = customNumberOfLayers;
-		};
+		}
 
-		Quick.stopTheme = function () {
+		static stopTheme() {
 			sound.stopTheme();
-		};
-
-		function load() {
-			for (var i = 0; i < images.length; ++i) {
-				var image = images[i];
-
-				if (!image.complete) {
-					setTimeout(onTimeout, LOADING_TIMEOUT);
-					return;
-				}
-			}
-
-			scene = sceneFactory();
-			loop();
-
-			function onTimeout() {
-				load();
-			}
 		}
 
-		function loop() {
-			var startTime = Date.now();
-			var context = canvas.getContext("2d");
-			everyOther = !everyOther;
-			input.update();
+	}
 
-			if (transition != null) {
-				if (transition.sync()) {
-					transition = null;
-				}
-			} else {
-				if (isTransitioning) {
-					isTransitioning = false;
-					scene = scene.getNext();
-				}
-
-				if (scene.sync()) {
-					isTransitioning = true;
-					transition = scene.getTransition();
-				} else {
-					scene.update();
-				}
-			}
-
-			sound.update();
-
-			for (var i = 0; i < renderableLists.length; ++i) {
-				var layer = renderableLists[i];
-				layer.render(context);
-			}
-
-			var elapsedTime = Date.now() - startTime;
-			var interval = frameTime - elapsedTime;
-			setTimeout(onTimeout, interval);
-
-			function onTimeout() {
-				isRunning && requestAnimationFrame(loop);
-			}
+	class ImageFactory {
+		static flip(image) {
+			return ImageFactory.invert(image, false, true);
 		}
 
-		function polyfill() {
-			if (!window.requestAnimationFrame) {
-				window.requestAnimationFrame = requestAnimationFrameFacade;
-			}
-
-			function requestAnimationFrameFacade(functionReference) {
-				functionReference();
-			}
+		static mirror(image) {
+			return ImageFactory.invert(image, true, false);
 		}
 
-		function scale() {
-			var width, height;
-
-			if (keepAspect) {
-				var proportion = window.innerWidth / canvas.width;
-
-				if (window.innerHeight < canvas.height * proportion) {
-					proportion = window.innerHeight / canvas.height;
-				}
-
-				width = canvas.width * proportion;
-				height = canvas.height * proportion
-			} else {
-				width = window.innerWidth;
-				height = window.innerHeight;
-			}
-
-			realWidth = width;
-			realHeight = height;
-			canvas.style.width = width + "px";
-			canvas.style.height = height + "px";
-		}
-
-		return Quick;
-	})();
-
-	var ImageFactory = (function () {
-		var ImageFactory = {};
-
-		ImageFactory.flip = function (image) {
-			return invert(image, false, true);
-		};
-
-		ImageFactory.mirror = function (image) {
-			return invert(image, true, false);
-		};
-
-		ImageFactory.rotate = function (image, degrees) {
+		static rotate(image, degrees) {
 			if (degrees % 360 == 0 ) {
 				return image;
 			}
 
-			var radians = toRadians(degrees);
-			var canvas = document.createElement("canvas");
-			var sideA = image.width;
-			var sideB = image.height;
+			const RADIANS = toRadians(degrees);
+			const IMAGE = document.createElement('canvas');
+			let sideA = image.width;
+			let sideB = image.height;
 
 			if (degrees == 90 || degrees == 270) {
 				sideA = image.height;
 				sideB = image.width;
 			}
 
-			canvas.width = sideA;
-			canvas.height = sideB;
-			var context = canvas.getContext("2d");
-			context.translate(canvas.width / 2, canvas.height / 2);
-			context.rotate(radians);
-			context.drawImage(image, -image.width / 2, -image.height / 2);
-			return canvas;
+			IMAGE.width = sideA;
+			IMAGE.height = sideB;
+			const CONTEXT = IMAGE.getContext('2d');
+			CONTEXT.translate(IMAGE.width / 2, IMAGE.height / 2);
+			CONTEXT.rotate(RADIANS);
+			CONTEXT.drawImage(image, -image.width / 2, -image.height / 2);
+			return IMAGE;
 		};
 
-		function invert(image, isMirror, isFlip) {
-			var canvas = document.createElement("canvas");
-			canvas.width = image.width;
-			canvas.height = image.height;
-			var context = canvas.getContext("2d");
-			context.translate(isMirror ? canvas.width : 0, isFlip ? canvas.height : 0);
-			context.scale(isMirror ? -1 : 1, isFlip ? - 1 : 1);
-			context.drawImage(image, 0, 0);
-			return canvas;
+		static invert(image, isMirror, isFlip) {
+			const IMAGE = document.createElement('canvas');
+			IMAGE.width = image.width;
+			IMAGE.height = image.height;
+			const CONTEXT = IMAGE.getContext('2d');
+			CONTEXT.translate(isMirror ? IMAGE.width : 0, isFlip ? IMAGE.height : 0);
+			CONTEXT.scale(isMirror ? -1 : 1, isFlip ? - 1 : 1);
+			CONTEXT.drawImage(image, 0, 0);
+			return IMAGE;
 		}
+	}
 
-		return ImageFactory;
-	})();
-
-	var Mouse = (function () {
-		function Mouse(event) {
-			var that = this;
-			this.buffer = false;
+	class Mouse {
+		constructor(event) {
+			event.preventDefault();
+			this.isDown = true;
 			this.position = new Point();
-			addEventListener("mousedown", onMouseDown, false);
-			addEventListener("mousemove", onMouseMove, false);
-			addEventListener("mouseup", onMouseUp, false);
-			event && onMouseDown(event);
 
-			function onMouseDown(event) {
+			addEventListener('mousedown', (event) => {
 				event.preventDefault();
-				that.buffer = true;
-			}
+				this.isDown = true;
+			}, false);
 
-			function onMouseUp(event) {
+			addEventListener('mousemove', (event) => {
 				event.preventDefault();
-				that.buffer = false;
-			}
+				this.updateCoordinates(event);
+			}, false);
 
-			function onMouseMove(event) {
+			addEventListener('mouseup', (event) => {
 				event.preventDefault();
-				that.updateCoordinates(event);
-			}
+				this.isDown = false;
+			}, false);
 		}
 
-		Mouse.prototype.getCommand = function () {
-			return this.buffer;
-		};
+		getCommand() {
+			return this.isDown;
+		}
 
-		Mouse.prototype.getX = function () {
+		getX() {
 			return this.position.getX();
-		};
+		}
 
-		Mouse.prototype.getY = function () {
+		getY() {
 			return this.position.getY();
-		};
+		}
 
-		Mouse.prototype.updateCoordinates = function (event) {
+		updateCoordinates(event) {
 			this.position.setX(event.x || event.clientX);
 			this.position.setY(event.y || event.clientY);
-		};
+		}
+	}
 
-		return Mouse;
-	})();
-
-	var Touch = (function () {
-		function Touch(event) {
-			var that = this;
-			this.buffer = false;
+	class Touch {
+		constructor(event) {
+			event.preventDefault();
+			this.isDown = true;
 			this.position = new Point();
-			addEventListener("touchend", onTouchEnd, false);
-			addEventListener("touchmove", onTouchMove, false);
-			addEventListener("touchstart", onTouchStart, false);
-			onTouchStart(event);
+			this.updateCoordinates(event);
 
-			function onTouchEnd(event) {
+			addEventListener('touchend', (event) => {
 				event.preventDefault();
-				that.buffer = false;
-				that.updateCoordinates(event);
-			}
+				this.isDown = false;
+				this.updateCoordinates(event);
+			}, false);
 
-			function onTouchMove(event) {
+			addEventListener('touchmove', (event) => {
 				event.preventDefault();
-				that.updateCoordinates(event);
-			}
+				this.updateCoordinates(event);
+			}, false);
 
-			function onTouchStart(event) {
+			addEventListener('touchstart', () => {
 				event.preventDefault();
-				that.buffer = true;
-				that.updateCoordinates(event);
-			}
+				this.isDown = true;
+				this.updateCoordinates(event);
+			}, false);
 		}
 
-		Touch.prototype.getCommand = function () {
-			return this.buffer;
-		};
+		getCommand() {
+			return this.isDown;
+		}
 
-		Touch.prototype.getX = function () {
+		getX() {
 			return this.position.getX();
-		};
+		}
 
-		Touch.prototype.getY = function () {
+		getY() {
 			return this.position.getY();
-		};
+		}
 
-		Touch.prototype.updateCoordinates = function (event) {
-			var touches = event["changedTouches"];
-			var touch = touches[0];
-			this.position.setX(touch.pageX);
-			this.position.setY(touch.pageY);
-		};
+		updateCoordinates(event) {
+			const TOUCHES = event['changedTouches'];
+			const TOUCH = TOUCHES[0];
+			this.position.setX(TOUCH.pageX);
+			this.position.setY(TOUCH.pageY);
+		}
+	}
 
-		return Touch;
-	})();
-
-	var Pointer = (function () {
-		function Pointer() {
+	class Pointer {
+		constructor() {
 			this.active = false;
 			this.device = null;
 			this.hold = false;
 			this.position = new Point();
 		}
 
-		Pointer.prototype.getDown = function () {
+		getDown() {
 			return this.active;
-		};
+		}
 
-		Pointer.prototype.getPush = function () {
+		getPush() {
 			return this.active && !this.hold;
-		};
+		}
 
-		Pointer.prototype.setDevice = function (device) {
+		setDevice(device) {
 			this.device = device;
-		};
+		}
 
-		Pointer.prototype.update = function () {
+		update() {
 			if (!this.device) {
 				return;
 			}
 
 			this.hold = false;
-			var last = this.active;
+			const LAST = this.active;
 			this.active = this.device.getCommand();
 
-			if (this.active && last) {
+			if (this.active && LAST) {
 				this.hold = true;
 			}
 
-			var realX = this.device.getX() - Quick.getOffsetLeft();
-			var realY = this.device.getY() - Quick.getOffsetTop();
-			this.position.setX(Math.floor(realX * Quick.getWidth() / Quick.getRealWidth()));
-			this.position.setY(Math.floor(realY * Quick.getHeight() / Quick.getRealHeight()));
-		};
+			const REAL_X = this.device.getX() - Quick.getOffsetLeft();
+			const REAL_Y = this.device.getY() - Quick.getOffsetTop();
+			this.position.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
+			this.position.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
+		}
 
-		Pointer.prototype.getPosition = function () {
+		getPosition() {
 			return this.position;
-		};
+		}
+	}
 
-		return Pointer;
-	})();
-
-	var Controller = (function () {
-		function Controller() {
+	class Controller {
+		constructor() {
 			this.active = {};
 			this.device = null;
 			this.hold = {};
 		}
 
-		Controller.prototype.keyDown = function (commandEnum) {
+		keyDown(commandEnum) {
 			return this.active[commandEnum];
-		};
+		}
 
-		Controller.prototype.keyPush = function (commandEnum) {
+		keyPush(commandEnum) {
 			return this.active[commandEnum] && !this.hold[commandEnum];
-		};
+		}
 
-		Controller.prototype.setDevice = function (device) {
+		setDevice(device) {
 			this.device = device;
-		};
+		}
 
-		Controller.prototype.update = function () {
+		update() {
 			if (!this.device) {
 				return;
 			}
 
 			this.hold = {};
-			var last = this.active;
+			const LAST = this.active;
 			this.active = this.device.getCommands();
 
-			for (var i in this.active) {
+			for (let i in this.active) {
 				if (this.active.hasOwnProperty(i)) {
-					if (last[i]) {
+					if (LAST[i]) {
 						this.hold[i] = true;
 					}
 				}
 			}
-		};
+		}
+	}
 
-		return Controller;
-	})();
-
-	var GamePad = (function () {
-		var ANALOG_THRESHOLD = 0.5;
-
-		var AxisEnum = {
-			"LEFT_X": 0,
-			"LEFT_Y": 1,
-			"RIGHT_X": 2,
-			"RIGHT_Y": 3
-		};
-
-		var ButtonEnum = {
-			"A": 0,
-			"B": 1,
-			"X": 2,
-			"Y": 3,
-			"L1": 4,
-			"R1": 5,
-			"L2": 6,
-			"R2": 7,
-			"SELECT": 8,
-			"START": 9,
-			"L3": 10,
-			"R3": 11,
-			"UP": 12,
-			"DOWN": 13,
-			"LEFT": 14,
-			"RIGHT": 15
-		};
-
-		var ButtonToCommandMap = {};
-			ButtonToCommandMap[ButtonEnum.UP] = CommandEnum.UP;
-			ButtonToCommandMap[ButtonEnum.DOWN] = CommandEnum.DOWN;
-			ButtonToCommandMap[ButtonEnum.LEFT] = CommandEnum.LEFT;
-			ButtonToCommandMap[ButtonEnum.RIGHT] = CommandEnum.RIGHT;
-			ButtonToCommandMap[ButtonEnum.A] = CommandEnum.A;
-			ButtonToCommandMap[ButtonEnum.B] = CommandEnum.B;
-			ButtonToCommandMap[ButtonEnum.X] = CommandEnum.X;
-			ButtonToCommandMap[ButtonEnum.Y] = CommandEnum.Y;
-			ButtonToCommandMap[ButtonEnum.START] = CommandEnum.START;
-			ButtonToCommandMap[ButtonEnum.SELECT] = CommandEnum.SELECT;
-
-		function GamePad(id) {
+	class GamePad {
+		constructor(id) {
 			this.id = id || 0;
 		}
 
-		GamePad.prototype.getCommands = function () {
-			var result = {};
+		getCommands() {
+			const BUTTONS = Input.getGamePadButtons(this.id);
+			const RESULT = {};
 
 			if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_Y] < - ANALOG_THRESHOLD) {
-				result[CommandEnum.UP] = true;
+				RESULT[CommandEnum.UP] = true;
 			} else if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_Y] > ANALOG_THRESHOLD) {
-				result[CommandEnum.DOWN] = true;
+				RESULT[CommandEnum.DOWN] = true;
 			}
 
 			if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_X] < - ANALOG_THRESHOLD) {
-				result[CommandEnum.LEFT] = true;
+				RESULT[CommandEnum.LEFT] = true;
 			} else if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_X] > ANALOG_THRESHOLD) {
-				result[CommandEnum.RIGHT] = true;
+				RESULT[CommandEnum.RIGHT] = true;
 			}
 
-			var buttons = Input.getGamePadButtons(this.id);
-
-			for (var i in ButtonToCommandMap) {
+			for (let i in ButtonToCommandMap) {
 				if (ButtonToCommandMap.hasOwnProperty(i)) {
-					if (buttons[i] && buttons[i]["pressed"]) {
-						result[ButtonToCommandMap[i]] = true;
+					if (BUTTONS[i] && BUTTONS[i]['pressed']) {
+						RESULT[ButtonToCommandMap[i]] = true;
 					}
 				}
 			}
 
-			return result;
+			return RESULT;
 		};
+	}
 
-		return GamePad;
-	})();
-
-	var Input = (function () {
-		function Input() {
+	class Input {
+		constructor() {
 			this.controllers = [];
 			this.controllerQueue = [];
 			this.controllerRequestQueue = [];
@@ -614,252 +546,170 @@
 			this.pointerQueue = [];
 			this.pointerRequestQueue = [];
 			this.gamePads = 0;
-			this.waitKeyboard();
-			this.waitMouse();
-			this.waitTouch();
+
+			const ON_KEY_DOWN = (event) => {
+				removeEventListener('keydown', ON_KEY_DOWN);
+				const keyboard = new Keyboard(event);
+				this.addController(keyboard);
+			};
+
+			const ON_MOUSE_DOWN = (event) => {
+				removeEventListener('mousedown', ON_MOUSE_DOWN);
+				this.addPointer(new Mouse(event));
+			};
+
+			const ON_TOUCH_START = (event) => {
+				removeEventListener('touchstart', ON_TOUCH_START);
+				this.addPointer(new Touch(event));
+			};
+
+			addEventListener('keydown', ON_KEY_DOWN, false);
+			addEventListener('mousedown', ON_MOUSE_DOWN, false);
+			addEventListener('touchstart', ON_TOUCH_START, false);
 		}
 
-		Input.getGamePadAxes = function (id) {
+		static getGamePadAxes(id) {
 			if (getGamePads()[id]) {
-				return getGamePads()[id]["axes"];
+				return getGamePads()[id]['axes'];
 			}
 
 			return [];
-		};
+		}
 
-		Input.getGamePadButtons = function (id) {
-			var gamePad = getGamePads()[id];
-			return gamePad && gamePad.buttons || [];
-		};
+		static getGamePadButtons(id) {
+			const GAME_PAD = getGamePads()[id];
+			return GAME_PAD && GAME_PAD.buttons || [];
+		}
 
-		Input.prototype.addController = function (device) {
+		addController(device) {
 			this.controllerQueue.push(device);
 			this.checkControllerQueues();
-		};
+		}
 
-		Input.prototype.addPointer = function (device) {
+		addPointer(device) {
 			this.pointerQueue.push(device);
 			this.checkPointerQueues();
-		};
+		}
 
-		Input.prototype.checkGamePads = function () {
+		checkGamePads() {
 			if (getGamePads()[this.gamePads]) {
 				this.addController(new GamePad(this.gamePads++));
 			}
-		};
+		}
 
-		Input.prototype.checkControllerQueues = function () {
+		checkControllerQueues() {
 			if (this.controllerRequestQueue.length > 0 && this.controllerQueue.length > 0) {
-				var requester = this.controllerRequestQueue.shift();
-				var device = this.controllerQueue.shift();
-				requester.setDevice(device);
+				const REQUESTER = this.controllerRequestQueue.shift();
+				const DEVICE = this.controllerQueue.shift();
+				REQUESTER.setDevice(DEVICE);
 			}
-		};
+		}
 
-		Input.prototype.checkPointerQueues = function () {
+		checkPointerQueues() {
 			if (this.pointerRequestQueue.length > 0 && this.pointerQueue.length > 0) {
-				var requester = this.pointerRequestQueue.shift();
-				var device = this.pointerQueue.shift();
-				requester.setDevice(device);
+				const REQUESTER = this.pointerRequestQueue.shift();
+				const DEVICE = this.pointerQueue.shift();
+				REQUESTER.setDevice(DEVICE);
 			}
-		};
+		}
 
-		Input.prototype.getController = function (id) {
-			id = id || 0;
-
+		getController(id = 0) {
 			if (this.controllers.length < id + 1) {
-				var controller = new Controller();
-				this.controllers.push(controller);
-				this.controllerRequestQueue.push(controller);
+				const CONTROLLER = new Controller();
+				this.controllers.push(CONTROLLER);
+				this.controllerRequestQueue.push(CONTROLLER);
 				this.checkControllerQueues();
 			}
 
 			return this.controllers[id];
-		};
+		}
 
-		Input.prototype.getPointer = function (id) {
-			id = id || 0;
-
+		getPointer(id = 0) {
 			if (this.pointers.length < id + 1) {
-				var pointer = new Pointer();
-				this.pointers.push(pointer);
-				this.pointerRequestQueue.push(pointer);
+				const POINTER = new Pointer();
+				this.pointers.push(POINTER);
+				this.pointerRequestQueue.push(POINTER);
 				this.checkPointerQueues();
 			}
 
 			return this.pointers[id];
-		};
+		}
 
-		Input.prototype.update = function () {
+		update() {
 			this.checkGamePads();
 
-			for (var i in this.controllers) {
+			for (let i in this.controllers) {
 				if (this.controllers.hasOwnProperty(i)) {
-					var controller = this.controllers[i];
-					controller.update();
+					this.controllers[i].update();
 				}
 			}
 
-			for (var j in this.pointers) {
+			for (let j in this.pointers) {
 				if (this.pointers.hasOwnProperty(j)) {
-					var pointer = this.pointers[j];
-					pointer.update();
+					this.pointers[j].update();
 				}
 			}
-		};
-
-		Input.prototype.waitKeyboard = function () {
-			var that = this;
-			addEventListener("keydown", onKeyDown, false);
-
-			function onKeyDown(event) {
-				removeEventListener("keydown", onKeyDown, false);
-				that.addController(new Keyboard(event));
-			}
-		};
-
-		Input.prototype.waitMouse = function () {
-			var that = this;
-			addEventListener("mousedown", onMouseDown, false);
-
-			function onMouseDown(event) {
-				removeEventListener("mousedown", onMouseDown, false);
-				that.addPointer(new Mouse(event));
-			}
-		};
-
-		Input.prototype.waitTouch = function () {
-			var that = this;
-			addEventListener("touchstart", onTouchStart, false);
-
-			function onTouchStart(event) {
-				removeEventListener("touchstart", onTouchStart, false);
-				that.addPointer(new Touch(event));
-			}
-		};
-
-		function getGamePads() {
-			if (navigator.getGamepads) {
-				return navigator.getGamepads();
-			}
-
-			return [];
 		}
+	}
 
-		return Input;
-	})();
-
-	var Keyboard = (function () {
-		var KeyEnum = {
-			"ENTER": 13,
-			"SHIFT": 16,
-			"CTRL": 17,
-			"ALT": 18,
-			"ESC": 27,
-			"SPACE": 32,
-			"LEFT": 37,
-			"UP": 38,
-			"RIGHT": 39,
-			"DOWN": 40,
-			"D": 68,
-			"E": 69,
-			"F": 70,
-			"I": 73,
-			"J": 74,
-			"K": 75,
-			"L": 76,
-			"S": 83,
-			"F5": 116,
-			"F11": 122,
-			"F12": 123
-		};
-
-		var KeyToCommandMap = {};
-			KeyToCommandMap[KeyEnum.UP] = CommandEnum.UP;
-			KeyToCommandMap[KeyEnum.E] = CommandEnum.UP;
-			KeyToCommandMap[KeyEnum.I] = CommandEnum.UP;
-			KeyToCommandMap[KeyEnum.DOWN] = CommandEnum.DOWN;
-			KeyToCommandMap[KeyEnum.D] = CommandEnum.DOWN;
-			KeyToCommandMap[KeyEnum.K] = CommandEnum.DOWN;
-			KeyToCommandMap[KeyEnum.LEFT] = CommandEnum.LEFT;
-			KeyToCommandMap[KeyEnum.S] = CommandEnum.LEFT;
-			KeyToCommandMap[KeyEnum.J] = CommandEnum.LEFT;
-			KeyToCommandMap[KeyEnum.RIGHT] = CommandEnum.RIGHT;
-			KeyToCommandMap[KeyEnum.F] = CommandEnum.RIGHT;
-			KeyToCommandMap[KeyEnum.L] = CommandEnum.RIGHT;
-			KeyToCommandMap[KeyEnum.SPACE] = CommandEnum.A;
-			KeyToCommandMap[KeyEnum.ALT] = CommandEnum.B;
-			KeyToCommandMap[KeyEnum.CTRL] = CommandEnum.X;
-			KeyToCommandMap[KeyEnum.SHIFT] = CommandEnum.Y;
-			KeyToCommandMap[KeyEnum.ENTER] = CommandEnum.START;
-			KeyToCommandMap[KeyEnum.ESC] = CommandEnum.SELECT;
-
-		var PassThrough = [];
-			PassThrough[KeyEnum.F5] = true;
-			PassThrough[KeyEnum.F11] = true;
-			PassThrough[KeyEnum.F12] = true;
-
-		function Keyboard(event) {
-			var that = this;
+	class Keyboard {
+		constructor(event) {
 			this.buffer = {};
-			addEventListener("keydown", onKeyDown, false);
-			addEventListener("keyup", onKeyUp, false);
-			onKeyDown(event);
+			this.onKeyDown(event);
 
-			function onKeyDown(event) {
-				PassThrough[event.keyCode] || event.preventDefault();
-				onKey(event.keyCode, true);
-			}
+			addEventListener('keydown', (event) => {
+				this.onKeyDown(event);
+			}, false);
 
-			function onKeyUp(event) {
-				onKey(event.keyCode, false);
-			}
-
-			function onKey(keyCode, isDown) {
-				that.buffer[KeyToCommandMap[keyCode]] = isDown;
-			}
+			addEventListener('keyup', (event) => {
+				this.onKey(event.keyCode, false);
+			}, false);
 		}
 
-		Keyboard.prototype.getCommands = function () {
-			var result = {};
+		getCommands() {
+			const RESULT = {};
 
-			for (var i in this.buffer) {
+			for (let i in this.buffer) {
 				if (this.buffer.hasOwnProperty(i)) {
 					if (this.buffer[i]) {
-						result[i] = true;
+						RESULT[i] = true;
 					}
 				}
 			}
 
-			return result;
-		};
+			return RESULT;
+		}
 
-		return Keyboard;
-	})();
+		onKey(keyCode, isDown) {
+			this.buffer[KeyToCommandMap[keyCode]] = isDown;
+		}
 
-	var RenderableList = (function () {
-		function RenderableList() {
+		onKeyDown(event) {
+			PassThrough[event.keyCode] || event.preventDefault();
+			this.onKey(event.keyCode, true);
+		}
+	}
+
+	class RenderableList {
+		constructor() {
 			this.elements = [];
 		}
 
-		RenderableList.prototype.add = function (renderable) {
+		add(renderable) {
 			this.elements.push(renderable);
-		};
+		}
 
-		RenderableList.prototype.render = function (context) {
-			for (var i = 0; i < this.elements.length; ++i) {
-				var renderable = this.elements[i];
-				renderable.render(context);
+		render(context) {
+			for (let i = 0; i < this.elements.length; ++i) {
+				this.elements[i].render(context);
 			}
 
 			this.elements.length = 0;
-		};
+		}
+	}
 
-		return RenderableList;
-	})();
-
-	var Scene = (function () {
-		function Scene() {
+	class Scene {
+		constructor() {
 			this.delegate = null;
 			this.gameObjects = [];
 			this.nextObjects = [];
@@ -869,65 +719,63 @@
 			this.transition = null;
 		}
 
-		Scene.prototype.add = function (gameObject) {
+		add(gameObject) {
 			gameObject.setScene(this);
 			gameObject.init(this);
 			this.nextObjects.push(gameObject);
 			gameObject.move(gameObject.getSpeedX() * -1, gameObject.getSpeedY() * -1);
-		};
+		}
 
-		Scene.prototype.build = function (map, tileFactory, offsetX, offsetY) {
-			tileFactory = tileFactory || function (id) { return new BaseTile(id) };
+		build(map, tileFactory = baseTileFactory, offsetX, offsetY) {
+			for (let i = 0; i < map.length; ++i) {
+				const LINE = map[i];
 
-			for (var i = 0; i < map.length; ++i) {
-				var line = map[i];
+				for (let j = 0; j < LINE.length; ++j) {
+					const ID = map[i][j];
 
-				for (var j = 0; j < line.length; ++j) {
-					var id = map[i][j];
-
-					if (id) {
-						var tile = tileFactory(id);
-						var x = offsetX ? offsetX : tile.getWidth();
-						var y = offsetY ? offsetY : tile.getHeight();
-						tile.setTop(i * y);
-						tile.setLeft(j * x);
-						this.add(tile);
+					if (ID) {
+						const TILE = tileFactory(ID);
+						const X = offsetX ? offsetX : TILE.getWidth();
+						const Y = offsetY ? offsetY : TILE.getHeight();
+						TILE.setTop(i * Y);
+						TILE.setLeft(j * X);
+						this.add(TILE);
 					}
 				}
 			}
-		};
+		}
 
-		Scene.prototype.expire = function () {
+		expire() {
 			this.isExpired = true;
-		};
+		}
 
-		Scene.prototype.sync = function () {
+		sync() {
 			if (this.isExpired) {
 				return true;
 			}
 
-			var gameObjects = [];
-			var solidGameObjects = [];
+			let gameObjects = [];
+			const SOLID_GAME_OBJECTS = [];
 
-			for (var i = 0; i < this.gameObjects.length; ++i) {
-				var gameObject = this.gameObjects[i];
-				gameObject.update();
+			for (let i = 0; i < this.gameObjects.length; ++i) {
+				const GAME_OBJECT = this.gameObjects[i];
+				GAME_OBJECT.update();
 
-				if (gameObject.sync()) {
-					if (gameObject.getEssential()) {
+				if (GAME_OBJECT.sync()) {
+					if (GAME_OBJECT.getEssential()) {
 						this.expire();
 					}
 				} else {
-					if (gameObject.getSolid()) {
-						solidGameObjects.push(gameObject);
+					if (GAME_OBJECT.getSolid()) {
+						SOLID_GAME_OBJECTS.push(GAME_OBJECT);
 					}
 
-					gameObjects.push(gameObject);
-					Quick.paint(gameObject, gameObject.getLayerIndex());
+					gameObjects.push(GAME_OBJECT);
+					Quick.paint(GAME_OBJECT, GAME_OBJECT.getLayerIndex());
 				}
 			}
 
-			checkCollisions(solidGameObjects);
+			checkCollisions(SOLID_GAME_OBJECTS);
 			this.gameObjects = gameObjects.concat(this.nextObjects);
 			this.nextObjects = [];
 
@@ -936,95 +784,73 @@
 			}
 
 			return false;
-		};
+		}
 
-		Scene.prototype.getNext = function () {
+		getNext() {
 			if (this.delegate && this.delegate.getNext) {
 				return this.delegate.getNext();
 			}
-		};
-
-		Scene.prototype.getObjectsWithTag = function (tag) {
-			var result = [];
-
-			for (var i = 0; i < this.gameObjects.length; ++i) {
-				var gameObject = this.gameObjects[i];
-
-				if (gameObject.hasTag(tag)) {
-					result.push(gameObject);
-				}
-			}
-
-			return result;
-		};
-
-		Scene.prototype.getTick = function () {
-			return this.tick;
-		};
-
-		Scene.prototype.getTransition = function () {
-			return this.transition;
-		};
-
-		Scene.prototype.setDelegate = function (delegate) {
-			this.delegate = delegate;
-		};
-
-		Scene.prototype.setExpiration = function (expiration) {
-			this.expiration = expiration;
-		};
-
-		Scene.prototype.setTransition = function (transition) {
-			this.transition = transition;
-		};
-
-		Scene.prototype.update = function () {
-			this.delegate && this.delegate.update && this.delegate.update();
-		};
-
-		function checkCollisions(gameObjects) {
-			var length = gameObjects.length;
-
-			for (var i = 0; i < length - 1; ++i) {
-				var leftGameObject = gameObjects[i];
-
-				for (var j = i + 1; j < length; ++j) {
-					var rightGameObject = gameObjects[j];
-
-					if (leftGameObject.hasCollision(rightGameObject)) {
-						leftGameObject.onCollision(rightGameObject);
-						rightGameObject.onCollision(leftGameObject);
-					}
-				}
-			}
 		}
 
-		return Scene;
-	})();
+		getObjectsWithTag(tag) {
+			const RESULT = [];
 
-	var Sound = (function () {
-		var DEFAULT_MUTE = false;
-		var DEFAULT_SOUND_EFFECTS_VOLUME = 0.3;
+			for (let i = 0; i < this.gameObjects.length; ++i) {
+				const GAME_OBJECT = this.gameObjects[i];
 
-		function Sound() {
+				if (GAME_OBJECT.hasTag(tag)) {
+					RESULT.push(GAME_OBJECT);
+				}
+			}
+
+			return RESULT;
+		}
+
+		getTick() {
+			return this.tick;
+		}
+
+		getTransition() {
+			return this.transition;
+		}
+
+		setDelegate(delegate) {
+			this.delegate = delegate;
+		}
+
+		setExpiration(expiration) {
+			this.expiration = expiration;
+		}
+
+		setTransition(transition) {
+			this.transition = transition;
+		}
+
+		update() {
+			this.delegate && this.delegate.update && this.delegate.update();
+		}
+	}
+
+	class Sound {
+		constructor() {
 			this.isFading = false;
-			this.isMute = DEFAULT_MUTE;
+			this.isMute = false;
 			this.nextThemeName = null;
 			this.queue = {};
 			this.theme = null;
 			this.volume = 100;
 		}
 
-		Sound.prototype.fadeOut = function () {
+		fadeOut() {
 			if (!this.theme) {
 				return;
 			}
 
 			this.isFading = true;
 			this.volume = 100;
-		};
+		}
 
-		Sound.prototype.mute = function () {
+		mute() {
 			this.isMute = !this.isMute;
 
 			if (!this.isMute) {
@@ -1032,23 +858,23 @@
 			} else {
 				this.theme.pause();
 			}
-		};
+		}
 
-		Sound.prototype.pause = function () {
+		pause() {
 			if (this.theme) {
 				this.theme.pause();
 			}
-		};
+		}
 
-		Sound.prototype.play = function (id) {
+		play(id) {
 			if (this.isMute) {
 				return;
 			}
 
 			this.queue[id] = true;
-		};
+		}
 
-		Sound.prototype.playTheme = function (id) {
+		playTheme(id) {
 			if (this.theme && this.theme.currentTime > 0) {
 				this.nextThemeName = id;
 
@@ -1072,9 +898,9 @@
 
 			this.theme.volume = 1;
 			this.theme.play();
-		};
+		}
 
-		Sound.prototype.resume = function () {
+		resume() {
 			if (this.isMute) {
 				return;
 			}
@@ -1082,27 +908,27 @@
 			if (this.theme.paused) {
 				this.theme.play();
 			}
-		};
+		}
 
-		Sound.prototype.stopTheme = function () {
+		stopTheme() {
 			if (this.theme) {
 				this.theme.pause();
 				this.theme.currentTime = 0;
 			}
-		};
+		}
 
-		Sound.prototype.update = function () {
-			for (var i in this.queue) {
+		update() {
+			for (let i in this.queue) {
 				if (this.queue.hasOwnProperty(i)) {
-					var sound = document.getElementById(i);
-					sound.pause();
+					const SOUND = document.getElementById(i);
+					SOUND.pause();
 
-					if (sound.currentTime > 0) {
-						sound.currentTime = 0;
+					if (SOUND.currentTime > 0) {
+						SOUND.currentTime = 0;
 					}
 
-					sound.volume = DEFAULT_SOUND_EFFECTS_VOLUME;
-					sound.play();
+					SOUND.volume = DEFAULT_SOUND_EFFECTS_VOLUME;
+					SOUND.play();
 				}
 			}
 
@@ -1121,13 +947,11 @@
 					}
 				}
 			}
-		};
+		}
+	}
 
-		return Sound;
-	})();
-
-	var Point = (function () {
-		function Point(x, y) {
+	class Point {
+		constructor(x, y) {
 			this.setAccelerationX();
 			this.setAccelerationY();
 			this.setMaxSpeedX();
@@ -1140,42 +964,42 @@
 			this.lastY = this.y;
 		}
 
-		Point.prototype.bounceX = function () {
+		bounceX() {
 			this.setSpeedX(this.getSpeedX() * -1);
 			this.moveX(this.getSpeedX());
-		};
+		}
 
-		Point.prototype.bounceY = function () {
+		bounceY() {
 			this.setSpeedY(this.getSpeedY() * -1);
 			this.moveY(this.getSpeedY());
-		};
+		}
 
-		Point.prototype.getAccelerationX = function () {
+		getAccelerationX() {
 			return this.accelerationX;
-		};
+		}
 
-		Point.prototype.getAccelerationY = function () {
+		getAccelerationY() {
 			return this.accelerationY;
-		};
+		}
 
-		Point.prototype.getAngle = function () {
+		getAngle() {
 			return toDegrees(Math.atan2(this.getSpeedY(), this.getSpeedX()));
-		};
+		}
 
-		Point.prototype.getCenter = function () {
+		getCenter() {
 			return this;
-		};
+		}
 
-		Point.prototype.getCenterX = function () {
+		getCenterX() {
 			return this.x;
-		};
+		}
 
-		Point.prototype.getCenterY = function () {
+		getCenterY() {
 			return this.y;
-		};
+		}
 
-		Point.prototype.getDirection = function () {
-			var direction = new Direction();
+		getDirection() {
+			const direction = new Direction();
 
 			if (this.getX() < this.getLastX()) {
 				direction.setLeft();
@@ -1190,104 +1014,104 @@
 			}
 
 			return direction;
-		};
+		}
 
-		Point.prototype.getLastPosition = function () {
+		getLastPosition() {
 			return new Point(this.getLastX(), this.getLastY());
-		};
+		}
 
-		Point.prototype.getLastX = function () {
+		getLastX() {
 			return this.lastX;
-		};
+		}
 
-		Point.prototype.getLastY = function () {
+		getLastY() {
 			return this.lastY;
-		};
+		}
 
-		Point.prototype.getSpeedX = function () {
+		getSpeedX() {
 			return this.speedX;
-		};
+		}
 
-		Point.prototype.getSpeedY = function () {
+		getSpeedY() {
 			return this.speedY;
-		};
+		}
 
-		Point.prototype.getX = function () {
+		getX() {
 			return this.x;
-		};
+		}
 
-		Point.prototype.getY = function () {
+		getY() {
 			return this.y;
-		};
+		}
 
-		Point.prototype.move = function (width, height) {
+		move(width, height) {
 			this.moveX(width);
 			this.moveY(height);
-		};
+		}
 
-		Point.prototype.moveX = function (width) {
+		moveX(width) {
 			this.setX(this.getX() + width);
-		};
+		}
 
-		Point.prototype.moveY = function (height) {
+		moveY(height) {
 			this.setY(this.getY() + height);
-		};
+		}
 
-		Point.prototype.setAccelerationX = function (accelerationX) {
+		setAccelerationX(accelerationX) {
 			this.accelerationX = accelerationX || 0;
-		};
+		}
 
-		Point.prototype.setAccelerationY = function (accelerationY) {
+		setAccelerationY(accelerationY) {
 			this.accelerationY = accelerationY || 0;
-		};
+		}
 
-		Point.prototype.setMaxSpeedX = function (maxSpeedX) {
+		setMaxSpeedX(maxSpeedX) {
 			this.maxSpeedX = maxSpeedX || 0;
-		};
+		}
 
-		Point.prototype.setMaxSpeedY = function (maxSpeedY) {
+		setMaxSpeedY(maxSpeedY) {
 			this.maxSpeedY = maxSpeedY || 0;
-		};
+		}
 
-		Point.prototype.setPosition = function (point) {
+		setPosition(point) {
 			this.setX(point.getX());
 			this.setY(point.getY());
-		};
+		}
 
-		Point.prototype.setSpeedToAngle = function (speed, degrees) {
-			var radians = toRadians(degrees);
+		setSpeedToAngle(speed, degrees) {
+			const radians = toRadians(degrees);
 			this.setSpeedX(speed * Math.cos(radians));
 			this.setSpeedY(speed * Math.sin(radians));
-		};
+		}
 
-		Point.prototype.setSpeedToPoint = function (speed, point) {
-			var squareDistance = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
+		setSpeedToPoint(speed, point) {
+			const squareDistance = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
 			this.setSpeedX((point.getX() - this.getCenterX()) * speed / squareDistance);
 			this.setSpeedY((point.getY() - this.getCenterY()) * speed / squareDistance);
-		};
+		}
 
-		Point.prototype.setSpeedX = function (speedX) {
+		setSpeedX(speedX) {
 			this.speedX = speedX || 0;
-		};
+		}
 
-		Point.prototype.setSpeedY = function (speedY) {
+		setSpeedY(speedY) {
 			this.speedY = speedY || 0;
-		};
+		}
 
-		Point.prototype.setX = function (x) {
+		setX(x) {
 			this.x = x || 0;
-		};
+		}
 
-		Point.prototype.setY = function (y) {
+		setY(y) {
 			this.y = y || 0;
-		};
+		}
 
-		Point.prototype.stop = function () {
+		stop() {
 			this.setSpeedX(0);
 			this.setSpeedY(0);
-		};
+		}
 
-		Point.prototype.sync = function () {
+		sync() {
 			this.setSpeedX(this.getSpeedX() + this.accelerationX);
 
 			if (this.maxSpeedX && this.getSpeedX() > this.maxSpeedX) {
@@ -1304,21 +1128,17 @@
 			this.lastY = this.getY();
 			this.move(this.getSpeedX(), this.getSpeedY());
 			return false;
-		};
+		}
+	}
 
-		return Point;
-	})();
-
-	var Rect = (function () {
-		function Rect(x, y, width, height) {
-			Point.call(this, x, y);
+	class Rect extends Point {
+		constructor(x, y, width, height) {
+			super(x, y);
 			this.setHeight(height);
 			this.setWidth(width);
 		}
 
-		Rect.prototype = Object.create(Point.prototype);
-
-		Rect.prototype.bounceFrom = function (direction) {
+		bounceFrom(direction) {
 			if ((this.getSpeedX() < 0 && direction.getLeft()) || (this.getSpeedX() > 0 && direction.getRight())) {
 				this.bounceX();
 			}
@@ -1326,38 +1146,38 @@
 			if ((this.getSpeedY() < 0 && direction.getTop()) || (this.getSpeedY() > 0 && direction.getBottom())) {
 				this.bounceY();
 			}
-		};
+		}
 
-		Rect.prototype.getBottom = function () {
+		getBottom() {
 			return this.getY() + this.getHeight() - 1;
-		};
+		}
 
-		Rect.prototype.getCenter = function () {
+		getCenter() {
 			return new Point(this.getCenterX(), this.getCenterY());
-		};
+		}
 
-		Rect.prototype.getCenterX = function () {
+		getCenterX() {
 			return this.getX() + this.getHalfWidth();
-		};
+		}
 
-		Rect.prototype.getCenterY = function () {
+		getCenterY() {
 			return this.getY() + this.getHalfHeight();
-		};
+		}
 
-		Rect.prototype.getCollision = function (rect) {
-			var direction = new Direction();
+		getCollision(rect) {
+			const direction = new Direction();
 
-			var ta = this.getTop();
-			var ra = this.getRight();
-			var ba = this.getBottom();
-			var la = this.getLeft();
-			var xa = this.getCenterX();
-			var ya = this.getCenterY();
+			const ta = this.getTop();
+			const ra = this.getRight();
+			const ba = this.getBottom();
+			const la = this.getLeft();
+			const xa = this.getCenterX();
+			const ya = this.getCenterY();
 
-			var tb = rect.getTop();
-			var rb = rect.getRight();
-			var bb = rect.getBottom();
-			var lb = rect.getLeft();
+			const tb = rect.getTop();
+			const rb = rect.getRight();
+			const bb = rect.getBottom();
+			const lb = rect.getLeft();
 
 			if (xa <= lb && ra < rb) {
 				direction.setRight();
@@ -1372,88 +1192,88 @@
 			}
 
 			return direction;
-		};
+		}
 
-		Rect.prototype.getHalfHeight = function () {
+		getHalfHeight() {
 			return Math.floor(this.getHeight() / 2);
-		};
+		}
 
-		Rect.prototype.getHalfWidth = function () {
+		getHalfWidth() {
 			return Math.floor(this.getWidth() / 2);
-		};
+		}
 
-		Rect.prototype.getHeight = function () {
+		getHeight() {
 			return this.height;
-		};
+		}
 
-		Rect.prototype.getLeft = function () {
+		getLeft() {
 			return this.getX();
-		};
+		}
 
-		Rect.prototype.getRight = function () {
+		getRight() {
 			return this.getX() + this.getWidth() - 1;
-		};
+		}
 
-		Rect.prototype.getTop = function () {
+		getTop() {
 			return this.getY();
-		};
+		}
 
-		Rect.prototype.getWidth = function () {
+		getWidth() {
 			return this.width;
-		};
+		}
 
-		Rect.prototype.hasCollision = function (rect) {
+		hasCollision(rect) {
 			return !(
 				this.getLeft() > rect.getRight() ||
 				this.getRight() < rect.getLeft() ||
 				this.getTop() > rect.getBottom() ||
 				this.getBottom() < rect.getTop()
 			);
-		};
+		}
 
-		Rect.prototype.increase = function (width, height) {
+		increase(width, height) {
 			this.increaseWidth(width);
 			this.increaseHeight(height);
-		};
+		}
 
-		Rect.prototype.increaseHeight = function (height) {
+		increaseHeight(height) {
 			this.setHeight(this.getHeight() + height);
-		};
+		}
 
-		Rect.prototype.increaseWidth = function (width) {
+		increaseWidth(width) {
 			this.setWidth(this.getWidth() + width);
-		};
+		}
 
-		Rect.prototype.setBottom = function (y) {
+		setBottom(y) {
 			this.setY(y - this.getHeight() + 1);
-		};
+		}
 
-		Rect.prototype.setCenter = function (point) {
+		setCenter(point) {
 			this.setCenterX(point.getX());
 			this.setCenterY(point.getY());
-		};
+		}
 
-		Rect.prototype.setCenterX = function (x) {
+		setCenterX(x) {
 			this.setX(x - this.getHalfWidth());
-		};
+		}
 
-		Rect.prototype.setCenterY = function (y) {
+		setCenterY(y) {
 			this.setY(y - this.getHalfHeight());
-		};
+		}
 
-		Rect.prototype.setHeight = function (height) {
+		setHeight(height) {
 			this.height = height || 0;
-		};
+		}
 
-		Rect.prototype.setLeft = function (x) {
+		setLeft(x) {
 			this.setX(x);
-		};
+		}
 
-		Rect.prototype.setRight = function (x) {
+		setRight(x) {
 			this.setX(x - this.getWidth() + 1);
-		};
+		}
 
-		Rect.prototype.setSize = function (width, height) {
+		setSize(width, height) {
 			this.setWidth(width);
 
 			if (arguments.length > 1) {
@@ -1461,105 +1281,99 @@
 			} else {
 				this.setHeight(width);
 			}
-		};
+		}
 
-		Rect.prototype.setTop = function (y) {
+		setTop(y) {
 			this.setY(y);
-		};
+		}
 
-		Rect.prototype.setWidth = function (width) {
+		setWidth(width) {
 			this.width = width || 0;
-		};
+		}
+	}
 
-		return Rect;
-	})();
-
-	var Direction = (function () {
-		function Direction() {
+	class Direction {
+		constructor() {
 			this.isBottom = false;
 			this.isLeft = false;
 			this.isRight = false;
 			this.isTop = false;
 		}
 
-		Direction.prototype.getBottom = function () {
+		getBottom() {
 			return this.isBottom;
-		};
+		}
 
-		Direction.prototype.getLeft = function () {
+		getLeft() {
 			return this.isLeft;
-		};
+		}
 
-		Direction.prototype.getRight = function () {
+		getRight() {
 			return this.isRight;
-		};
+		}
 
-		Direction.prototype.getTop = function () {
+		getTop() {
 			return this.isTop;
-		};
+		}
 
-		Direction.prototype.setBottom = function (isBottom) {
+		setBottom(isBottom) {
 			this.isBottom = isBottom == undefined || isBottom;
-		};
+		}
 
-		Direction.prototype.setLeft = function (isLeft) {
+		setLeft(isLeft) {
 			this.isLeft = isLeft == undefined || isLeft;
-		};
+		}
 
-		Direction.prototype.setRight = function (isRight) {
+		setRight(isRight) {
 			this.isRight = isRight == undefined || isRight;
-		};
+		}
 
-		Direction.prototype.setTop = function (isTop) {
+		setTop(isTop) {
 			this.isTop = isTop == undefined || isTop;
-		};
+		}
+	}
 
-		return Direction;
-	})();
-
-	var Frame = (function () {
-		function Frame(image, duration) {
+	class Frame {
+		constructor(image, duration) {
 			this.duration = duration || 0;
 			this.image = image || new Image();
 		}
 
-		Frame.prototype.getDuration = function () {
+		getDuration() {
 			return this.duration;
-		};
+		}
 
-		Frame.prototype.getHeight = function () {
+		getHeight() {
 			return this.image.height;
-		};
+		}
 
-		Frame.prototype.getImage = function () {
+		getImage() {
 			return this.image;
-		};
+		}
 
-		Frame.prototype.getWidth = function () {
+		getWidth() {
 			return this.image.width;
-		};
+		}
+	}
 
-		return Frame;
-	})();
-
-	var Animation = (function () {
-		function Animation(frames) {
+	class Animation {
+		constructor(frames) {
 			this.setFrames(frames);
 		}
 
-		Animation.prototype.getHeight = function () {
+		getHeight() {
 			return this.frame.getHeight();
-		};
+		}
 
-		Animation.prototype.getImage = function () {
+		getImage() {
 			return this.frame.getImage();
-		};
+		}
 
-		Animation.prototype.getWidth = function () {
+		getWidth() {
 			return this.frame.getWidth();
-		};
+		}
 
-		Animation.prototype.setFrameIndex = function (frameIndex) {
+		setFrameIndex(frameIndex) {
 			if (frameIndex < this.frames.length && frameIndex > -1) {
 				this.frameIndex = frameIndex;
 				this.tick = 0;
@@ -1568,18 +1382,18 @@
 			}
 
 			return false;
-		};
+		}
 
-		Animation.prototype.setFrames = function (frames) {
+		setFrames(frames) {
 			this.frames = frames || [new Frame()];
 			this.setFrameIndex(0);
-		};
+		}
 
-		Animation.prototype.update = function () {
-			var hasLooped = false;
+		update() {
+			let hasLooped = false;
 
 			if (this.frame.getDuration() && ++this.tick > this.frame.getDuration()) {
-				var index = this.frameIndex + 1;
+				let index = this.frameIndex + 1;
 
 				if (index == this.frames.length) {
 					hasLooped = true;
@@ -1590,47 +1404,43 @@
 			}
 
 			return hasLooped;
-		};
+		}
+	}
 
-		return Animation;
-	})();
-
-	var Sprite = (function () {
-		function Sprite() {
-			Rect.call(this);
+	class Sprite extends Rect {
+		constructor() {
+			super();
 			this.animation = null;
 			this.boundary = null;
 			this.delegate = null;
 		}
 
-		Sprite.prototype = Object.create(Rect.prototype);
-
-		Sprite.prototype.getImage = function () {
+		getImage() {
 			return this.animation.getImage();
-		};
+		}
 
-		Sprite.prototype.offBoundary = function () {
+		offBoundary() {
 			if (this.delegate && this.delegate.offBoundary) {
 				this.delegate.offBoundary();
 			} else {
 				this.expire();
 			}
-		};
+		}
 
-		Sprite.prototype.onAnimationLoop = function () {
+		onAnimationLoop() {
 			this.delegate && this.delegate.onAnimationLoop && this.delegate.onAnimationLoop();
-		};
+		}
 
-		Sprite.prototype.render = function (context) {
+		render(context) {
 			if (this.animation) {
-				var image = this.getImage();
-				var x = Math.floor(this.getX());
-				var y = Math.floor(this.getY());
+				const image = this.getImage();
+				const x = Math.floor(this.getX());
+				const y = Math.floor(this.getY());
 				context.drawImage(image, x, y, this.getWidth(), this.getHeight());
 			}
-		};
+		}
 
-		Sprite.prototype.setAnimation = function (animation) {
+		setAnimation(animation) {
 			if (this.animation == animation) {
 				return;
 			}
@@ -1639,26 +1449,26 @@
 			this.animation.setFrameIndex(0);
 			this.setHeight(this.animation.getHeight());
 			this.setWidth(this.animation.getWidth());
-		};
+		}
 
-		Sprite.prototype.setBoundary = function (rect) {
+		setBoundary(rect) {
 			this.boundary = rect || Quick.getBoundary();
-		};
+		}
 
-		Sprite.prototype.setDelegate = function (delegate) {
+		setDelegate(delegate) {
 			this.delegate = delegate;
-		};
+		}
 
-		Sprite.prototype.setImage = function (image) {
+		setImage(image) {
 			this.setAnimation(new Animation([new Frame(image)]));
-		};
+		}
 
-		Sprite.prototype.setImageId = function (id) {
+		setImageId(id) {
 			this.setImage(document.getElementById(id));
-		};
+		}
 
-		Sprite.prototype.sync = function () {
-			var result = Rect.prototype.sync.call(this);
+		sync() {
+			const result = Rect.prototype.sync.call(this);
 
 			if (this.animation && this.animation.update()) {
 				this.onAnimationLoop();
@@ -1669,14 +1479,12 @@
 			}
 
 			return result;
-		};
+		}
+	}
 
-		return Sprite;
-	})();
-
-	var GameObject = (function () {
-		function GameObject() {
-			Sprite.call(this);
+	class GameObject extends Sprite {
+		constructor() {
+			super();
 			this.color = null;
 			this.layerIndex = 0;
 			this.isEssential = false;
@@ -1689,104 +1497,102 @@
 			this.tick = 0;
 		}
 
-		GameObject.prototype = Object.create(Sprite.prototype);
-
-		GameObject.prototype.addTag = function (tag) {
+		addTag(tag) {
 			this.tags[tag] = true;
-		};
+		}
 
-		GameObject.prototype.expire = function () {
+		expire() {
 			this.isExpired = true;
-		};
+		}
 
-		GameObject.prototype.getColor = function () {
+		getColor() {
 			return this.color;
-		};
+		}
 
-		GameObject.prototype.getEssential = function () {
+		getEssential() {
 			return this.isEssential;
-		};
+		}
 
-		GameObject.prototype.getExpired = function () {
+		getExpired() {
 			return this.isExpired;
-		};
+		}
 
-		GameObject.prototype.getLayerIndex = function () {
+		getLayerIndex() {
 			return this.layerIndex;
-		};
+		}
 
-		GameObject.prototype.getScene = function () {
+		getScene() {
 			return this.scene;
-		};
+		}
 
-		GameObject.prototype.getSolid = function () {
+		getSolid() {
 			return this.isSolid;
-		};
+		}
 
-		GameObject.prototype.getTick = function () {
+		getTick() {
 			return this.tick;
-		};
+		}
 
-		GameObject.prototype.getVisible = function () {
+		getVisible() {
 			return this.isVisible;
-		};
+		}
 
-		GameObject.prototype.hasTag = function (tag) {
-			return this.tags[tag]
-		};
+		hasTag(tag) {
+			return this.tags[tag];
+		}
 
-		GameObject.prototype.init = function (scene) {
+		init(scene) {
 			this.delegate && this.delegate.init && this.delegate.init(scene);
-		};
+		}
 
-		GameObject.prototype.onCollision = function (gameObject) {
+		onCollision(gameObject) {
 			this.delegate && this.delegate.onCollision && this.delegate.onCollision(gameObject);
-		};
+		}
 
-		GameObject.prototype.setColor = function (color) {
+		setColor(color) {
 			this.color = color;
-		};
+		}
 
-		GameObject.prototype.setEssential = function (isEssential) {
+		setEssential(isEssential) {
 			this.isEssential = isEssential == undefined || isEssential;
-		};
+		}
 
-		GameObject.prototype.setLayerIndex = function (layerIndex) {
+		setLayerIndex(layerIndex) {
 			this.layerIndex = layerIndex || 0;
-		};
+		}
 
-		GameObject.prototype.setScene = function (scene) {
+		setScene(scene) {
 			this.scene = scene;
-		};
+		}
 
-		GameObject.prototype.setSolid = function (isSolid) {
+		setSolid(isSolid) {
 			this.isSolid = isSolid == undefined || isSolid;
-		};
+		}
 
-		GameObject.prototype.setVisible = function (isVisible) {
+		setVisible(isVisible) {
 			this.isVisible = isVisible == undefined || isVisible;
-		};
+		}
 
-		GameObject.prototype.setExpiration = function (expiration) {
+		setExpiration(expiration) {
 			this.expiration = expiration;
-		};
+		}
 
-		GameObject.prototype.render = function (context) {
+		render(context) {
 			if (!this.isVisible) {
 				return;
 			}
 
 			if (this.color) {
-				var x = Math.floor(this.getX());
-				var y = Math.floor(this.getY());
+				const x = Math.floor(this.getX());
+				const y = Math.floor(this.getY());
 				context.fillStyle = this.color;
 				context.fillRect(x, y, this.getWidth(), this.getHeight());
 			}
 
 			Sprite.prototype.render.call(this, context);
-		};
+		}
 
-		GameObject.prototype.sync = function () {
+		sync() {
 			if (this.getExpired()) {
 				return true;
 			}
@@ -1796,46 +1602,41 @@
 			}
 
 			return Sprite.prototype.sync.call(this);
-		};
-
-		GameObject.prototype.update = function () {
-			this.delegate && this.delegate.update && this.delegate.update();
-		};
-
-		return GameObject;
-	})();
-
-	var TextObject = (function () {
-		var SPACE = 4;
-		var SPACING = 0;
-
-		function TextObject(string) {
-			GameObject.call(this);
-			this.setString(string || "");
 		}
 
-		TextObject.prototype = Object.create(GameObject.prototype);
+		update() {
+			this.delegate && this.delegate.update && this.delegate.update();
+		}
+	}
 
-		TextObject.prototype.getString = function () {
+	class TextObject extends GameObject {
+		constructor(string) {
+			super();
+			this.setString(string || '');
+		}
+
+		getString() {
 			return this.string;
-		};
+		}
 
-		TextObject.prototype.parse = function (context) {
-			var height = 0;
-			var width = 0;
-			var x = 0;
-			var y = 0;
+		parse(context) {
+			const SPACE = 4;
+			const SPACING = 0;
+			let height = 0;
+			let width = 0;
+			let x = 0;
+			let y = 0;
 
-			for (var i = 0; i < this.string.length; ++i) {
-				var character = this.string[i];
+			for (let i = 0; i < this.string.length; ++i) {
+				let character = this.string[i];
 
-				if (character == " ") {
+				if (character == ' ') {
 					x += SPACE + SPACING;
-				} else if (character == "\n") {
+				} else if (character == '\n') {
 					x = 0;
 					y += height + SPACING;
 				} else {
-					var image = document.getElementById(character + "Font");
+					const image = document.getElementById(character + 'Font');
 
 					if (context) {
 						context.drawImage(image, this.getX() + x, this.getY() + y, image.width, image.height);
@@ -1855,45 +1656,36 @@
 
 			this.setWidth(width);
 			this.setHeight(y + height);
-		};
-
-		TextObject.prototype.render = function (context) {
-			this.parse(context);
-		};
-
-		TextObject.prototype.setString = function (string) {
-			this.string = string;
-			this.parse();
-		};
-
-		return TextObject;
-	})();
-
-	var BaseTile = (function () {
-		function BaseTile(id) {
-			GameObject.call(this);
-			this.setImageId(id);
 		}
 
-		BaseTile.prototype = Object.create(GameObject.prototype);
+		render(context) {
+			this.parse(context);
+		}
 
-		return BaseTile;
-	})();
+		setString(string) {
+			this.string = string;
+			this.parse();
+		}
+	}
 
-	var BaseTransition = (function () {
-		var COLOR = "Black";
-		var FRAMES = 32;
+	class BaseTile extends GameObject {
+		constructor(id) {
+			super();
+			this.setImageId(id);
+		}
+	}
 
-		function BaseTransition() {
-			GameObject.call(this);
+	class BaseTransition extends GameObject {
+		constructor() {
+			super();
+			const COLOR = 'Black';
+			const FRAMES = 32;
 			this.setColor(COLOR);
 			this.setHeight(Quick.getHeight());
 			this.increase = Quick.getWidth() / FRAMES;
 		}
 
-		BaseTransition.prototype = Object.create(GameObject.prototype);
-
-		BaseTransition.prototype.sync = function () {
+		sync() {
 			if (this.getWidth() > Quick.getWidth()) {
 				return true;
 			}
@@ -1901,10 +1693,129 @@
 			this.increaseWidth(this.increase);
 			Quick.paint(this);
 			return GameObject.prototype.sync.call(this);
-		};
+		}
+	}
 
-		return BaseTransition;
-	})();
+	function baseTileFactory(id) {
+		return new BaseTile(id)
+	}
+
+	function boot() {
+		const LOADING_TIMEOUT = 100;
+		const IMAGES = Array.from(document.getElementsByTagName('img'));
+
+		for (let i = 0; i < IMAGES.length; ++i) {
+			const IMAGE = IMAGES[i];
+
+			if (IMAGE.complete) {
+				IMAGES.shift();
+			} else {
+				setTimeout(onTimeout, LOADING_TIMEOUT);
+				return;
+			}
+		}
+
+		scene = sceneFactory();
+		loop();
+
+		function onTimeout() {
+			boot();
+		}
+	}
+
+	function checkCollisions(gameObjects) {
+		const LENGTH = gameObjects.length;
+
+		for (let i = 0; i < LENGTH - 1; ++i) {
+			const LEFT_GAME_OBJECT = gameObjects[i];
+
+			for (let j = i + 1; j < LENGTH; ++j) {
+				const RIGHT_GAME_OBJECT = gameObjects[j];
+
+				if (LEFT_GAME_OBJECT.hasCollision(RIGHT_GAME_OBJECT)) {
+					LEFT_GAME_OBJECT.onCollision(RIGHT_GAME_OBJECT);
+					RIGHT_GAME_OBJECT.onCollision(LEFT_GAME_OBJECT);
+				}
+			}
+		}
+	}
+
+	function getGamePads() {
+		if (navigator.getGamepads) {
+			return navigator.getGamepads();
+		}
+
+		return [];
+	}
+
+	function loop() {
+		const START_TIME = Date.now();
+		const CONTEXT = canvas.getContext('2d');
+		everyOther = !everyOther;
+		input.update();
+
+		if (transition != null) {
+			if (transition.sync()) {
+				transition = null;
+			}
+		} else {
+			if (isTransitioning) {
+				isTransitioning = false;
+				scene = scene.getNext();
+			}
+
+			if (scene.sync()) {
+				isTransitioning = true;
+				transition = scene.getTransition();
+			} else {
+				scene.update();
+			}
+		}
+
+		sound.update();
+
+		for (let i = 0; i < renderableLists.length; ++i) {
+			renderableLists[i].render(CONTEXT);
+		}
+
+		const ELAPSED_TIME = Date.now() - START_TIME;
+		const INTERVAL = frameTime - ELAPSED_TIME;
+
+		setTimeout(() => {
+			isRunning && requestAnimationFrame(loop);
+		}, INTERVAL);
+	}
+
+	function polyfill() {
+		if (!window.requestAnimationFrame) {
+			window.requestAnimationFrame = (callback) => {
+				callback();
+			};
+		}
+	}
+
+	function scale() {
+		let width, height;
+
+		if (keepAspect) {
+			let proportion = window.innerWidth / canvas.width;
+
+			if (window.innerHeight < canvas.height * proportion) {
+				proportion = window.innerHeight / canvas.height;
+			}
+
+			width = canvas.width * proportion;
+			height = canvas.height * proportion
+		} else {
+			width = window.innerWidth;
+			height = window.innerHeight;
+		}
+
+		realWidth = width;
+		realHeight = height;
+		canvas.style.width = `${width}px`;
+		canvas.style.height = `${height}px`;
+	}
 
 	function toDegrees(radians) {
 		return radians * 180 / Math.PI;
@@ -1914,25 +1825,21 @@
 		return degrees * Math.PI / 180;
 	}
 
-	function publish() {
-		window.quick = {
-			"Animation": Animation,
-			"BaseTile": BaseTile,
-			"BaseTransition": BaseTransition,
-			"CommandEnum": CommandEnum,
-			"Controller": Controller,
-			"Frame": Frame,
-			"GameObject": GameObject,
-			"ImageFactory": ImageFactory,
-			"Mouse": Mouse,
-			"Point": Point,
-			"Quick": Quick,
-			"Rect": Rect,
-			"Scene": Scene,
-			"Sprite": Sprite,
-			"TextObject": TextObject
-		};
-	}
-
-	publish();
+	window.quick = {
+		Animation,
+		BaseTile,
+		BaseTransition,
+		CommandEnum,
+		Controller,
+		Frame,
+		GameObject,
+		ImageFactory,
+		Mouse,
+		Point,
+		Quick,
+		Rect,
+		Scene,
+		Sprite,
+		TextObject,
+	};
 })();

@@ -38,6 +38,10 @@ const deviceMock = {
   }
 };
 
+const event = {
+  preventDefault: () => {}
+}
+
 // run tests
 controllerTest();
 gameObjectTest();
@@ -119,10 +123,10 @@ function mouseTest() {
   var mouse;
 
   // no args constructor
-  mouse = new global.window.quick.Mouse();
+  mouse = new global.window.quick.Mouse(event);
   assert.equal(0, mouse.getX());
   assert.equal(0, mouse.getY());
-  assert.equal(false, mouse.getCommand());
+  assert.equal(true, mouse.getCommand());
 
   // updateCoordinates
   mouse.updateCoordinates({ x: 1, y: 2 });
@@ -513,10 +517,10 @@ function textTest() {
   var text;
 
   // no args constructor
-  new global.window.quick.Text();
+  new global.window.quick.TextObject();
 
   // all args constructor
-  text = new global.window.quick.Text("whatever");
+  text = new global.window.quick.TextObject("whatever");
 
   // setString
   text.setString("test");
