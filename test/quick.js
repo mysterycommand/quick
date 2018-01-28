@@ -1,14 +1,6 @@
-/**
- * Copyright (c) 2018 Diogo Schneider
- * 
- * Released under The MIT License (MIT)
- * 
- * https://github.com/diogoschneider/quick
- */
-
 'use strict';
 
-// support for browser code
+// support for browser code in node.js
 global.window = global.window || global;
 
 // imports
