@@ -27,5 +27,6 @@ All you need is to add Quick to your HTML file and make sure you have a canvas e
   * [quick-assets](https://github.com/diogoschneider/quick-assets) assets for games
   * [quick-demos](https://github.com/diogoschneider/quick-demos) demos that showcase quick
   * [quick-developers](https://facebook.com/groups/quick.developers) developer community
+  * [quick-plugins](https://github.com/diogoschneider/quick-plugins) reusable game components
 
 [![VanillaJS](http://vanilla-js.com/assets/button.png)](http://vanilla-js.com)
