@@ -241,8 +241,7 @@
     }
 
     static paint(renderable, index) {
-      const layer = renderableLists[index || 0];
-      layer.add(renderable);
+      renderableLists[index || 0].add(renderable);
     }
 
     static play(id) {
@@ -254,9 +253,8 @@
     }
 
     static random(ceil) {
-      const random = Math.random();
-      const raw = random * (ceil + 1);
-      return Math.floor(raw);
+      const RANDOM = Math.random() * (ceil + 1);
+      return Math.floor(RANDOM);
     }
 
     static save(data) {
@@ -338,12 +336,12 @@
   class Mouse {
     constructor(event) {
       event.preventDefault();
-      this.isDown = true;
-      this.position = new Point();
+      this._isDown = true;
+      this._position = new Point();
 
       addEventListener('mousedown', (event) => {
         event.preventDefault();
-        this.isDown = true;
+        this._isDown = true;
       }, false);
 
       addEventListener('mousemove', (event) => {
@@ -353,38 +351,38 @@
 
       addEventListener('mouseup', (event) => {
         event.preventDefault();
-        this.isDown = false;
+        this._isDown = false;
       }, false);
     }
 
     getCommand() {
-      return this.isDown;
+      return this._isDown;
     }
 
     getX() {
-      return this.position.getX();
+      return this._position.getX();
     }
 
     getY() {
-      return this.position.getY();
+      return this._position.getY();
     }
 
     updateCoordinates(event) {
-      this.position.setX(event.x || event.clientX);
-      this.position.setY(event.y || event.clientY);
+      this._position.setX(event.x || event.clientX);
+      this._position.setY(event.y || event.clientY);
     }
   }
 
   class Touch {
     constructor(event) {
       event.preventDefault();
-      this.isDown = true;
-      this.position = new Point();
+      this._isDown = true;
+      this._position = new Point();
       this.updateCoordinates(event);
 
       addEventListener('touchend', (event) => {
         event.preventDefault();
-        this.isDown = false;
+        this._isDown = false;
         this.updateCoordinates(event);
       }, false);
 
@@ -395,107 +393,107 @@
 
       addEventListener('touchstart', () => {
         event.preventDefault();
-        this.isDown = true;
+        this._isDown = true;
         this.updateCoordinates(event);
       }, false);
     }
 
     getCommand() {
-      return this.isDown;
+      return this._isDown;
     }
 
     getX() {
-      return this.position.getX();
+      return this._position.getX();
     }
 
     getY() {
-      return this.position.getY();
+      return this._position.getY();
     }
 
     updateCoordinates(event) {
       const TOUCHES = event['changedTouches'];
       const TOUCH = TOUCHES[0];
-      this.position.setX(TOUCH.pageX);
-      this.position.setY(TOUCH.pageY);
+      this._position.setX(TOUCH.pageX);
+      this._position.setY(TOUCH.pageY);
     }
   }
 
   class Pointer {
     constructor() {
-      this.active = false;
-      this.device = null;
-      this.hold = false;
-      this.position = new Point();
+      this._active = false;
+      this._device = null;
+      this._hold = false;
+      this._position = new Point();
     }
 
     getDown() {
-      return this.active;
+      return this._active;
     }
 
     getPush() {
-      return this.active && !this.hold;
+      return this._active && !this._hold;
     }
 
     setDevice(device) {
-      this.device = device;
+      this._device = device;
     }
 
     update() {
-      if (!this.device) {
+      if (!this._device) {
         return;
       }
 
-      this.hold = false;
-      const LAST = this.active;
-      this.active = this.device.getCommand();
+      this._hold = false;
+      const LAST = this._active;
+      this._active = this._device.getCommand();
 
-      if (this.active && LAST) {
-        this.hold = true;
+      if (this._active && LAST) {
+        this._hold = true;
       }
 
-      const REAL_X = this.device.getX() - Quick.getOffsetLeft();
-      const REAL_Y = this.device.getY() - Quick.getOffsetTop();
-      this.position.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
-      this.position.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
+      const REAL_X = this._device.getX() - Quick.getOffsetLeft();
+      const REAL_Y = this._device.getY() - Quick.getOffsetTop();
+      this._position.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
+      this._position.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
     }
 
     getPosition() {
-      return this.position;
+      return this._position;
     }
   }
 
   class Controller {
     constructor() {
-      this.active = {};
-      this.device = null;
-      this.hold = {};
+      this._active = {};
+      this._device = null;
+      this._hold = {};
     }
 
     keyDown(commandEnum) {
-      return this.active[commandEnum];
+      return this._active[commandEnum];
     }
 
     keyPush(commandEnum) {
-      return this.active[commandEnum] && !this.hold[commandEnum];
+      return this._active[commandEnum] && !this._hold[commandEnum];
     }
 
     setDevice(device) {
-      this.device = device;
+      this._device = device;
     }
 
     update() {
-      if (!this.device) {
+      if (!this._device) {
         return;
       }
 
-      this.hold = {};
-      const LAST = this.active;
-      this.active = this.device.getCommands();
+      this._hold = {};
+      const LAST = this._active;
+      this._active = this._device.getCommands();
 
-      for (let i in this.active) {
-        if (this.active.hasOwnProperty(i)) {
+      for (let i in this._active) {
+        if (this._active.hasOwnProperty(i)) {
           if (LAST[i]) {
-            this.hold[i] = true;
+            this._hold[i] = true;
           }
         }
       }
@@ -504,22 +502,22 @@
 
   class GamePad {
     constructor(id) {
-      this.id = id || 0;
+      this._id = id || 0;
     }
 
     getCommands() {
-      const BUTTONS = Input.getGamePadButtons(this.id);
+      const BUTTONS = Input.getGamePadButtons(this._id);
       const RESULT = {};
 
-      if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_Y] < - ANALOG_THRESHOLD) {
+      if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_Y] < - ANALOG_THRESHOLD) {
         RESULT[CommandEnum.UP] = true;
-      } else if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_Y] > ANALOG_THRESHOLD) {
+      } else if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_Y] > ANALOG_THRESHOLD) {
         RESULT[CommandEnum.DOWN] = true;
       }
 
-      if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_X] < - ANALOG_THRESHOLD) {
+      if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_X] < - ANALOG_THRESHOLD) {
         RESULT[CommandEnum.LEFT] = true;
-      } else if (Input.getGamePadAxes(this.id)[AxisEnum.LEFT_X] > ANALOG_THRESHOLD) {
+      } else if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_X] > ANALOG_THRESHOLD) {
         RESULT[CommandEnum.RIGHT] = true;
       }
 
@@ -537,18 +535,17 @@
 
   class Input {
     constructor() {
-      this.controllers = [];
-      this.controllerQueue = [];
-      this.controllerRequestQueue = [];
-      this.pointers = [];
-      this.pointerQueue = [];
-      this.pointerRequestQueue = [];
-      this.gamePads = 0;
+      this._controllers = [];
+      this._controllerQueue = [];
+      this._controllerRequestQueue = [];
+      this._pointers = [];
+      this._pointerQueue = [];
+      this._pointerRequestQueue = [];
+      this._gamePads = 0;
 
       const ON_KEY_DOWN = (event) => {
         removeEventListener('keydown', ON_KEY_DOWN);
-        const keyboard = new Keyboard(event);
-        this.addController(keyboard);
+        this.addController(new Keyboard(event));
       };
 
       const ON_MOUSE_DOWN = (event) => {
@@ -580,71 +577,71 @@
     }
 
     addController(device) {
-      this.controllerQueue.push(device);
+      this._controllerQueue.push(device);
       this.checkControllerQueues();
     }
 
     addPointer(device) {
-      this.pointerQueue.push(device);
+      this._pointerQueue.push(device);
       this.checkPointerQueues();
     }
 
     checkGamePads() {
-      if (getGamePads()[this.gamePads]) {
-        this.addController(new GamePad(this.gamePads++));
+      if (getGamePads()[this._gamePads]) {
+        this.addController(new GamePad(this._gamePads++));
       }
     }
 
     checkControllerQueues() {
-      if (this.controllerRequestQueue.length > 0 && this.controllerQueue.length > 0) {
-        const REQUESTER = this.controllerRequestQueue.shift();
-        const DEVICE = this.controllerQueue.shift();
+      if (this._controllerRequestQueue.length > 0 && this._controllerQueue.length > 0) {
+        const REQUESTER = this._controllerRequestQueue.shift();
+        const DEVICE = this._controllerQueue.shift();
         REQUESTER.setDevice(DEVICE);
       }
     }
 
     checkPointerQueues() {
-      if (this.pointerRequestQueue.length > 0 && this.pointerQueue.length > 0) {
-        const REQUESTER = this.pointerRequestQueue.shift();
-        const DEVICE = this.pointerQueue.shift();
+      if (this._pointerRequestQueue.length > 0 && this._pointerQueue.length > 0) {
+        const REQUESTER = this._pointerRequestQueue.shift();
+        const DEVICE = this._pointerQueue.shift();
         REQUESTER.setDevice(DEVICE);
       }
     }
 
     getController(id = 0) {
-      if (this.controllers.length < id + 1) {
+      if (this._controllers.length < id + 1) {
         const CONTROLLER = new Controller();
-        this.controllers.push(CONTROLLER);
-        this.controllerRequestQueue.push(CONTROLLER);
+        this._controllers.push(CONTROLLER);
+        this._controllerRequestQueue.push(CONTROLLER);
         this.checkControllerQueues();
       }
 
-      return this.controllers[id];
+      return this._controllers[id];
     }
 
     getPointer(id = 0) {
-      if (this.pointers.length < id + 1) {
+      if (this._pointers.length < id + 1) {
         const POINTER = new Pointer();
-        this.pointers.push(POINTER);
-        this.pointerRequestQueue.push(POINTER);
+        this._pointers.push(POINTER);
+        this._pointerRequestQueue.push(POINTER);
         this.checkPointerQueues();
       }
 
-      return this.pointers[id];
+      return this._pointers[id];
     }
 
     update() {
       this.checkGamePads();
 
-      for (let i in this.controllers) {
-        if (this.controllers.hasOwnProperty(i)) {
-          this.controllers[i].update();
+      for (let i in this._controllers) {
+        if (this._controllers.hasOwnProperty(i)) {
+          this._controllers[i].update();
         }
       }
 
-      for (let j in this.pointers) {
-        if (this.pointers.hasOwnProperty(j)) {
-          this.pointers[j].update();
+      for (let j in this._pointers) {
+        if (this._pointers.hasOwnProperty(j)) {
+          this._pointers[j].update();
         }
       }
     }
@@ -652,7 +649,7 @@
 
   class Keyboard {
     constructor(event) {
-      this.buffer = {};
+      this._buffer = {};
       this.onKeyDown(event);
 
       addEventListener('keydown', (event) => {
@@ -667,9 +664,9 @@
     getCommands() {
       const RESULT = {};
 
-      for (let i in this.buffer) {
-        if (this.buffer.hasOwnProperty(i)) {
-          if (this.buffer[i]) {
+      for (let i in this._buffer) {
+        if (this._buffer.hasOwnProperty(i)) {
+          if (this._buffer[i]) {
             RESULT[i] = true;
           }
         }
@@ -679,7 +676,7 @@
     }
 
     onKey(keyCode, isDown) {
-      this.buffer[KeyToCommandMap[keyCode]] = isDown;
+      this._buffer[KeyToCommandMap[keyCode]] = isDown;
     }
 
     onKeyDown(event) {
@@ -690,37 +687,37 @@
 
   class RenderableList {
     constructor() {
-      this.elements = [];
+      this._elements = [];
     }
 
     add(renderable) {
-      this.elements.push(renderable);
+      this._elements.push(renderable);
     }
 
     render(context) {
-      for (let i = 0; i < this.elements.length; ++i) {
-        this.elements[i].render(context);
+      for (let i = 0; i < this._elements.length; ++i) {
+        this._elements[i].render(context);
       }
 
-      this.elements.length = 0;
+      this._elements.length = 0;
     }
   }
 
   class Scene {
     constructor() {
-      this.delegate = null;
-      this.gameObjects = [];
-      this.nextObjects = [];
-      this.expiration = -1;
-      this.isExpired = false;
-      this.tick = -1;
-      this.transition = null;
+      this._delegate = null;
+      this._gameObjects = [];
+      this._nextObjects = [];
+      this._expiration = -1;
+      this._isExpired = false;
+      this._tick = -1;
+      this._transition = null;
     }
 
     add(gameObject) {
       gameObject.setScene(this);
       gameObject.init(this);
-      this.nextObjects.push(gameObject);
+      this._nextObjects.push(gameObject);
       gameObject.move(gameObject.getSpeedX() * -1, gameObject.getSpeedY() * -1);
     }
 
@@ -744,19 +741,19 @@
     }
 
     expire() {
-      this.isExpired = true;
+      this._isExpired = true;
     }
 
     sync() {
-      if (this.isExpired) {
+      if (this._isExpired) {
         return true;
       }
 
       let gameObjects = [];
       const SOLID_GAME_OBJECTS = [];
 
-      for (let i = 0; i < this.gameObjects.length; ++i) {
-        const GAME_OBJECT = this.gameObjects[i];
+      for (let i = 0; i < this._gameObjects.length; ++i) {
+        const GAME_OBJECT = this._gameObjects[i];
         GAME_OBJECT.update();
 
         if (GAME_OBJECT.sync()) {
@@ -774,10 +771,10 @@
       }
 
       checkCollisions(SOLID_GAME_OBJECTS);
-      this.gameObjects = gameObjects.concat(this.nextObjects);
-      this.nextObjects = [];
+      this._gameObjects = gameObjects.concat(this._nextObjects);
+      this._nextObjects = [];
 
-      if (++this.tick == this.expiration) {
+      if (++this._tick == this._expiration) {
         this.expire();
       }
 
@@ -785,16 +782,16 @@
     }
 
     getNext() {
-      if (this.delegate && this.delegate.getNext) {
-        return this.delegate.getNext();
+      if (this._delegate && this._delegate.getNext) {
+        return this._delegate.getNext();
       }
     }
 
     getObjectsWithTag(tag) {
       const RESULT = [];
 
-      for (let i = 0; i < this.gameObjects.length; ++i) {
-        const GAME_OBJECT = this.gameObjects[i];
+      for (let i = 0; i < this._gameObjects.length; ++i) {
+        const GAME_OBJECT = this._gameObjects[i];
 
         if (GAME_OBJECT.hasTag(tag)) {
           RESULT.push(GAME_OBJECT);
@@ -805,78 +802,78 @@
     }
 
     getTick() {
-      return this.tick;
+      return this._tick;
     }
 
     getTransition() {
-      return this.transition;
+      return this._transition;
     }
 
     setDelegate(delegate) {
-      this.delegate = delegate;
+      this._delegate = delegate;
     }
 
     setExpiration(expiration) {
-      this.expiration = expiration;
+      this._expiration = expiration;
     }
 
     setTransition(transition) {
-      this.transition = transition;
+      this._transition = transition;
     }
 
     update() {
-      this.delegate && this.delegate.update && this.delegate.update();
+      this._delegate && this._delegate.update && this._delegate.update();
     }
   }
 
   class Sound {
     constructor() {
-      this.isFading = false;
-      this.isMute = false;
-      this.nextThemeName = null;
-      this.queue = {};
-      this.theme = null;
-      this.volume = 100;
+      this._isFading = false;
+      this._isMute = false;
+      this._nextThemeName = null;
+      this._queue = {};
+      this._theme = null;
+      this._volume = 100;
     }
 
     fadeOut() {
-      if (!this.theme) {
+      if (!this._theme) {
         return;
       }
 
-      this.isFading = true;
-      this.volume = 100;
+      this._isFading = true;
+      this._volume = 100;
     }
 
     mute() {
-      this.isMute = !this.isMute;
+      this._isMute = !this._isMute;
 
-      if (!this.isMute) {
-        this.theme.play();
+      if (!this._isMute) {
+        this._theme.play();
       } else {
-        this.theme.pause();
+        this._theme.pause();
       }
     }
 
     pause() {
-      if (this.theme) {
-        this.theme.pause();
+      if (this._theme) {
+        this._theme.pause();
       }
     }
 
     play(id) {
-      if (this.isMute) {
+      if (this._isMute) {
         return;
       }
 
-      this.queue[id] = true;
+      this._queue[id] = true;
     }
 
     playTheme(id) {
-      if (this.theme && this.theme.currentTime > 0) {
-        this.nextThemeName = id;
+      if (this._theme && this._theme.currentTime > 0) {
+        this._nextThemeName = id;
 
-        if (!this.isFading) {
+        if (!this._isFading) {
           this.fadeOut();
         }
 
@@ -884,40 +881,40 @@
       }
 
       this.stopTheme();
-      this.theme = document.getElementById(id);
+      this._theme = document.getElementById(id);
 
-      if (this.theme.currentTime > 0) {
-        this.theme.currentTime = 0;
+      if (this._theme.currentTime > 0) {
+        this._theme.currentTime = 0;
       }
 
-      if (this.isMute) {
+      if (this._isMute) {
         return;
       }
 
-      this.theme.volume = 1;
-      this.theme.play();
+      this._theme.volume = 1;
+      this._theme.play();
     }
 
     resume() {
-      if (this.isMute) {
+      if (this._isMute) {
         return;
       }
 
-      if (this.theme.paused) {
-        this.theme.play();
+      if (this._theme.paused) {
+        this._theme.play();
       }
     }
 
     stopTheme() {
-      if (this.theme) {
-        this.theme.pause();
-        this.theme.currentTime = 0;
+      if (this._theme) {
+        this._theme.pause();
+        this._theme.currentTime = 0;
       }
     }
 
     update() {
-      for (let i in this.queue) {
-        if (this.queue.hasOwnProperty(i)) {
+      for (let i in this._queue) {
+        if (this._queue.hasOwnProperty(i)) {
           const SOUND = document.getElementById(i);
           SOUND.pause();
 
@@ -930,18 +927,18 @@
         }
       }
 
-      this.queue = {};
+      this._queue = {};
 
-      if (this.isFading) {
-        if (--this.volume > 0) {
-          this.theme.volume = this.volume / 100;
+      if (this._isFading) {
+        if (--this._volume > 0) {
+          this._theme.volume = this._volume / 100;
         } else {
-          this.isFading = false;
-          this.theme = null;
+          this._isFading = false;
+          this._theme = null;
 
-          if (this.nextThemeName) {
-            this.playTheme(this.nextThemeName);
-            this.nextThemeName = null;
+          if (this._nextThemeName) {
+            this.playTheme(this._nextThemeName);
+            this._nextThemeName = null;
           }
         }
       }
@@ -958,8 +955,8 @@
       this.setSpeedY();
       this.setX(x);
       this.setY(y);
-      this.lastX = this.x;
-      this.lastY = this.y;
+      this._lastX = this._x;
+      this._lastY = this._y;
     }
 
     bounceX() {
@@ -975,11 +972,11 @@
     }
 
     getAccelerationX() {
-      return this.accelerationX;
+      return this._accelerationX;
     }
 
     getAccelerationY() {
-      return this.accelerationY;
+      return this._accelerationY;
     }
 
     getAngle() {
@@ -991,29 +988,29 @@
     }
 
     getCenterX() {
-      return this.x;
+      return this._x;
     }
 
     getCenterY() {
-      return this.y;
+      return this._y;
     }
 
     getDirection() {
-      const direction = new Direction();
+      const DIRECTION = new Direction();
 
       if (this.getX() < this.getLastX()) {
-        direction.setLeft();
+        DIRECTION.setLeft();
       } else if (this.getX() > this.getLastX()) {
-        direction.setRight();
+        DIRECTION.setRight();
       }
 
       if (this.getY() < this.getLastY()) {
-        direction.setTop();
+        DIRECTION.setTop();
       } else if (this.getY() > this.getLastY()) {
-        direction.setBottom();
+        DIRECTION.setBottom();
       }
 
-      return direction;
+      return DIRECTION;
     }
 
     getLastPosition() {
@@ -1021,27 +1018,27 @@
     }
 
     getLastX() {
-      return this.lastX;
+      return this._lastX;
     }
 
     getLastY() {
-      return this.lastY;
+      return this._lastY;
     }
 
     getSpeedX() {
-      return this.speedX;
+      return this._speedX;
     }
 
     getSpeedY() {
-      return this.speedY;
+      return this._speedY;
     }
 
     getX() {
-      return this.x;
+      return this._x;
     }
 
     getY() {
-      return this.y;
+      return this._y;
     }
 
     move(width, height) {
@@ -1061,22 +1058,22 @@
     }
 
     setAccelerationX(accelerationX) {
-      this.accelerationX = accelerationX || 0;
+      this._accelerationX = accelerationX || 0;
       return this;
     }
 
     setAccelerationY(accelerationY) {
-      this.accelerationY = accelerationY || 0;
+      this._accelerationY = accelerationY || 0;
       return this;
     }
 
     setMaxSpeedX(maxSpeedX) {
-      this.maxSpeedX = maxSpeedX || 0;
+      this._maxSpeedX = maxSpeedX || 0;
       return this;
     }
 
     setMaxSpeedY(maxSpeedY) {
-      this.maxSpeedY = maxSpeedY || 0;
+      this._maxSpeedY = maxSpeedY || 0;
       return this;
     }
 
@@ -1087,42 +1084,36 @@
     }
 
     setSpeedToAngle(speed, degrees) {
-      const radians = toRadians(degrees);
-      this.setSpeedX(speed * Math.cos(radians));
-      this.setSpeedY(speed * Math.sin(radians));
+      const RADIANS = toRadians(degrees);
+      this.setSpeedX(speed * Math.cos(RADIANS));
+      this.setSpeedY(speed * Math.sin(RADIANS));
       return this;
     }
 
     setSpeedToPoint(speed, point) {
-      const squareDistance = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
-      this.setSpeedX((point.getX() - this.getCenterX()) * speed / squareDistance);
-      this.setSpeedY((point.getY() - this.getCenterY()) * speed / squareDistance);
+      const SQUARE_DISTANCE = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
+      this.setSpeedX((point.getX() - this.getCenterX()) * speed / SQUARE_DISTANCE);
+      this.setSpeedY((point.getY() - this.getCenterY()) * speed / SQUARE_DISTANCE);
       return this;
     }
 
     setSpeedX(speedX) {
-      this.speedX = speedX || 0;
+      this._speedX = speedX || 0;
       return this;
     }
 
     setSpeedY(speedY) {
-      this.speedY = speedY || 0;
+      this._speedY = speedY || 0;
       return this;
     }
 
     setX(x) {
-      this.x = x || 0;
-      return this;
-    }
-
-    setXY(x, y) {
-      this.setX(x);
-      this.setY(x);
+      this._x = x || 0;
       return this;
     }
 
     setY(y) {
-      this.y = y || 0;
+      this._y = y || 0;
       return this;
     }
 
@@ -1133,20 +1124,20 @@
     }
 
     sync() {
-      this.setSpeedX(this.getSpeedX() + this.accelerationX);
+      this.setSpeedX(this.getSpeedX() + this._accelerationX);
 
-      if (this.maxSpeedX && this.getSpeedX() > this.maxSpeedX) {
-        this.setSpeedX(this.maxSpeedX);
+      if (this._maxSpeedX && this.getSpeedX() > this._maxSpeedX) {
+        this.setSpeedX(this._maxSpeedX);
       }
 
-      this.setSpeedY(this.getSpeedY() + this.accelerationY);
+      this.setSpeedY(this.getSpeedY() + this._accelerationY);
 
-      if (this.maxSpeedY && this.getSpeedY() > this.maxSpeedY) {
-        this.setSpeedY(this.maxSpeedY);
+      if (this._maxSpeedY && this.getSpeedY() > this._maxSpeedY) {
+        this.setSpeedY(this._maxSpeedY);
       }
 
-      this.lastX = this.getX();
-      this.lastY = this.getY();
+      this._lastX = this.getX();
+      this._lastY = this.getY();
       this.move(this.getSpeedX(), this.getSpeedY());
       return false;
     }
@@ -1188,33 +1179,31 @@
     }
 
     getCollision(rect) {
-      const direction = new Direction();
+      const DIRECTION = new Direction();
+      const TA = this.getTop();
+      const RA = this.getRight();
+      const BA = this.getBottom();
+      const LA = this.getLeft();
+      const XA = this.getCenterX();
+      const YA = this.getCenterY();
+      const TB = rect.getTop();
+      const RB = rect.getRight();
+      const BB = rect.getBottom();
+      const LB = rect.getLeft();
 
-      const ta = this.getTop();
-      const ra = this.getRight();
-      const ba = this.getBottom();
-      const la = this.getLeft();
-      const xa = this.getCenterX();
-      const ya = this.getCenterY();
-
-      const tb = rect.getTop();
-      const rb = rect.getRight();
-      const bb = rect.getBottom();
-      const lb = rect.getLeft();
-
-      if (xa <= lb && ra < rb) {
-        direction.setRight();
-      } else if (xa >= rb && la > lb) {
-        direction.setLeft();
+      if (XA <= LB && RA < RB) {
+        DIRECTION.setRight();
+      } else if (XA >= RB && LA > LB) {
+        DIRECTION.setLeft();
       }
 
-      if (ya <= tb && ba < bb) {
-        direction.setBottom();
-      } else if (ya >= bb && ta > tb) {
-        direction.setTop();
+      if (YA <= TB && BA < BB) {
+        DIRECTION.setBottom();
+      } else if (YA >= BB && TA > TB) {
+        DIRECTION.setTop();
       }
 
-      return direction;
+      return DIRECTION;
     }
 
     getHalfHeight() {
@@ -1226,7 +1215,7 @@
     }
 
     getHeight() {
-      return this.height;
+      return this._height;
     }
 
     getLeft() {
@@ -1242,7 +1231,7 @@
     }
 
     getWidth() {
-      return this.width;
+      return this._width;
     }
 
     hasCollision(rect) {
@@ -1292,7 +1281,7 @@
     }
 
     setHeight(height) {
-      this.height = height || 0;
+      this._height = height || 0;
       return this;
     }
 
@@ -1308,13 +1297,7 @@
 
     setSize(width, height) {
       this.setWidth(width);
-
-      if (arguments.length > 1) {
-        this.setHeight(height);
-      } else {
-        this.setHeight(width);
-      }
-
+      this.setHeight(height);
       return this;
     }
 
@@ -1324,76 +1307,76 @@
     }
 
     setWidth(width) {
-      this.width = width || 0;
+      this._width = width || 0;
       return this;
     }
   }
 
   class Direction {
     constructor() {
-      this.isBottom = false;
-      this.isLeft = false;
-      this.isRight = false;
-      this.isTop = false;
+      this._isBottom = false;
+      this._isLeft = false;
+      this._isRight = false;
+      this._isTop = false;
     }
 
     getBottom() {
-      return this.isBottom;
+      return this._isBottom;
     }
 
     getLeft() {
-      return this.isLeft;
+      return this._isLeft;
     }
 
     getRight() {
-      return this.isRight;
+      return this._isRight;
     }
 
     getTop() {
-      return this.isTop;
+      return this._isTop;
     }
 
     setBottom(isBottom) {
-      this.isBottom = isBottom == undefined || isBottom;
+      this._isBottom = isBottom == undefined || isBottom;
       return this;
     }
 
     setLeft(isLeft) {
-      this.isLeft = isLeft == undefined || isLeft;
+      this._isLeft = isLeft == undefined || isLeft;
       return this;
     }
 
     setRight(isRight) {
-      this.isRight = isRight == undefined || isRight;
+      this._isRight = isRight == undefined || isRight;
       return this;
     }
 
     setTop(isTop) {
-      this.isTop = isTop == undefined || isTop;
+      this._isTop = isTop == undefined || isTop;
       return this;
     }
   }
 
   class Frame {
     constructor(image, duration) {
-      this.duration = duration || 0;
-      this.image = image || new Image();
+      this._duration = duration || 0;
+      this._image = image || new Image();
     }
 
     getDuration() {
-      return this.duration;
+      return this._duration;
     }
 
     getHeight() {
-      return this.image.height;
+      return this._image.height;
     }
 
     getImage() {
-      return this.image;
+      return this._image;
     }
 
     getWidth() {
-      return this.image.width;
+      return this._image.width;
     }
   }
 
@@ -1403,19 +1386,19 @@
     }
 
     getHeight() {
-      return this.frame.getHeight();
+      return this._frame.getHeight();
     }
 
     getImage() {
-      return this.frame.getImage();
+      return this._frame.getImage();
     }
 
     getWidth() {
-      return this.frame.getWidth();
+      return this._frame.getWidth();
     }
 
     setFrames(frames) {
-      this.frames = frames || [new Frame()];
+      this._frames = frames || [new Frame()];
       this.updateFrameIndex(0);
       return this;
     }
@@ -1423,10 +1406,10 @@
     update() {
       let hasLooped = false;
 
-      if (this.frame.getDuration() && ++this.tick > this.frame.getDuration()) {
-        let index = this.frameIndex + 1;
+      if (this._frame.getDuration() && ++this._tick > this._frame.getDuration()) {
+        let index = this._frameIndex + 1;
 
-        if (index == this.frames.length) {
+        if (index == this._frames.length) {
           hasLooped = true;
           index = 0;
         }
@@ -1438,10 +1421,10 @@
     }
 
     updateFrameIndex(frameIndex) {
-      if (frameIndex < this.frames.length && frameIndex > -1) {
-        this.frameIndex = frameIndex;
-        this.tick = 0;
-        this.frame = this.frames[frameIndex];
+      if (frameIndex < this._frames.length && frameIndex > -1) {
+        this._frameIndex = frameIndex;
+        this._tick = 0;
+        this._frame = this._frames[frameIndex];
         return true;
       }
 
@@ -1452,55 +1435,55 @@
   class Sprite extends Rect {
     constructor() {
       super();
-      this.animation = null;
-      this.boundary = null;
-      this.delegate = null;
+      this._animation = null;
+      this._boundary = null;
+      this._delegate = null;
     }
 
     getImage() {
-      return this.animation.getImage();
+      return this._animation.getImage();
     }
 
     offBoundary() {
-      if (this.delegate && this.delegate.offBoundary) {
-        this.delegate.offBoundary();
+      if (this._delegate && this._delegate.offBoundary) {
+        this._delegate.offBoundary();
       } else {
         this.expire();
       }
     }
 
     onAnimationLoop() {
-      this.delegate && this.delegate.onAnimationLoop && this.delegate.onAnimationLoop();
+      this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
     }
 
     render(context) {
-      if (this.animation) {
-        const image = this.getImage();
-        const x = Math.floor(this.getX());
-        const y = Math.floor(this.getY());
-        context.drawImage(image, x, y, this.getWidth(), this.getHeight());
+      if (this._animation) {
+        const IMAGE = this.getImage();
+        const X = Math.floor(this.getX());
+        const Y = Math.floor(this.getY());
+        context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
       }
     }
 
     setAnimation(animation) {
-      if (this.animation == animation) {
+      if (this._animation == animation) {
         return this;
       }
 
-      this.animation = animation;
-      this.animation.updateFrameIndex(0);
-      this.setHeight(this.animation.getHeight());
-      this.setWidth(this.animation.getWidth());
+      this._animation = animation;
+      this._animation.updateFrameIndex(0);
+      this.setHeight(this._animation.getHeight());
+      this.setWidth(this._animation.getWidth());
       return this;
     }
 
     setBoundary(rect) {
-      this.boundary = rect || Quick.getBoundary();
+      this._boundary = rect || Quick.getBoundary();
       return this;
     }
 
     setDelegate(delegate) {
-      this.delegate = delegate;
+      this._delegate = delegate;
       return this;
     }
 
@@ -1515,134 +1498,134 @@
     }
 
     sync() {
-      const result = Rect.prototype.sync.call(this);
+      const RESULT = Rect.prototype.sync.call(this);
 
-      if (this.animation && this.animation.update()) {
+      if (this._animation && this._animation.update()) {
         this.onAnimationLoop();
       }
 
-      if (this.boundary && !this.hasCollision(this.boundary)) {
+      if (this._boundary && !this.hasCollision(this._boundary)) {
         this.offBoundary();
       }
 
-      return result;
+      return RESULT;
     }
   }
 
   class GameObject extends Sprite {
     constructor() {
       super();
-      this.color = null;
-      this.layerIndex = 0;
-      this.isEssential = false;
-      this.expiration = -1;
-      this.isExpired = false;
-      this.isSolid = false;
-      this.isVisible = true;
-      this.scene = null;
-      this.tags = {};
-      this.tick = 0;
+      this._color = null;
+      this._layerIndex = 0;
+      this._isEssential = false;
+      this._expiration = -1;
+      this._isExpired = false;
+      this._isSolid = false;
+      this._isVisible = true;
+      this._scene = null;
+      this._tags = {};
+      this._tick = 0;
     }
 
     addTag(tag) {
-      this.tags[tag] = true;
+      this._tags[tag] = true;
       return this;
     }
 
     expire() {
-      this.isExpired = true;
+      this._isExpired = true;
       return this;
     }
 
     getColor() {
-      return this.color;
+      return this._color;
     }
 
     getEssential() {
-      return this.isEssential;
+      return this._isEssential;
     }
 
     getExpired() {
-      return this.isExpired;
+      return this._isExpired;
     }
 
     getLayerIndex() {
-      return this.layerIndex;
+      return this._layerIndex;
     }
 
     getScene() {
-      return this.scene;
+      return this._scene;
     }
 
     getSolid() {
-      return this.isSolid;
+      return this._isSolid;
     }
 
     getTick() {
-      return this.tick;
+      return this._tick;
     }
 
     getVisible() {
-      return this.isVisible;
+      return this._isVisible;
     }
 
     hasTag(tag) {
-      return this.tags[tag];
+      return this._tags[tag];
     }
 
     init(scene) {
-      this.delegate && this.delegate.init && this.delegate.init(scene);
+      this._delegate && this._delegate.init && this._delegate.init(scene);
     }
 
     onCollision(gameObject) {
-      this.delegate && this.delegate.onCollision && this.delegate.onCollision(gameObject);
+      this._delegate && this._delegate.onCollision && this._delegate.onCollision(gameObject);
     }
 
     setColor(color) {
-      this.color = color;
+      this._color = color;
       return this;
     }
 
     setEssential(isEssential) {
-      this.isEssential = isEssential == undefined || isEssential;
+      this._isEssential = isEssential == undefined || isEssential;
       return this;
     }
 
     setLayerIndex(layerIndex) {
-      this.layerIndex = layerIndex || 0;
+      this._layerIndex = layerIndex || 0;
       return this;
     }
 
     setScene(scene) {
-      this.scene = scene;
+      this._scene = scene;
       return this;
     }
 
     setSolid(isSolid) {
-      this.isSolid = isSolid == undefined || isSolid;
+      this._isSolid = isSolid == undefined || isSolid;
       return this;
     }
 
     setVisible(isVisible) {
-      this.isVisible = isVisible == undefined || isVisible;
+      this._isVisible = isVisible == undefined || isVisible;
       return this;
     }
 
     setExpiration(expiration) {
-      this.expiration = expiration;
+      this._expiration = expiration;
       return this;
     }
 
     render(context) {
-      if (!this.isVisible) {
+      if (!this._isVisible) {
         return;
       }
 
-      if (this.color) {
-        const x = Math.floor(this.getX());
-        const y = Math.floor(this.getY());
-        context.fillStyle = this.color;
-        context.fillRect(x, y, this.getWidth(), this.getHeight());
+      if (this._color) {
+        const X = Math.floor(this.getX());
+        const Y = Math.floor(this.getY());
+        context.fillStyle = this._color;
+        context.fillRect(X, Y, this.getWidth(), this.getHeight());
       }
 
       Sprite.prototype.render.call(this, context);
@@ -1653,7 +1636,7 @@
         return true;
       }
 
-      if (++this.tick == this.expiration) {
+      if (++this._tick == this._expiration) {
         this.expire();
       }
 
@@ -1661,7 +1644,7 @@
     }
 
     update() {
-      this.delegate && this.delegate.update && this.delegate.update();
+      this._delegate && this._delegate.update && this._delegate.update();
     }
   }
 
@@ -1672,7 +1655,7 @@
     }
 
     getString() {
-      return this.string;
+      return this._string;
     }
 
     parse(context) {
@@ -1683,8 +1666,8 @@
       let x = 0;
       let y = 0;
 
-      for (let i = 0; i < this.string.length; ++i) {
-        let character = this.string[i];
+      for (let i = 0; i < this._string.length; ++i) {
+        let character = this._string[i];
 
         if (character == ' ') {
           x += SPACE + SPACING;
@@ -1692,20 +1675,20 @@
           x = 0;
           y += height + SPACING;
         } else {
-          const image = document.getElementById(character + 'Font');
+          const IMAGE = document.getElementById(character + 'Font');
 
           if (context) {
-            context.drawImage(image, this.getX() + x, this.getY() + y, image.width, image.height);
+            context.drawImage(IMAGE, this.getX() + x, this.getY() + y, IMAGE.width, IMAGE.height);
           }
 
-          x += image.width + SPACING;
+          x += IMAGE.width + SPACING;
 
           if (x > width) {
             width = x;
           }
 
-          if (image.height > height) {
-            height = image.height;
+          if (IMAGE.height > height) {
+            height = IMAGE.height;
           }
         }
       }
@@ -1719,7 +1702,7 @@
     }
 
     setString(string) {
-      this.string = string;
+      this._string = string;
       this.parse();
       return this;
     }
@@ -1739,7 +1722,7 @@
       const FRAMES = 32;
       this.setColor(COLOR);
       this.setHeight(Quick.getHeight());
-      this.increase = Quick.getWidth() / FRAMES;
+      this._increase = Quick.getWidth() / FRAMES;
     }
 
     sync() {
@@ -1747,7 +1730,7 @@
         return true;
       }
 
-      this.increaseWidth(this.increase);
+      this.increaseWidth(this._increase);
       Quick.paint(this);
       return GameObject.prototype.sync.call(this);
     }
