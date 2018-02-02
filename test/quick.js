@@ -244,10 +244,10 @@ function pointTest() {
 
   // max speed
   point = new global.window.quick.Point();
-  point.setAccelerationX(1);
-  point.setAccelerationY(2);
   point.setMaxSpeedX(2);
   point.setMaxSpeedY(4);
+  point.setAccelerationX(1);
+  point.setAccelerationY(2);
   point.sync();
   assert.equal(1, point.getSpeedX());
   assert.equal(2, point.getSpeedY());
@@ -257,6 +257,18 @@ function pointTest() {
   point.sync();
   assert.equal(2, point.getSpeedX());
   assert.equal(4, point.getSpeedY());
+  point.stop();
+  point.setAccelerationX(-1);
+  point.setAccelerationY(-2);
+  point.sync();
+  assert.equal(-1, point.getSpeedX());
+  assert.equal(-2, point.getSpeedY());
+  point.sync();
+  assert.equal(-2, point.getSpeedX());
+  assert.equal(-4, point.getSpeedY());
+  point.sync();
+  assert.equal(-2, point.getSpeedX());
+  assert.equal(-4, point.getSpeedY());
 
   // last position
   point = new global.window.quick.Point();

@@ -1126,14 +1126,16 @@
     sync() {
       this.setSpeedX(this.getSpeedX() + this._accelerationX);
 
-      if (this._maxSpeedX && this.getSpeedX() > this._maxSpeedX) {
-        this.setSpeedX(this._maxSpeedX);
+      if (this._maxSpeedX && Math.abs(this.getSpeedX()) > this._maxSpeedX) {
+        const SIGNAL = this.getSpeedX() / Math.abs(this.getSpeedX());
+        this.setSpeedX(this._maxSpeedX * SIGNAL);
       }
 
       this.setSpeedY(this.getSpeedY() + this._accelerationY);
 
-      if (this._maxSpeedY && this.getSpeedY() > this._maxSpeedY) {
-        this.setSpeedY(this._maxSpeedY);
+      if (this._maxSpeedY && Math.abs(this.getSpeedY()) > this._maxSpeedY) {
+        const SIGNAL = this.getSpeedY() / Math.abs(this.getSpeedY());
+        this.setSpeedY(this._maxSpeedY * SIGNAL);
       }
 
       this._lastX = this.getX();
