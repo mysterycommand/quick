@@ -1297,9 +1297,9 @@
       return this;
     }
 
-    setSize(width, height) {
-      this.setWidth(width);
-      this.setHeight(height);
+    setSize(size, height) {
+      this.setWidth(size);
+      this.setHeight(height || size);
       return this;
     }
 

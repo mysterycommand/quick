@@ -417,7 +417,7 @@ function rectTest() {
   rect.setRight(18);
   assert.equal(18, rect.getRight());
 
-  rect.setSize(19, 19);
+  rect.setSize(19);
   assert.equal(19, rect.getWidth());
   assert.equal(19, rect.getHeight());
 
@@ -488,7 +488,7 @@ function spriteTest() {
 
   // on boundary
   sprite = new global.window.quick.Sprite();
-  sprite.setSize(16, 16);
+  sprite.setSize(16);
   offBoundaryCalled = false;
 
   sprite.setDelegate({
