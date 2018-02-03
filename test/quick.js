@@ -1,11 +1,8 @@
 'use strict';
 
-// support for browser code in node.js
-global.window = global.window || global;
-
 // imports
 const assert = require('assert');
-require('../src/quick.js');
+const quick = require('../src/quick.js');
 
 // mocks
 global.addEventListener = () => {};
@@ -22,8 +19,8 @@ const deviceMock = {
   getCommands: () => {
     var result = {};
   
-    for (var key in global.window.quick.CommandEnum) if (global.window.quick.CommandEnum.hasOwnProperty(key)) {
-      result[global.window.quick.CommandEnum[key]] = true;
+    for (var key in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(key)) {
+      result[quick.CommandEnum[key]] = true;
     }
   
     return result;
@@ -49,10 +46,10 @@ function controllerTest() {
   var controller;
 
   // no args constructor
-  controller = new global.window.quick.Controller();
+  controller = new quick.Controller();
 
-  for (var i in global.window.quick.CommandEnum) if (global.window.quick.CommandEnum.hasOwnProperty(i)) {
-    var value = global.window.quick.CommandEnum[i];
+  for (var i in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(i)) {
+    var value = quick.CommandEnum[i];
     assert.equal(undefined, controller.keyDown(value));
     assert.equal(undefined, controller.keyPush(value));
   }
@@ -61,17 +58,17 @@ function controllerTest() {
   controller.setDevice(deviceMock);
   assert.equal(undefined, controller.update());
 
-  for (var j in global.window.quick.CommandEnum) if (global.window.quick.CommandEnum.hasOwnProperty(j)) {
-    assert.equal(true, controller.keyDown(global.window.quick.CommandEnum[j]));
-    assert.equal(true, controller.keyPush(global.window.quick.CommandEnum[j]));
+  for (var j in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(j)) {
+    assert.equal(true, controller.keyDown(quick.CommandEnum[j]));
+    assert.equal(true, controller.keyPush(quick.CommandEnum[j]));
   }
 
   // with all commands, second update
   assert.equal(undefined, controller.update());
 
-  for (var k in global.window.quick.CommandEnum) if (global.window.quick.CommandEnum.hasOwnProperty(k)) {
-    assert.equal(true, controller.keyDown(global.window.quick.CommandEnum[k]));
-    assert.equal(false, controller.keyPush(global.window.quick.CommandEnum[k]));
+  for (var k in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(k)) {
+    assert.equal(true, controller.keyDown(quick.CommandEnum[k]));
+    assert.equal(false, controller.keyPush(quick.CommandEnum[k]));
   }
 }
 
@@ -79,7 +76,7 @@ function gameObjectTest() {
   var gameObject;
 
   // no args constructor
-  gameObject = new global.window.quick.GameObject();
+  gameObject = new quick.GameObject();
   assert.equal(0, gameObject.getHeight());
   assert.equal(0, gameObject.getWidth());
   assert.equal(0, gameObject.getX());
@@ -91,7 +88,7 @@ function gameObjectTest() {
   assert.equal(true, gameObject.getVisible());
 
   // expiration
-  gameObject = new global.window.quick.GameObject();
+  gameObject = new quick.GameObject();
   gameObject.setExpiration(5);
 
   for (var i = 0; i < 5; ++i) {
@@ -115,7 +112,7 @@ function mouseTest() {
   var mouse;
 
   // no args constructor
-  mouse = new global.window.quick.Mouse(event);
+  mouse = new quick.Mouse(event);
   assert.equal(0, mouse.getX());
   assert.equal(0, mouse.getY());
   assert.equal(true, mouse.getCommand());
@@ -135,7 +132,7 @@ function pointTest() {
   var point;
 
   // no args constructor
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   assert.equal(0, point.getAccelerationX());
   assert.equal(0, point.getAccelerationY());
   assert.equal(point, point.getCenter());
@@ -147,7 +144,7 @@ function pointTest() {
   assert.equal(0, point.getY());
 
   // all args constructor
-  point = new global.window.quick.Point(1, 2);
+  point = new quick.Point(1, 2);
   assert.equal(0, point.getAccelerationX());
   assert.equal(0, point.getAccelerationY());
   assert.equal(point, point.getCenter());
@@ -159,7 +156,7 @@ function pointTest() {
   assert.equal(2, point.getY());
 
   // partial args constructor
-  point = new global.window.quick.Point(3);
+  point = new quick.Point(3);
   assert.equal(3, point.getX());
 
   // getters & setters
@@ -169,7 +166,7 @@ function pointTest() {
   point.setAccelerationY(5);
   assert.equal(5, point.getAccelerationY());
 
-  point.setPosition(new global.window.quick.Point(10, 11));
+  point.setPosition(new quick.Point(10, 11));
   assert.equal(10, point.getX());
   assert.equal(11, point.getY());
 
@@ -186,7 +183,7 @@ function pointTest() {
   assert.equal(9, point.getY());
 
   // multiple objects
-  var point1 = new global.window.quick.Point(10, 11);
+  var point1 = new quick.Point(10, 11);
   assert.equal(0, point1.getAccelerationX());
   assert.equal(0, point1.getAccelerationY());
   assert.equal(0, point1.getSpeedX());
@@ -194,7 +191,7 @@ function pointTest() {
   assert.equal(10, point1.getX());
   assert.equal(11, point1.getY());
 
-  var point2 = new global.window.quick.Point(12, 13);
+  var point2 = new quick.Point(12, 13);
   assert.equal(0, point2.getAccelerationX());
   assert.equal(0, point2.getAccelerationY());
   assert.equal(0, point2.getSpeedX());
@@ -203,7 +200,7 @@ function pointTest() {
   assert.equal(13, point2.getY());
 
   // speed to angle
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   point.setSpeedToAngle(1, 0);
   assert.equal(1, Math.round(point.getSpeedX()));
   assert.equal(0, Math.round(point.getSpeedY()));
@@ -218,7 +215,7 @@ function pointTest() {
   assert.equal(-1, Math.round(point.getSpeedY()));
 
   // get angle
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   point.setSpeedX(1);
   point.setSpeedY(1);
   assert.equal(45, point.getAngle());
@@ -233,8 +230,8 @@ function pointTest() {
   assert.equal(-45, point.getAngle());
 
   // speed to point
-  point1 = new global.window.quick.Point();
-  point2 = new global.window.quick.Point(100, 50);
+  point1 = new quick.Point();
+  point2 = new quick.Point(100, 50);
   point1.setSpeedToPoint(2, point2);
   point2.setSpeedToPoint(2, point1);
   assert.equal(100 / 150 * 2, point1.getSpeedX());
@@ -243,7 +240,7 @@ function pointTest() {
   assert.equal(-50 / 150 * 2, point2.getSpeedY());
 
   // max speed
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   point.setMaxSpeedX(2);
   point.setMaxSpeedY(4);
   point.setAccelerationX(1);
@@ -271,7 +268,7 @@ function pointTest() {
   assert.equal(-4, point.getSpeedY());
 
   // last position
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   assert.equal(0, point.getX());
   assert.equal(0, point.getY());
   assert.equal(0, point.getLastX());
@@ -299,7 +296,7 @@ function pointTest() {
   assert.equal(30, lastPosition.getY());
 
   // direction
-  point = new global.window.quick.Point();
+  point = new quick.Point();
   assert.equal(false, point.getDirection().getLeft());
   assert.equal(false, point.getDirection().getRight());
   assert.equal(false, point.getDirection().getTop());
@@ -342,10 +339,10 @@ function pointTest() {
 
 function quickTest() {
   // load / save
-  assert.equal(undefined, global.window.quick.Quick.load());
+  assert.equal(undefined, quick.Quick.load());
   var game = { level: 1, lives: 2 };
-  assert.equal(undefined, global.window.quick.Quick.save(game));
-  game = global.window.quick.Quick.load();
+  assert.equal(undefined, quick.Quick.save(game));
+  game = quick.Quick.load();
   assert.equal(JSON.stringify({ level: 1, lives: 2 }), JSON.stringify(game));
 }
 
@@ -353,51 +350,51 @@ function rectTest() {
   var rect;
 
   // no args constructor
-  rect = new global.window.quick.Rect();
+  rect = new quick.Rect();
   assert.equal(0, rect.getHeight());
   assert.equal(0, rect.getWidth());
   assert.equal(0, rect.getX());
   assert.equal(0, rect.getY());
 
   // all args constructor
-  rect = new global.window.quick.Rect(1, 2, 3, 4);
+  rect = new quick.Rect(1, 2, 3, 4);
   assert.equal(1, rect.getX());
   assert.equal(2, rect.getY());
   assert.equal(3, rect.getWidth());
   assert.equal(4, rect.getHeight());
 
   // partial args constructor
-  rect = new global.window.quick.Rect(5);
+  rect = new quick.Rect(5);
   assert.equal(5, rect.getX());
   assert.equal(0, rect.getY());
   assert.equal(0, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
-  rect = new global.window.quick.Rect(6, 7);
+  rect = new quick.Rect(6, 7);
   assert.equal(6, rect.getX());
   assert.equal(7, rect.getY());
   assert.equal(0, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
-  rect = new global.window.quick.Rect(8, 9, 10);
+  rect = new quick.Rect(8, 9, 10);
   assert.equal(8, rect.getX());
   assert.equal(9, rect.getY());
   assert.equal(10, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
   // getters & setters
-  rect = new global.window.quick.Rect(0, 0, 5, 5);
+  rect = new quick.Rect(0, 0, 5, 5);
   assert.equal(2, rect.getHalfWidth());
   assert.equal(2, rect.getHalfHeight());
 
-  rect = new global.window.quick.Rect(0, 0, 6, 6);
+  rect = new quick.Rect(0, 0, 6, 6);
   assert.equal(3, rect.getHalfWidth());
   assert.equal(3, rect.getHalfHeight());
 
   rect.setBottom(11);
   assert.equal(11, rect.getBottom());
 
-  rect.setCenter(new global.window.quick.Point(12, 13));
+  rect.setCenter(new quick.Point(12, 13));
   var point = rect.getCenter();
   assert.equal(12, point.getX());
   assert.equal(13, point.getY());
@@ -432,19 +429,19 @@ function rectTest() {
   assert.equal(22, rect.getTop());
 
   // metrics
-  rect = new global.window.quick.Rect(0, 0, 1, 1);
+  rect = new quick.Rect(0, 0, 1, 1);
   assert.equal(0, rect.getRight());
   assert.equal(0, rect.getBottom());
 
-  rect = new global.window.quick.Rect(0, 0, 2, 2);
+  rect = new quick.Rect(0, 0, 2, 2);
   assert.equal(1, rect.getRight());
   assert.equal(1, rect.getBottom());
 
-  rect = new global.window.quick.Rect(0, 0, 3, 3);
+  rect = new quick.Rect(0, 0, 3, 3);
   assert.equal(2, rect.getRight());
   assert.equal(2, rect.getBottom());
 
-  rect = new global.window.quick.Rect(0, 0, 4, 4);
+  rect = new quick.Rect(0, 0, 4, 4);
   assert.equal(3, rect.getRight());
   assert.equal(3, rect.getBottom());
 
@@ -454,22 +451,22 @@ function rectTest() {
   assert.equal(0, rect.getY());
 
   // multiple objects
-  var rect1 = new global.window.quick.Rect(0, 1, 2, 3);
+  var rect1 = new quick.Rect(0, 1, 2, 3);
   assert.equal(0, rect1.getX());
   assert.equal(1, rect1.getY());
   assert.equal(2, rect1.getWidth());
   assert.equal(3, rect1.getHeight());
 
-  var rect2 = new global.window.quick.Rect(4, 5, 6, 7);
+  var rect2 = new quick.Rect(4, 5, 6, 7);
   assert.equal(4, rect2.getX());
   assert.equal(5, rect2.getY());
   assert.equal(6, rect2.getWidth());
   assert.equal(7, rect2.getHeight());
 
   // collision detection
-  rect1 = new global.window.quick.Rect(0, 0, 2, 2);
-  rect2 = new global.window.quick.Rect(1, 1, 2, 2);
-  var rect3 = new global.window.quick.Rect(2, 2, 2, 2);
+  rect1 = new quick.Rect(0, 0, 2, 2);
+  rect2 = new quick.Rect(1, 1, 2, 2);
+  var rect3 = new quick.Rect(2, 2, 2, 2);
   assert.equal(true, rect1.hasCollision(rect2));
   assert.equal(false, rect1.hasCollision(rect3));
   var collision = rect1.getCollision(rect2);
@@ -482,12 +479,12 @@ function spriteTest() {
   var offBoundaryCalled;
 
   // no args constructor
-  sprite = new global.window.quick.Sprite();
+  sprite = new quick.Sprite();
   assert.equal(0, sprite.getLeft());
   assert.equal(0, sprite.getTop());
 
   // on boundary
-  sprite = new global.window.quick.Sprite();
+  sprite = new quick.Sprite();
   sprite.setSize(16);
   offBoundaryCalled = false;
 
@@ -497,12 +494,12 @@ function spriteTest() {
     }
   });
 
-  sprite.setBoundary(new global.window.quick.Rect(0, 0, 200, 200));
+  sprite.setBoundary(new quick.Rect(0, 0, 200, 200));
   sprite.sync();
   assert.equal(false, offBoundaryCalled);
 
   // off boundary
-  sprite = new global.window.quick.Sprite();
+  sprite = new quick.Sprite();
   sprite.setSize(16);
   offBoundaryCalled = false;
 
@@ -512,7 +509,7 @@ function spriteTest() {
     }
   });
 
-  sprite.setBoundary(new global.window.quick.Rect(20, 20, 100, 100));
+  sprite.setBoundary(new quick.Rect(20, 20, 100, 100));
   sprite.sync();
   assert.equal(true, offBoundaryCalled);
 }
@@ -521,10 +518,10 @@ function textTest() {
   var text;
 
   // no args constructor
-  new global.window.quick.TextObject();
+  new quick.TextObject();
 
   // all args constructor
-  text = new global.window.quick.TextObject("whatever");
+  text = new quick.TextObject("whatever");
 
   // setString
   text.setString("test");

@@ -1864,7 +1864,7 @@
     return degrees * Math.PI / 180;
   }
 
-  window.quick = {
+  const EXPORTS = {
     Animation,
     BaseTile,
     BaseTransition,
@@ -1881,4 +1881,10 @@
     Sprite,
     TextObject,
   };
+
+  if (typeof(window) == 'object') {
+    window.quick = EXPORTS;
+  } else if (typeof(module.exports) == 'object') {
+    module.exports = EXPORTS;
+  }
 })();
