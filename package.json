@@ -1,6 +1,6 @@
 {
   "name": "quick",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "open multi-platform game engine",
   "main": "quick.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "engine",
     "game",
     "library",
-	"quick"
+    "quick"
   ],
   "author": "Diogo Schneider",
   "license": "MIT",
