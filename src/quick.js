@@ -168,10 +168,6 @@
       sound.fadeOut();
     }
 
-    static getBoundary() {
-      return new Rect(0, 0, Quick.getWidth(), Quick.getHeight());
-    }
-
     static getBottom() {
       return height - 1;
     }
@@ -1340,11 +1336,15 @@
     }
 
     getParentX() {
-      return this.getX();
+      return this._scene && this._scene.getParentX() || 0;
     }
 
     getParentY() {
-      return this.getY();
+      return this._scene && this._scene.getParentY() || 0;
+    }
+
+    getScene() {
+      return this._scene;
     }
 
     init(scene) {
@@ -1366,8 +1366,8 @@
     render(context) {
       if (this._animation) {
         const IMAGE = this.getImage();
-        const X = Math.floor(this.getX() + this._scene.getParentX());
-        const Y = Math.floor(this.getY() + this._scene.getParentY());
+        const X = Math.floor(this.getX() + this.getParentX());
+        const Y = Math.floor(this.getY() + this.getParentY());
         context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
       }
     }
@@ -1385,7 +1385,7 @@
     }
 
     setBoundary(rect) {
-      this._boundary = rect || Quick.getBoundary();
+      this._boundary = rect || this._scene && this._scene.getBoundary();
       return this;
     }
 
@@ -1511,8 +1511,8 @@
       }
 
       if (this._color) {
-        const X = Math.floor(this.getX() + this._scene.getX());
-        const Y = Math.floor(this.getY() + this._scene.getY());
+        const X = Math.floor(this.getX() + this.getParentX());
+        const Y = Math.floor(this.getY() + this.getParentY());
         context.fillStyle = this._color;
         context.fillRect(X, Y, this.getWidth(), this.getHeight());
       }
@@ -1537,10 +1537,9 @@
     }
   }
 
-  class Scene extends Point {
-    constructor(x, y) {
-      super(x, y);
-      this._delegate = null;
+  class Scene extends Rect {
+    constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
+      super(x, y, width, height);
       this._expiration = -1;
       this._isExpired = false;
       this._sprites = [];
@@ -1577,6 +1576,10 @@
 
     expire() {
       this._isExpired = true;
+    }
+
+    getBoundary() {
+      return new Rect(0, 0, this.getWidth(), this.getHeight());
     }
 
     getParentX() {
@@ -1650,10 +1653,6 @@
 
     getTransition() {
       return this._transition;
-    }
-
-    setDelegate(delegate) {
-      this._delegate = delegate;
     }
 
     setExpiration(expiration) {
