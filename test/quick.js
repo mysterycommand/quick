@@ -87,6 +87,13 @@ function gameObjectTest() {
   assert.equal(false, gameObject.getSolid());
   assert.equal(true, gameObject.getVisible());
 
+  // all args constructor
+  gameObject = new quick.GameObject(1, 2, 3, 4);
+  assert.equal(4, gameObject.getHeight());
+  assert.equal(3, gameObject.getWidth());
+  assert.equal(1, gameObject.getX());
+  assert.equal(2, gameObject.getY());
+
   // expiration
   gameObject = new quick.GameObject();
   gameObject.setExpiration(5);
@@ -482,6 +489,13 @@ function spriteTest() {
   sprite = new quick.Sprite();
   assert.equal(0, sprite.getLeft());
   assert.equal(0, sprite.getTop());
+
+  // all args constructor
+  sprite = new quick.Sprite(2, 4, 8, 16);
+  assert.equal(2, sprite.getLeft());
+  assert.equal(4, sprite.getTop());
+  assert.equal(8, sprite.getWidth());
+  assert.equal(16, sprite.getHeight());
 
   // on boundary
   sprite = new quick.Sprite();

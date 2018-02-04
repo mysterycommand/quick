@@ -1435,8 +1435,8 @@
   }
 
   class Sprite extends Rect {
-    constructor() {
-      super();
+    constructor(x, y, width, height) {
+      super(x, y, width, height);
       this._animation = null;
       this._boundary = null;
       this._delegate = null;
@@ -1515,8 +1515,8 @@
   }
 
   class GameObject extends Sprite {
-    constructor() {
-      super();
+    constructor(x, y, width, height) {
+      super(x, y, width, height);
       this._color = null;
       this._layerIndex = 0;
       this._isEssential = false;
