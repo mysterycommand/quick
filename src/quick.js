@@ -703,129 +703,6 @@
     }
   }
 
-  class Scene {
-    constructor() {
-      this._delegate = null;
-      this._gameObjects = [];
-      this._nextObjects = [];
-      this._expiration = -1;
-      this._isExpired = false;
-      this._tick = -1;
-      this._transition = null;
-    }
-
-    add(gameObject) {
-      gameObject.setScene(this);
-      gameObject.init(this);
-      this._nextObjects.push(gameObject);
-      gameObject.move(gameObject.getSpeedX() * -1, gameObject.getSpeedY() * -1);
-    }
-
-    build(map, tileFactory = baseTileFactory, offsetX, offsetY) {
-      for (let i = 0; i < map.length; ++i) {
-        const LINE = map[i];
-
-        for (let j = 0; j < LINE.length; ++j) {
-          const ID = map[i][j];
-
-          if (ID) {
-            const TILE = tileFactory(ID);
-            const X = offsetX ? offsetX : TILE.getWidth();
-            const Y = offsetY ? offsetY : TILE.getHeight();
-            TILE.setTop(i * Y);
-            TILE.setLeft(j * X);
-            this.add(TILE);
-          }
-        }
-      }
-    }
-
-    expire() {
-      this._isExpired = true;
-    }
-
-    sync() {
-      if (this._isExpired) {
-        return true;
-      }
-
-      let gameObjects = [];
-      const SOLID_GAME_OBJECTS = [];
-
-      for (let i = 0; i < this._gameObjects.length; ++i) {
-        const GAME_OBJECT = this._gameObjects[i];
-        GAME_OBJECT.update();
-
-        if (GAME_OBJECT.sync()) {
-          if (GAME_OBJECT.getEssential()) {
-            this.expire();
-          }
-        } else {
-          if (GAME_OBJECT.getSolid()) {
-            SOLID_GAME_OBJECTS.push(GAME_OBJECT);
-          }
-
-          gameObjects.push(GAME_OBJECT);
-          Quick.paint(GAME_OBJECT, GAME_OBJECT.getLayerIndex());
-        }
-      }
-
-      checkCollisions(SOLID_GAME_OBJECTS);
-      this._gameObjects = gameObjects.concat(this._nextObjects);
-      this._nextObjects = [];
-
-      if (++this._tick == this._expiration) {
-        this.expire();
-      }
-
-      return false;
-    }
-
-    getNext() {
-      if (this._delegate && this._delegate.getNext) {
-        return this._delegate.getNext();
-      }
-    }
-
-    getObjectsWithTag(tag) {
-      const RESULT = [];
-
-      for (let i = 0; i < this._gameObjects.length; ++i) {
-        const GAME_OBJECT = this._gameObjects[i];
-
-        if (GAME_OBJECT.hasTag(tag)) {
-          RESULT.push(GAME_OBJECT);
-        }
-      }
-
-      return RESULT;
-    }
-
-    getTick() {
-      return this._tick;
-    }
-
-    getTransition() {
-      return this._transition;
-    }
-
-    setDelegate(delegate) {
-      this._delegate = delegate;
-    }
-
-    setExpiration(expiration) {
-      this._expiration = expiration;
-    }
-
-    setTransition(transition) {
-      this._transition = transition;
-    }
-
-    update() {
-      this._delegate && this._delegate.update && this._delegate.update();
-    }
-  }
-
   class Sound {
     constructor() {
       this._isFading = false;
@@ -942,6 +819,51 @@
           }
         }
       }
+    }
+  }
+
+  class Direction {
+    constructor() {
+      this._isBottom = false;
+      this._isLeft = false;
+      this._isRight = false;
+      this._isTop = false;
+    }
+
+    getBottom() {
+      return this._isBottom;
+    }
+
+    getLeft() {
+      return this._isLeft;
+    }
+
+    getRight() {
+      return this._isRight;
+    }
+
+    getTop() {
+      return this._isTop;
+    }
+
+    setBottom(isBottom) {
+      this._isBottom = isBottom == undefined || isBottom;
+      return this;
+    }
+
+    setLeft(isLeft) {
+      this._isLeft = isLeft == undefined || isLeft;
+      return this;
+    }
+
+    setRight(isRight) {
+      this._isRight = isRight == undefined || isRight;
+      return this;
+    }
+
+    setTop(isTop) {
+      this._isTop = isTop == undefined || isTop;
+      return this;
     }
   }
 
@@ -1154,6 +1076,7 @@
   class Rect extends Point {
     constructor(x, y, width, height) {
       super(x, y);
+      this._delegate = null;
       this.setHeight(height);
       this.setWidth(width);
     }
@@ -1267,6 +1190,10 @@
       return this;
     }
 
+    onCollision(rect) {
+      this._delegate && this._delegate.onCollision && this._delegate.onCollision(rect);
+    }
+
     setBottom(y) {
       this.setY(y - this.getHeight() + 1);
       return this;
@@ -1285,6 +1212,11 @@
 
     setCenterY(y) {
       this.setY(y - this.getHalfHeight());
+      return this;
+    }
+
+    setDelegate(delegate) {
+      this._delegate = delegate;
       return this;
     }
 
@@ -1316,51 +1248,6 @@
 
     setWidth(width) {
       this._width = width || 0;
-      return this;
-    }
-  }
-
-  class Direction {
-    constructor() {
-      this._isBottom = false;
-      this._isLeft = false;
-      this._isRight = false;
-      this._isTop = false;
-    }
-
-    getBottom() {
-      return this._isBottom;
-    }
-
-    getLeft() {
-      return this._isLeft;
-    }
-
-    getRight() {
-      return this._isRight;
-    }
-
-    getTop() {
-      return this._isTop;
-    }
-
-    setBottom(isBottom) {
-      this._isBottom = isBottom == undefined || isBottom;
-      return this;
-    }
-
-    setLeft(isLeft) {
-      this._isLeft = isLeft == undefined || isLeft;
-      return this;
-    }
-
-    setRight(isRight) {
-      this._isRight = isRight == undefined || isRight;
-      return this;
-    }
-
-    setTop(isTop) {
-      this._isTop = isTop == undefined || isTop;
       return this;
     }
   }
@@ -1445,11 +1332,23 @@
       super(x, y, width, height);
       this._animation = null;
       this._boundary = null;
-      this._delegate = null;
+      this._scene = null;
     }
 
     getImage() {
       return this._animation.getImage();
+    }
+
+    getParentX() {
+      return this.getX();
+    }
+
+    getParentY() {
+      return this.getY();
+    }
+
+    init(scene) {
+      this._delegate && this._delegate.init && this._delegate.init(scene);
     }
 
     offBoundary() {
@@ -1467,8 +1366,8 @@
     render(context) {
       if (this._animation) {
         const IMAGE = this.getImage();
-        const X = Math.floor(this.getX());
-        const Y = Math.floor(this.getY());
+        const X = Math.floor(this.getX() + this._scene.getParentX());
+        const Y = Math.floor(this.getY() + this._scene.getParentY());
         context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
       }
     }
@@ -1490,11 +1389,6 @@
       return this;
     }
 
-    setDelegate(delegate) {
-      this._delegate = delegate;
-      return this;
-    }
-
     setImage(image) {
       this.setAnimation(new Animation([new Frame(image)]));
       return this;
@@ -1502,6 +1396,11 @@
 
     setImageId(id) {
       this.setImage(document.getElementById(id));
+      return this;
+    }
+
+    setScene(scene) {
+      this._scene = scene;
       return this;
     }
 
@@ -1530,7 +1429,6 @@
       this._isExpired = false;
       this._isSolid = false;
       this._isVisible = true;
-      this._scene = null;
       this._tags = {};
       this._tick = 0;
     }
@@ -1561,10 +1459,6 @@
       return this._layerIndex;
     }
 
-    getScene() {
-      return this._scene;
-    }
-
     getSolid() {
       return this._isSolid;
     }
@@ -1581,14 +1475,6 @@
       return this._tags[tag];
     }
 
-    init(scene) {
-      this._delegate && this._delegate.init && this._delegate.init(scene);
-    }
-
-    onCollision(gameObject) {
-      this._delegate && this._delegate.onCollision && this._delegate.onCollision(gameObject);
-    }
-
     setColor(color) {
       this._color = color;
       return this;
@@ -1601,11 +1487,6 @@
 
     setLayerIndex(layerIndex) {
       this._layerIndex = layerIndex || 0;
-      return this;
-    }
-
-    setScene(scene) {
-      this._scene = scene;
       return this;
     }
 
@@ -1630,8 +1511,8 @@
       }
 
       if (this._color) {
-        const X = Math.floor(this.getX());
-        const Y = Math.floor(this.getY());
+        const X = Math.floor(this.getX() + this._scene.getX());
+        const Y = Math.floor(this.getY() + this._scene.getY());
         context.fillStyle = this._color;
         context.fillRect(X, Y, this.getWidth(), this.getHeight());
       }
@@ -1653,6 +1534,166 @@
 
     update() {
       this._delegate && this._delegate.update && this._delegate.update();
+    }
+  }
+
+  class Scene extends Point {
+    constructor(x, y) {
+      super(x, y);
+      this._delegate = null;
+      this._expiration = -1;
+      this._isExpired = false;
+      this._sprites = [];
+      this._spritesQueue = [];
+      this._tick = -1;
+      this._transition = null;
+    }
+
+    add(sprite) {
+      sprite.setScene(this);
+      sprite.init(this);
+      this._spritesQueue.push(sprite);
+      sprite.move(sprite.getSpeedX() * -1, sprite.getSpeedY() * -1);
+    }
+
+    build(map, tileFactory = baseTileFactory, offsetX, offsetY) {
+      for (let i = 0; i < map.length; ++i) {
+        const LINE = map[i];
+
+        for (let j = 0; j < LINE.length; ++j) {
+          const ID = map[i][j];
+
+          if (ID) {
+            const TILE = tileFactory(ID);
+            const X = offsetX ? offsetX : TILE.getWidth();
+            const Y = offsetY ? offsetY : TILE.getHeight();
+            TILE.setTop(i * Y);
+            TILE.setLeft(j * X);
+            this.add(TILE);
+          }
+        }
+      }
+    }
+
+    expire() {
+      this._isExpired = true;
+    }
+
+    getParentX() {
+      return this.getX() * -1;
+    }
+
+    getParentY() {
+      return this.getY() * -1;
+    }
+
+    sync() {
+      if (this._isExpired) {
+        return true;
+      }
+
+      let sprites = [];
+      const SOLID_SPRITES = [];
+
+      for (let i = 0; i < this._sprites.length; ++i) {
+        const SPRITE = this._sprites[i];
+        SPRITE.update();
+
+        if (SPRITE.sync()) {
+          if (SPRITE.getEssential()) {
+            this.expire();
+          }
+        } else {
+          if (SPRITE.getSolid()) {
+            SOLID_SPRITES.push(SPRITE);
+          }
+
+          sprites.push(SPRITE);
+          Quick.paint(SPRITE, SPRITE.getLayerIndex());
+        }
+      }
+
+      checkCollisions(SOLID_SPRITES);
+      this._sprites = sprites.concat(this._spritesQueue);
+      this._spritesQueue = [];
+
+      if (++this._tick == this._expiration) {
+        this.expire();
+      }
+
+      return false;
+    }
+
+    getNext() {
+      if (this._delegate && this._delegate.getNext) {
+        return this._delegate.getNext();
+      }
+    }
+
+    getObjectsWithTag(tag) {
+      const RESULT = [];
+
+      for (let i = 0; i < this._sprites.length; ++i) {
+        const SPRITE = this._sprites[i];
+
+        if (SPRITE.hasTag(tag)) {
+          RESULT.push(SPRITE);
+        }
+      }
+
+      return RESULT;
+    }
+
+    getTick() {
+      return this._tick;
+    }
+
+    getTransition() {
+      return this._transition;
+    }
+
+    setDelegate(delegate) {
+      this._delegate = delegate;
+    }
+
+    setExpiration(expiration) {
+      this._expiration = expiration;
+    }
+
+    setTransition(transition) {
+      this._transition = transition;
+    }
+
+    update() {
+      this._delegate && this._delegate.update && this._delegate.update();
+    }
+  }
+
+  class BaseTile extends GameObject {
+    constructor(id) {
+      super();
+      this.setImageId(id);
+    }
+  }
+
+  class BaseTransition extends GameObject {
+    constructor() {
+      super();
+      const COLOR = 'Black';
+      const FRAMES = 32;
+      this.setColor(COLOR);
+      this.setHeight(Quick.getHeight());
+      this._increase = Quick.getWidth() / FRAMES;
+    }
+
+    sync() {
+      if (this.getWidth() > Quick.getWidth()) {
+        return true;
+      }
+
+      this.increaseWidth(this._increase);
+      Quick.paint(this);
+      return GameObject.prototype.sync.call(this);
     }
   }
 
@@ -1716,34 +1757,6 @@
     }
   }
 
-  class BaseTile extends GameObject {
-    constructor(id) {
-      super();
-      this.setImageId(id);
-    }
-  }
-
-  class BaseTransition extends GameObject {
-    constructor() {
-      super();
-      const COLOR = 'Black';
-      const FRAMES = 32;
-      this.setColor(COLOR);
-      this.setHeight(Quick.getHeight());
-      this._increase = Quick.getWidth() / FRAMES;
-    }
-
-    sync() {
-      if (this.getWidth() > Quick.getWidth()) {
-        return true;
-      }
-
-      this.increaseWidth(this._increase);
-      Quick.paint(this);
-      return GameObject.prototype.sync.call(this);
-    }
-  }
-
   function baseTileFactory(id) {
     return new BaseTile(id)
   }
@@ -1771,18 +1784,18 @@
     }
   }
 
-  function checkCollisions(gameObjects) {
-    const LENGTH = gameObjects.length;
+  function checkCollisions(rects) {
+    const LENGTH = rects.length;
 
     for (let i = 0; i < LENGTH - 1; ++i) {
-      const LEFT_GAME_OBJECT = gameObjects[i];
+      const LEFT_RECT = rects[i];
 
       for (let j = i + 1; j < LENGTH; ++j) {
-        const RIGHT_GAME_OBJECT = gameObjects[j];
+        const RIGHT_RECT = rects[j];
 
-        if (LEFT_GAME_OBJECT.hasCollision(RIGHT_GAME_OBJECT)) {
-          LEFT_GAME_OBJECT.onCollision(RIGHT_GAME_OBJECT);
-          RIGHT_GAME_OBJECT.onCollision(LEFT_GAME_OBJECT);
+        if (LEFT_RECT.hasCollision(RIGHT_RECT)) {
+          LEFT_RECT.onCollision(RIGHT_RECT);
+          RIGHT_RECT.onCollision(LEFT_RECT);
         }
       }
     }
