@@ -177,6 +177,10 @@ function pointTest() {
   assert.equal(10, point.getX());
   assert.equal(11, point.getY());
 
+  point.setPosition(10, 11);
+  assert.equal(10, point.getX());
+  assert.equal(11, point.getY());
+
   point.setSpeedX(6);
   assert.equal(6, point.getSpeedX());
 

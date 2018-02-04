@@ -1077,9 +1077,15 @@
       return this;
     }
 
-    setPosition(point) {
-      this.setX(point.getX());
-      this.setY(point.getY());
+    setPosition(pointOrX, y) {
+      if (y) {
+        this.setX(pointOrX);
+        this.setY(y);
+      } else {
+        this.setX(pointOrX.getX());
+        this.setY(pointOrX.getY());
+      }
+
       return this;
     }
 
@@ -1297,9 +1303,9 @@
       return this;
     }
 
-    setSize(size, height) {
-      this.setWidth(size);
-      this.setHeight(height || size);
+    setSize(sizeOrWidth, height) {
+      this.setWidth(sizeOrWidth);
+      this.setHeight(height || sizeOrWidth);
       return this;
     }
 
