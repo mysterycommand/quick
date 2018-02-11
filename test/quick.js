@@ -33,7 +33,6 @@ const event = {
 
 // run tests
 controllerTest();
-gameObjectTest();
 mouseTest();
 pointTest();
 quickTest();
@@ -70,49 +69,6 @@ function controllerTest() {
     assert.equal(true, controller.keyDown(quick.CommandEnum[k]));
     assert.equal(false, controller.keyPush(quick.CommandEnum[k]));
   }
-}
-
-function gameObjectTest() {
-  var gameObject;
-
-  // no args constructor
-  gameObject = new quick.GameObject();
-  assert.equal(0, gameObject.getHeight());
-  assert.equal(0, gameObject.getWidth());
-  assert.equal(0, gameObject.getX());
-  assert.equal(0, gameObject.getY());
-  assert.equal(null, gameObject.getColor());
-  assert.equal(0, gameObject.getLayerIndex());
-  assert.equal(false, gameObject.getEssential());
-  assert.equal(false, gameObject.getSolid());
-  assert.equal(true, gameObject.getVisible());
-
-  // all args constructor
-  gameObject = new quick.GameObject(1, 2, 3, 4);
-  assert.equal(4, gameObject.getHeight());
-  assert.equal(3, gameObject.getWidth());
-  assert.equal(1, gameObject.getX());
-  assert.equal(2, gameObject.getY());
-
-  // expiration
-  gameObject = new quick.GameObject();
-  gameObject.setExpiration(5);
-
-  for (var i = 0; i < 5; ++i) {
-    assert.equal(false, gameObject.getExpired());
-    assert.equal(false, gameObject.sync());
-  }
-
-  assert.equal(true, gameObject.getExpired());
-  assert.equal(true, gameObject.sync());
-
-  // visibility
-  gameObject.setVisible();
-  assert.equal(true, gameObject.getVisible());
-  gameObject.setVisible(true);
-  assert.equal(true, gameObject.getVisible());
-  gameObject.setVisible(false);
-  assert.equal(false, gameObject.getVisible());
 }
 
 function mouseTest() {
@@ -493,6 +449,15 @@ function spriteTest() {
   sprite = new quick.Sprite();
   assert.equal(0, sprite.getLeft());
   assert.equal(0, sprite.getTop());
+  assert.equal(0, sprite.getHeight());
+  assert.equal(0, sprite.getWidth());
+  assert.equal(0, sprite.getX());
+  assert.equal(0, sprite.getY());
+  assert.equal(null, sprite.getColor());
+  assert.equal(0, sprite.getLayerIndex());
+  assert.equal(false, sprite.getEssential());
+  assert.equal(false, sprite.getSolid());
+  assert.equal(true, sprite.getVisible());
 
   // all args constructor
   sprite = new quick.Sprite(2, 4, 8, 16);
@@ -530,6 +495,26 @@ function spriteTest() {
   sprite.setBoundary(new quick.Rect(20, 20, 100, 100));
   sprite.sync();
   assert.equal(true, offBoundaryCalled);
+
+  // expiration
+  sprite = new quick.Sprite();
+  sprite.setExpiration(5);
+
+  for (var i = 0; i < 5; ++i) {
+    assert.equal(false, sprite.getExpired());
+    assert.equal(false, sprite.sync());
+  }
+
+  assert.equal(true, sprite.getExpired());
+  assert.equal(true, sprite.sync());
+
+  // visibility
+  sprite.setVisible();
+  assert.equal(true, sprite.getVisible());
+  sprite.setVisible(true);
+  assert.equal(true, sprite.getVisible());
+  sprite.setVisible(false);
+  assert.equal(false, sprite.getVisible());
 }
 
 function textTest() {

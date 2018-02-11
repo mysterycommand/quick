@@ -1328,107 +1328,14 @@
       super(x, y, width, height);
       this._animation = null;
       this._boundary = null;
-      this._scene = null;
-    }
-
-    getImage() {
-      return this._animation.getImage();
-    }
-
-    getParentX() {
-      return this._scene && this._scene.getParentX() || 0;
-    }
-
-    getParentY() {
-      return this._scene && this._scene.getParentY() || 0;
-    }
-
-    getScene() {
-      return this._scene;
-    }
-
-    init(scene) {
-      this._delegate && this._delegate.init && this._delegate.init(scene);
-    }
-
-    offBoundary() {
-      if (this._delegate && this._delegate.offBoundary) {
-        this._delegate.offBoundary();
-      } else {
-        this.expire();
-      }
-    }
-
-    onAnimationLoop() {
-      this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
-    }
-
-    render(context) {
-      if (this._animation) {
-        const IMAGE = this.getImage();
-        const X = Math.floor(this.getX() + this.getParentX());
-        const Y = Math.floor(this.getY() + this.getParentY());
-        context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
-      }
-    }
-
-    setAnimation(animation) {
-      if (this._animation == animation) {
-        return this;
-      }
-
-      this._animation = animation;
-      this._animation.updateFrameIndex(0);
-      this.setHeight(this._animation.getHeight());
-      this.setWidth(this._animation.getWidth());
-      return this;
-    }
-
-    setBoundary(rect) {
-      this._boundary = rect || this._scene && this._scene.getBoundary();
-      return this;
-    }
-
-    setImage(image) {
-      this.setAnimation(new Animation([new Frame(image)]));
-      return this;
-    }
-
-    setImageId(id) {
-      this.setImage(document.getElementById(id));
-      return this;
-    }
-
-    setScene(scene) {
-      this._scene = scene;
-      return this;
-    }
-
-    sync() {
-      const RESULT = Rect.prototype.sync.call(this);
-
-      if (this._animation && this._animation.update()) {
-        this.onAnimationLoop();
-      }
-
-      if (this._boundary && !this.hasCollision(this._boundary)) {
-        this.offBoundary();
-      }
-
-      return RESULT;
-    }
-  }
-
-  class GameObject extends Sprite {
-    constructor(x, y, width, height) {
-      super(x, y, width, height);
       this._color = null;
+      this._expiration = -1;
       this._layerIndex = 0;
       this._isEssential = false;
-      this._expiration = -1;
       this._isExpired = false;
       this._isSolid = false;
       this._isVisible = true;
+      this._scene = null;
       this._tags = {};
       this._tick = 0;
     }
@@ -1455,8 +1362,24 @@
       return this._isExpired;
     }
 
+    getImage() {
+      return this._animation.getImage();
+    }
+
     getLayerIndex() {
       return this._layerIndex;
+    }
+
+    getParentX() {
+      return this._scene && this._scene.getParentX() || 0;
+    }
+
+    getParentY() {
+      return this._scene && this._scene.getParentY() || 0;
+    }
+
+    getScene() {
+      return this._scene;
     }
 
     getSolid() {
@@ -1475,6 +1398,58 @@
       return this._tags[tag];
     }
 
+    init(scene) {
+      this._delegate && this._delegate.init && this._delegate.init(scene);
+    }
+
+    offBoundary() {
+      if (this._delegate && this._delegate.offBoundary) {
+        this._delegate.offBoundary();
+      } else {
+        this.expire();
+      }
+    }
+
+    onAnimationLoop() {
+      this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
+    }
+
+    render(context) {
+      if (!this._isVisible) {
+        return;
+      }
+
+      const X = Math.floor(this.getX() + this.getParentX());
+      const Y = Math.floor(this.getY() + this.getParentY());
+
+      if (this._color) {
+        context.fillStyle = this._color;
+        context.fillRect(X, Y, this.getWidth(), this.getHeight());
+      }
+
+      if (this._animation) {
+        const IMAGE = this.getImage();
+        context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
+      }
+    }
+
+    setAnimation(animation) {
+      if (this._animation == animation) {
+        return this;
+      }
+
+      this._animation = animation;
+      this._animation.updateFrameIndex(0);
+      this.setHeight(this._animation.getHeight());
+      this.setWidth(this._animation.getWidth());
+      return this;
+    }
+
+    setBoundary(rect) {
+      this._boundary = rect || this._scene && this._scene.getBoundary();
+      return this;
+    }
+
     setColor(color) {
       this._color = color;
       return this;
@@ -1485,8 +1460,28 @@
       return this;
     }
 
+    setExpiration(expiration) {
+      this._expiration = expiration;
+      return this;
+    }
+
+    setImage(image) {
+      this.setAnimation(new Animation([new Frame(image)]));
+      return this;
+    }
+
+    setImageId(id) {
+      this.setImage(document.getElementById(id));
+      return this;
+    }
+
     setLayerIndex(layerIndex) {
       this._layerIndex = layerIndex || 0;
+      return this;
+    }
+
+    setScene(scene) {
+      this._scene = scene;
       return this;
     }
 
@@ -1500,26 +1495,6 @@
       return this;
     }
 
-    setExpiration(expiration) {
-      this._expiration = expiration;
-      return this;
-    }
-
-    render(context) {
-      if (!this._isVisible) {
-        return;
-      }
-
-      if (this._color) {
-        const X = Math.floor(this.getX() + this.getParentX());
-        const Y = Math.floor(this.getY() + this.getParentY());
-        context.fillStyle = this._color;
-        context.fillRect(X, Y, this.getWidth(), this.getHeight());
-      }
-
-      Sprite.prototype.render.call(this, context);
-    }
-
     sync() {
       if (this.getExpired()) {
         return true;
@@ -1529,7 +1504,15 @@
         this.expire();
       }
 
-      return Sprite.prototype.sync.call(this);
+      if (this._animation && this._animation.update()) {
+        this.onAnimationLoop();
+      }
+
+      if (this._boundary && !this.hasCollision(this._boundary)) {
+        this.offBoundary();
+      }
+
+      return Rect.prototype.sync.call(this);
     }
 
     update() {
@@ -1668,14 +1651,14 @@
     }
   }
 
-  class BaseTile extends GameObject {
+  class BaseTile extends Sprite {
     constructor(id) {
       super();
       this.setImageId(id);
     }
   }
 
-  class BaseTransition extends GameObject {
+  class BaseTransition extends Sprite {
     constructor() {
       super();
       const COLOR = 'Black';
@@ -1692,11 +1675,11 @@
 
       this.increaseWidth(this._increase);
       Quick.paint(this);
-      return GameObject.prototype.sync.call(this);
+      return Sprite.prototype.sync.call(this);
     }
   }
 
-  class TextObject extends GameObject {
+  class TextObject extends Sprite {
     constructor(string) {
       super();
       this.setString(string || '');
@@ -1889,7 +1872,6 @@
     CommandEnum,
     Controller,
     Frame,
-    GameObject,
     ImageFactory,
     Mouse,
     Point,
