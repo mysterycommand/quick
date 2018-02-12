@@ -3,7 +3,7 @@
 // imports
 const CommandEnum = quick.CommandEnum;
 const Quick = quick.Quick;
-const GameObject = quick.GameObject;
+const Sprite = quick.Sprite;
 const Scene = quick.Scene;
 
 // constants
@@ -18,7 +18,7 @@ class GameScene extends Scene {
   }
 }
 
-class Background extends GameObject {
+class Background extends Sprite {
   constructor() {
     super();
     this.setColor('Black');
@@ -27,7 +27,7 @@ class Background extends GameObject {
   }
 }
 
-class Player extends GameObject {
+class Player extends Sprite {
   constructor() {
     super();
     this.controller = Quick.getController();

@@ -3,7 +3,7 @@
 // imports
 const CommandEnum = quick.CommandEnum;
 const Quick = quick.Quick;
-const GameObject = quick.GameObject;
+const Sprite = quick.Sprite;
 const Scene = quick.Scene;
 
 // constants
@@ -12,12 +12,12 @@ const SPEED = 2;
 const GAME_SCENE = new Scene();
 Quick.setName('Skel');
 Quick.init(function () { return GAME_SCENE });
-const BACKGROUND = new GameObject();
+const BACKGROUND = new Sprite();
 BACKGROUND.setColor('Black');
 BACKGROUND.setHeight(Quick.getHeight());
 BACKGROUND.setWidth(Quick.getWidth());
 GAME_SCENE.add(BACKGROUND);
-const PLAYER = new GameObject();
+const PLAYER = new Sprite();
 PLAYER.controller = Quick.getController();
 PLAYER.setColor('White');
 PLAYER.setSize(32);
