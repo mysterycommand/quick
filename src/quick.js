@@ -1607,7 +1607,7 @@
         this.expire();
       }
 
-      return false;
+      return Rect.prototype.sync.call(this);
     }
 
     getNext() {
