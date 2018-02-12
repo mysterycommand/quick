@@ -381,11 +381,11 @@ function rectTest() {
   rect.setRight(18);
   assert.equal(18, rect.getRight());
 
-  rect.setSize(19);
+  rect.setSize(19, 19);
   assert.equal(19, rect.getWidth());
   assert.equal(19, rect.getHeight());
 
-  rect.setSize(20, 21);
+  rect.setSize(new quick.Rect(0, 0, 20, 21));
   assert.equal(20, rect.getWidth());
   assert.equal(21, rect.getHeight());
 
@@ -468,7 +468,7 @@ function spriteTest() {
 
   // on boundary
   sprite = new quick.Sprite();
-  sprite.setSize(16);
+  sprite.setSize(16, 16);
   offBoundaryCalled = false;
 
   sprite.setDelegate({
@@ -483,7 +483,7 @@ function spriteTest() {
 
   // off boundary
   sprite = new quick.Sprite();
-  sprite.setSize(16);
+  sprite.setSize(16, 16);
   offBoundaryCalled = false;
 
   sprite.setDelegate({

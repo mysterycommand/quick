@@ -1231,9 +1231,15 @@
       return this;
     }
 
-    setSize(sizeOrWidth, height) {
-      this.setWidth(sizeOrWidth);
-      this.setHeight(height || sizeOrWidth);
+    setSize(rectOrWidth, height) {
+      if (height) {
+        this.setWidth(rectOrWidth);
+        this.setHeight(height);
+      } else {
+        this.setWidth(rectOrWidth.getWidth());
+        this.setHeight(rectOrWidth.getHeight());
+      }
+
       return this;
     }
 

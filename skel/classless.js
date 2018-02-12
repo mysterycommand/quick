@@ -20,7 +20,7 @@ GAME_SCENE.add(BACKGROUND);
 const PLAYER = new Sprite();
 PLAYER.controller = Quick.getController();
 PLAYER.setColor('White');
-PLAYER.setSize(32);
+PLAYER.setSize(32, 32);
 
 PLAYER.setDelegate({
   'update' : function() {

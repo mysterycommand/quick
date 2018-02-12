@@ -22,8 +22,10 @@ class Background extends Sprite {
   constructor() {
     super();
     this.setColor('Black');
-    this.setHeight(Quick.getHeight());
-    this.setWidth(Quick.getWidth());
+  }
+
+  init() {
+    this.setSize(this.getScene());
   }
 }
 
@@ -32,7 +34,7 @@ class Player extends Sprite {
     super();
     this.controller = Quick.getController();
     this.setColor('White');
-    this.setSize(32);
+    this.setSize(32, 32);
   }
 
   // override
