@@ -1520,14 +1520,11 @@
     }
   }
 
-  class Scene extends Rect {
+  class Scene extends Sprite {
     constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
       super(x, y, width, height);
-      this._expiration = 0;
-      this._isExpired = false;
       this._sprites = [];
       this._spritesQueue = [];
-      this._tick = 0;
       this._transition = null;
     }
 
@@ -1557,10 +1554,6 @@
       }
     }
 
-    expire() {
-      this._isExpired = true;
-    }
-
     getBoundary() {
       return new Rect(0, 0, this.getWidth(), this.getHeight());
     }
@@ -1574,10 +1567,6 @@
     }
 
     sync() {
-      if (this._isExpired) {
-        return true;
-      }
-
       let sprites = [];
       const SOLID_SPRITES = [];
 
@@ -1602,12 +1591,7 @@
       checkCollisions(SOLID_SPRITES);
       this._sprites = sprites.concat(this._spritesQueue);
       this._spritesQueue = [];
-
-      if (++this._tick == this._expiration) {
-        this.expire();
-      }
-
-      return Rect.prototype.sync.call(this);
+      return Sprite.prototype.sync.call(this);
     }
 
     getNext() {
@@ -1630,10 +1614,6 @@
       return RESULT;
     }
 
-    getTick() {
-      return this._tick;
-    }
-
     getTransition() {
       return this._transition;
     }
@@ -1644,10 +1624,6 @@
 
     setTransition(transition) {
       this._transition = transition;
-    }
-
-    update() {
-      this._delegate && this._delegate.update && this._delegate.update();
     }
   }
 
