@@ -1329,7 +1329,7 @@
       this._animation = null;
       this._boundary = null;
       this._color = null;
-      this._expiration = -1;
+      this._expiration = 0;
       this._layerIndex = 0;
       this._isEssential = false;
       this._isExpired = false;
@@ -1523,11 +1523,11 @@
   class Scene extends Rect {
     constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
       super(x, y, width, height);
-      this._expiration = -1;
+      this._expiration = 0;
       this._isExpired = false;
       this._sprites = [];
       this._spritesQueue = [];
-      this._tick = -1;
+      this._tick = 0;
       this._transition = null;
     }
 
