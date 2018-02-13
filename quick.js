@@ -147,7 +147,6 @@
       sound = new Sound();
       addEventListener('resize', scale, false);
       autoScale && scale();
-      polyfill();
 
       for (let i = 0; i < numberOfLayers; ++i) {
         renderableLists.push(new RenderableList());
@@ -1796,15 +1795,7 @@
     }
 
     sound.update();
-    requestAnimationFrame(render);
-  }
-
-  function polyfill() {
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = (callback) => {
-        callback();
-      };
-    }
+    window.requestAnimationFrame && window.requestAnimationFrame(render) || render();
   }
 
   function render() {
@@ -1835,8 +1826,8 @@
 
     realWidth = width;
     realHeight = height;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
   }
 
   function toDegrees(radians) {
