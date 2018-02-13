@@ -17,9 +17,9 @@ global.localStorage = {};
 
 const deviceMock = {
   getCommands: () => {
-    var result = {};
+    let result = {};
   
-    for (var key in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(key)) {
+    for (let key in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(key)) {
       result[quick.CommandEnum[key]] = true;
     }
   
@@ -42,13 +42,13 @@ textTest();
 
 // tests
 function controllerTest() {
-  var controller;
+  let controller;
 
   // no args constructor
   controller = new quick.Controller();
 
-  for (var i in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(i)) {
-    var value = quick.CommandEnum[i];
+  for (let i in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(i)) {
+    let value = quick.CommandEnum[i];
     assert.equal(undefined, controller.keyDown(value));
     assert.equal(undefined, controller.keyPush(value));
   }
@@ -57,7 +57,7 @@ function controllerTest() {
   controller.setDevice(deviceMock);
   assert.equal(undefined, controller.update());
 
-  for (var j in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(j)) {
+  for (let j in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(j)) {
     assert.equal(true, controller.keyDown(quick.CommandEnum[j]));
     assert.equal(true, controller.keyPush(quick.CommandEnum[j]));
   }
@@ -65,14 +65,14 @@ function controllerTest() {
   // with all commands, second update
   assert.equal(undefined, controller.update());
 
-  for (var k in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(k)) {
+  for (let k in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(k)) {
     assert.equal(true, controller.keyDown(quick.CommandEnum[k]));
     assert.equal(false, controller.keyPush(quick.CommandEnum[k]));
   }
 }
 
 function mouseTest() {
-  var mouse;
+  let mouse;
 
   // no args constructor
   mouse = new quick.Mouse(event);
@@ -92,229 +92,57 @@ function mouseTest() {
 }
 
 function pointTest() {
-  var point;
+  let subject;
 
   // no args constructor
-  point = new quick.Point();
-  assert.equal(0, point.getAccelerationX());
-  assert.equal(0, point.getAccelerationY());
-  assert.equal(point, point.getCenter());
-  assert.equal(0, point.getCenterX());
-  assert.equal(0, point.getCenterY());
-  assert.equal(0, point.getSpeedX());
-  assert.equal(0, point.getSpeedY());
-  assert.equal(0, point.getX());
-  assert.equal(0, point.getY());
+  subject = new quick.Point();
+  assert.equal(subject, subject.getCenter());
+  assert.equal(subject.getX(), subject.getPosition().getX());
+  assert.equal(subject.getY(), subject.getPosition().getY());
+  assert.equal(0, subject.getCenterX());
+  assert.equal(0, subject.getCenterY());
+  assert.equal(0, subject.getX());
+  assert.equal(0, subject.getY());
 
   // all args constructor
-  point = new quick.Point(1, 2);
-  assert.equal(0, point.getAccelerationX());
-  assert.equal(0, point.getAccelerationY());
-  assert.equal(point, point.getCenter());
-  assert.equal(1, point.getCenterX());
-  assert.equal(2, point.getCenterY());
-  assert.equal(0, point.getSpeedX());
-  assert.equal(0, point.getSpeedY());
-  assert.equal(1, point.getX());
-  assert.equal(2, point.getY());
+  subject = new quick.Point(1, 2);
+  assert.equal(subject, subject.getCenter());
+  assert.equal(subject.getX(), subject.getPosition().getX());
+  assert.equal(subject.getY(), subject.getPosition().getY());
+  assert.equal(1, subject.getCenterX());
+  assert.equal(2, subject.getCenterY());
+  assert.equal(1, subject.getX());
+  assert.equal(2, subject.getY());
 
   // partial args constructor
-  point = new quick.Point(3);
-  assert.equal(3, point.getX());
+  subject = new quick.Point(3);
+  assert.equal(3, subject.getX());
+  assert.equal(0, subject.getY());
 
   // getters & setters
-  point.setAccelerationX(4);
-  assert.equal(4, point.getAccelerationX());
-
-  point.setAccelerationY(5);
-  assert.equal(5, point.getAccelerationY());
-
-  point.setPosition(new quick.Point(10, 11));
-  assert.equal(10, point.getX());
-  assert.equal(11, point.getY());
-
-  point.setPosition(10, 11);
-  assert.equal(10, point.getX());
-  assert.equal(11, point.getY());
-
-  point.setSpeedX(6);
-  assert.equal(6, point.getSpeedX());
-
-  point.setSpeedY(7);
-  assert.equal(7, point.getSpeedY());
-
-  point.setX(8);
-  assert.equal(8, point.getX());
-
-  point.setY(9);
-  assert.equal(9, point.getY());
-
-  // multiple objects
-  var point1 = new quick.Point(10, 11);
-  assert.equal(0, point1.getAccelerationX());
-  assert.equal(0, point1.getAccelerationY());
-  assert.equal(0, point1.getSpeedX());
-  assert.equal(0, point1.getSpeedY());
-  assert.equal(10, point1.getX());
-  assert.equal(11, point1.getY());
-
-  var point2 = new quick.Point(12, 13);
-  assert.equal(0, point2.getAccelerationX());
-  assert.equal(0, point2.getAccelerationY());
-  assert.equal(0, point2.getSpeedX());
-  assert.equal(0, point2.getSpeedY());
-  assert.equal(12, point2.getX());
-  assert.equal(13, point2.getY());
-
-  // speed to angle
-  point = new quick.Point();
-  point.setSpeedToAngle(1, 0);
-  assert.equal(1, Math.round(point.getSpeedX()));
-  assert.equal(0, Math.round(point.getSpeedY()));
-  point.setSpeedToAngle(1, 90);
-  assert.equal(0, Math.round(point.getSpeedX()));
-  assert.equal(1, Math.round(point.getSpeedY()));
-  point.setSpeedToAngle(1, 180);
-  assert.equal(-1, Math.round(point.getSpeedX()));
-  assert.equal(0, Math.round(point.getSpeedY()));
-  point.setSpeedToAngle(1, 270);
-  assert.equal(0, Math.round(point.getSpeedX()));
-  assert.equal(-1, Math.round(point.getSpeedY()));
-
-  // get angle
-  point = new quick.Point();
-  point.setSpeedX(1);
-  point.setSpeedY(1);
-  assert.equal(45, point.getAngle());
-  point.setSpeedX(-1);
-  point.setSpeedY(1);
-  assert.equal(135, point.getAngle());
-  point.setSpeedX(-1);
-  point.setSpeedY(-1);
-  assert.equal(-135, point.getAngle());
-  point.setSpeedX(1);
-  point.setSpeedY(-1);
-  assert.equal(-45, point.getAngle());
-
-  // speed to point
-  point1 = new quick.Point();
-  point2 = new quick.Point(100, 50);
-  point1.setSpeedToPoint(2, point2);
-  point2.setSpeedToPoint(2, point1);
-  assert.equal(100 / 150 * 2, point1.getSpeedX());
-  assert.equal(50 / 150 * 2, point1.getSpeedY());
-  assert.equal(-100 / 150 * 2, point2.getSpeedX());
-  assert.equal(-50 / 150 * 2, point2.getSpeedY());
-
-  // max speed
-  point = new quick.Point();
-  point.setMaxSpeedX(2);
-  point.setMaxSpeedY(4);
-  point.setAccelerationX(1);
-  point.setAccelerationY(2);
-  point.sync();
-  assert.equal(1, point.getSpeedX());
-  assert.equal(2, point.getSpeedY());
-  point.sync();
-  assert.equal(2, point.getSpeedX());
-  assert.equal(4, point.getSpeedY());
-  point.sync();
-  assert.equal(2, point.getSpeedX());
-  assert.equal(4, point.getSpeedY());
-  point.stop();
-  point.setAccelerationX(-1);
-  point.setAccelerationY(-2);
-  point.sync();
-  assert.equal(-1, point.getSpeedX());
-  assert.equal(-2, point.getSpeedY());
-  point.sync();
-  assert.equal(-2, point.getSpeedX());
-  assert.equal(-4, point.getSpeedY());
-  point.sync();
-  assert.equal(-2, point.getSpeedX());
-  assert.equal(-4, point.getSpeedY());
-
-  // last position
-  point = new quick.Point();
-  assert.equal(0, point.getX());
-  assert.equal(0, point.getY());
-  assert.equal(0, point.getLastX());
-  assert.equal(0, point.getLastY());
-  var lastPosition = point.getLastPosition();
-  assert.equal(0, lastPosition.getX());
-  assert.equal(0, lastPosition.getY());
-  point.sync();
-  point.setX(20);
-  point.setY(30);
-  assert.equal(20, point.getX());
-  assert.equal(30, point.getY());
-  assert.equal(0, point.getLastX());
-  assert.equal(0, point.getLastY());
-  lastPosition = point.getLastPosition();
-  assert.equal(0, lastPosition.getX());
-  assert.equal(0, lastPosition.getY());
-  point.sync();
-  assert.equal(20, point.getX());
-  assert.equal(30, point.getY());
-  assert.equal(20, point.getLastX());
-  assert.equal(30, point.getLastY());
-  lastPosition = point.getLastPosition();
-  assert.equal(20, lastPosition.getX());
-  assert.equal(30, lastPosition.getY());
-
-  // direction
-  point = new quick.Point();
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
-  point.sync()
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
-  point.sync()
-  point.moveX(1);
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(true, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
-  point.sync();
-  point.moveY(1);
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(true, point.getDirection().getBottom());
-  point.sync();
-  point.moveX(-1);
-  assert.equal(true, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
-  point.sync();
-  point.moveY(-1);
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(true, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
-  point.sync()
-  assert.equal(false, point.getDirection().getLeft());
-  assert.equal(false, point.getDirection().getRight());
-  assert.equal(false, point.getDirection().getTop());
-  assert.equal(false, point.getDirection().getBottom());
+  subject.setPosition(new quick.Point(10, 11));
+  assert.equal(10, subject.getX());
+  assert.equal(11, subject.getY());
+  subject.setPosition(10, 11);
+  assert.equal(10, subject.getX());
+  assert.equal(11, subject.getY());
+  subject.setX(8);
+  assert.equal(8, subject.getX());
+  subject.setY(9);
+  assert.equal(9, subject.getY());
 }
 
 function quickTest() {
   // load / save
   assert.equal(undefined, quick.Quick.load());
-  var game = { level: 1, lives: 2 };
+  let game = { level: 1, lives: 2 };
   assert.equal(undefined, quick.Quick.save(game));
   game = quick.Quick.load();
   assert.equal(JSON.stringify({ level: 1, lives: 2 }), JSON.stringify(game));
 }
 
 function rectTest() {
-  var rect;
+  let rect;
 
   // no args constructor
   rect = new quick.Rect();
@@ -362,7 +190,7 @@ function rectTest() {
   assert.equal(11, rect.getBottom());
 
   rect.setCenter(new quick.Point(12, 13));
-  var point = rect.getCenter();
+  let point = rect.getCenter();
   assert.equal(12, point.getX());
   assert.equal(13, point.getY());
 
@@ -418,13 +246,13 @@ function rectTest() {
   assert.equal(0, rect.getY());
 
   // multiple objects
-  var rect1 = new quick.Rect(0, 1, 2, 3);
+  let rect1 = new quick.Rect(0, 1, 2, 3);
   assert.equal(0, rect1.getX());
   assert.equal(1, rect1.getY());
   assert.equal(2, rect1.getWidth());
   assert.equal(3, rect1.getHeight());
 
-  var rect2 = new quick.Rect(4, 5, 6, 7);
+  let rect2 = new quick.Rect(4, 5, 6, 7);
   assert.equal(4, rect2.getX());
   assert.equal(5, rect2.getY());
   assert.equal(6, rect2.getWidth());
@@ -433,92 +261,234 @@ function rectTest() {
   // collision detection
   rect1 = new quick.Rect(0, 0, 2, 2);
   rect2 = new quick.Rect(1, 1, 2, 2);
-  var rect3 = new quick.Rect(2, 2, 2, 2);
+  let rect3 = new quick.Rect(2, 2, 2, 2);
   assert.equal(true, rect1.hasCollision(rect2));
   assert.equal(false, rect1.hasCollision(rect3));
-  var collision = rect1.getCollision(rect2);
+  let collision = rect1.getCollision(rect2);
   assert.equal(true, collision.getRight());
   assert.equal(true, collision.getBottom());
 }
 
 function spriteTest() {
-  var sprite;
-  var offBoundaryCalled;
+  let subject;
+  let offBoundaryCalled;
 
   // no args constructor
-  sprite = new quick.Sprite();
-  assert.equal(0, sprite.getLeft());
-  assert.equal(0, sprite.getTop());
-  assert.equal(0, sprite.getHeight());
-  assert.equal(0, sprite.getWidth());
-  assert.equal(0, sprite.getX());
-  assert.equal(0, sprite.getY());
-  assert.equal(null, sprite.getColor());
-  assert.equal(0, sprite.getLayerIndex());
-  assert.equal(false, sprite.getEssential());
-  assert.equal(false, sprite.getSolid());
-  assert.equal(true, sprite.getVisible());
+  subject = new quick.Sprite();
+  assert.equal(0, subject.getAccelerationX());
+  assert.equal(0, subject.getAccelerationY());
+  assert.equal(0, subject.getLeft());
+  assert.equal(0, subject.getTop());
+  assert.equal(0, subject.getSpeedX());
+  assert.equal(0, subject.getSpeedY());
+  assert.equal(0, subject.getHeight());
+  assert.equal(0, subject.getWidth());
+  assert.equal(0, subject.getX());
+  assert.equal(0, subject.getY());
+  assert.equal(null, subject.getColor());
+  assert.equal(0, subject.getLayerIndex());
+  assert.equal(false, subject.getEssential());
+  assert.equal(false, subject.getSolid());
+  assert.equal(true, subject.getVisible());
 
   // all args constructor
-  sprite = new quick.Sprite(2, 4, 8, 16);
-  assert.equal(2, sprite.getLeft());
-  assert.equal(4, sprite.getTop());
-  assert.equal(8, sprite.getWidth());
-  assert.equal(16, sprite.getHeight());
+  subject = new quick.Sprite(2, 4, 8, 16);
+  assert.equal(2, subject.getLeft());
+  assert.equal(4, subject.getTop());
+  assert.equal(8, subject.getWidth());
+  assert.equal(16, subject.getHeight());
+
+  // getters & setters
+  subject.setAccelerationX(4);
+  assert.equal(4, subject.getAccelerationX());
+  subject.setAccelerationY(5);
+  assert.equal(5, subject.getAccelerationY());
+  subject.setSpeedX(6);
+  assert.equal(6, subject.getSpeedX());
+  subject.setSpeedY(7);
+  assert.equal(7, subject.getSpeedY());
 
   // on boundary
-  sprite = new quick.Sprite();
-  sprite.setSize(16, 16);
+  subject = new quick.Sprite();
+  subject.setSize(16, 16);
   offBoundaryCalled = false;
 
-  sprite.setDelegate({
+  subject.setDelegate({
     offBoundary: function () {
       offBoundaryCalled = true;
     }
   });
 
-  sprite.setBoundary(new quick.Rect(0, 0, 200, 200));
-  sprite.sync();
+  subject.setBoundary(new quick.Rect(0, 0, 200, 200));
+  subject.sync();
   assert.equal(false, offBoundaryCalled);
 
   // off boundary
-  sprite = new quick.Sprite();
-  sprite.setSize(16, 16);
+  subject = new quick.Sprite();
+  subject.setSize(16, 16);
   offBoundaryCalled = false;
 
-  sprite.setDelegate({
+  subject.setDelegate({
     offBoundary: function () {
       offBoundaryCalled = true;
     }
   });
 
-  sprite.setBoundary(new quick.Rect(20, 20, 100, 100));
-  sprite.sync();
+  subject.setBoundary(new quick.Rect(20, 20, 100, 100));
+  subject.sync();
   assert.equal(true, offBoundaryCalled);
 
   // expiration
-  sprite = new quick.Sprite();
-  sprite.setExpiration(5);
+  subject = new quick.Sprite();
+  subject.setExpiration(5);
 
-  for (var i = 0; i < 5; ++i) {
-    assert.equal(false, sprite.getExpired());
-    assert.equal(false, sprite.sync());
+  for (let i = 0; i < 5; ++i) {
+    assert.equal(false, subject.getExpired());
+    assert.equal(false, subject.sync());
   }
 
-  assert.equal(true, sprite.getExpired());
-  assert.equal(true, sprite.sync());
+  assert.equal(true, subject.getExpired());
+  assert.equal(true, subject.sync());
 
   // visibility
-  sprite.setVisible();
-  assert.equal(true, sprite.getVisible());
-  sprite.setVisible(true);
-  assert.equal(true, sprite.getVisible());
-  sprite.setVisible(false);
-  assert.equal(false, sprite.getVisible());
+  subject.setVisible();
+  assert.equal(true, subject.getVisible());
+  subject.setVisible(true);
+  assert.equal(true, subject.getVisible());
+  subject.setVisible(false);
+  assert.equal(false, subject.getVisible());
+
+  // speed to angle
+  subject = new quick.Sprite();
+  subject.setSpeedToAngle(1, 0);
+  assert.equal(1, Math.round(subject.getSpeedX()));
+  assert.equal(0, Math.round(subject.getSpeedY()));
+  subject.setSpeedToAngle(1, 90);
+  assert.equal(0, Math.round(subject.getSpeedX()));
+  assert.equal(1, Math.round(subject.getSpeedY()));
+  subject.setSpeedToAngle(1, 180);
+  assert.equal(-1, Math.round(subject.getSpeedX()));
+  assert.equal(0, Math.round(subject.getSpeedY()));
+  subject.setSpeedToAngle(1, 270);
+  assert.equal(0, Math.round(subject.getSpeedX()));
+  assert.equal(-1, Math.round(subject.getSpeedY()));
+
+  // get angle
+  subject = new quick.Sprite();
+  subject.setSpeedX(1);
+  subject.setSpeedY(1);
+  assert.equal(45, subject.getAngle());
+  subject.setSpeedX(-1);
+  subject.setSpeedY(1);
+  assert.equal(135, subject.getAngle());
+  subject.setSpeedX(-1);
+  subject.setSpeedY(-1);
+  assert.equal(-135, subject.getAngle());
+  subject.setSpeedX(1);
+  subject.setSpeedY(-1);
+  assert.equal(-45, subject.getAngle());
+
+  // speed to subject
+  let subject1 = new quick.Sprite();
+  let subject2 = new quick.Sprite(100, 50);
+  subject1.setSpeedToPoint(2, subject2);
+  subject2.setSpeedToPoint(2, subject1);
+  assert.equal(100 / 150 * 2, subject1.getSpeedX());
+  assert.equal(50 / 150 * 2, subject1.getSpeedY());
+  assert.equal(-100 / 150 * 2, subject2.getSpeedX());
+  assert.equal(-50 / 150 * 2, subject2.getSpeedY());
+
+  // max speed
+  subject = new quick.Sprite();
+  subject.setMaxSpeedX(2);
+  subject.setMaxSpeedY(4);
+  subject.setAccelerationX(1);
+  subject.setAccelerationY(2);
+  subject.sync();
+  assert.equal(1, subject.getSpeedX());
+  assert.equal(2, subject.getSpeedY());
+  subject.sync();
+  assert.equal(2, subject.getSpeedX());
+  assert.equal(4, subject.getSpeedY());
+  subject.sync();
+  assert.equal(2, subject.getSpeedX());
+  assert.equal(4, subject.getSpeedY());
+  subject.stop();
+  subject.setAccelerationX(-1);
+  subject.setAccelerationY(-2);
+  subject.sync();
+  assert.equal(-1, subject.getSpeedX());
+  assert.equal(-2, subject.getSpeedY());
+  subject.sync();
+  assert.equal(-2, subject.getSpeedX());
+  assert.equal(-4, subject.getSpeedY());
+  subject.sync();
+  assert.equal(-2, subject.getSpeedX());
+  assert.equal(-4, subject.getSpeedY());
+
+  // last position
+  subject = new quick.Sprite();
+  assert.equal(0, subject.getX());
+  assert.equal(0, subject.getY());
+  assert.equal(0, subject.getLastPosition().getX());
+  assert.equal(0, subject.getLastPosition().getY());
+  subject.sync();
+  subject.setX(20);
+  subject.setY(30);
+  assert.equal(20, subject.getX());
+  assert.equal(30, subject.getY());
+  assert.equal(0, subject.getLastPosition().getX());
+  assert.equal(0, subject.getLastPosition().getY());
+  subject.sync();
+  assert.equal(20, subject.getX());
+  assert.equal(30, subject.getY());
+  assert.equal(20, subject.getLastPosition().getX());
+  assert.equal(30, subject.getLastPosition().getY());
+
+  // direction
+  subject = new quick.Sprite();
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
+  subject.sync()
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
+  subject.sync()
+  subject.moveX(1);
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(true, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
+  subject.sync();
+  subject.moveY(1);
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(true, subject.getDirection().getBottom());
+  subject.sync();
+  subject.moveX(-1);
+  assert.equal(true, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
+  subject.sync();
+  subject.moveY(-1);
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(true, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
+  subject.sync()
+  assert.equal(false, subject.getDirection().getLeft());
+  assert.equal(false, subject.getDirection().getRight());
+  assert.equal(false, subject.getDirection().getTop());
+  assert.equal(false, subject.getDirection().getBottom());
 }
 
 function textTest() {
-  var text;
+  let text;
 
   // no args constructor
   new quick.TextObject();

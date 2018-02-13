@@ -864,40 +864,8 @@
 
   class Point {
     constructor(x, y) {
-      this.setAccelerationX();
-      this.setAccelerationY();
-      this.setMaxSpeedX();
-      this.setMaxSpeedY();
-      this.setSpeedX();
-      this.setSpeedY();
       this.setX(x);
       this.setY(y);
-      this._lastX = this._x;
-      this._lastY = this._y;
-    }
-
-    bounceX() {
-      this.setSpeedX(this.getSpeedX() * -1);
-      this.moveX(this.getSpeedX());
-      return this;
-    }
-
-    bounceY() {
-      this.setSpeedY(this.getSpeedY() * -1);
-      this.moveY(this.getSpeedY());
-      return this;
-    }
-
-    getAccelerationX() {
-      return this._accelerationX;
-    }
-
-    getAccelerationY() {
-      return this._accelerationY;
-    }
-
-    getAngle() {
-      return toDegrees(Math.atan2(this.getSpeedY(), this.getSpeedX()));
     }
 
     getCenter() {
@@ -912,42 +880,8 @@
       return this._y;
     }
 
-    getDirection() {
-      const DIRECTION = new Direction();
-
-      if (this.getX() < this.getLastX()) {
-        DIRECTION.setLeft();
-      } else if (this.getX() > this.getLastX()) {
-        DIRECTION.setRight();
-      }
-
-      if (this.getY() < this.getLastY()) {
-        DIRECTION.setTop();
-      } else if (this.getY() > this.getLastY()) {
-        DIRECTION.setBottom();
-      }
-
-      return DIRECTION;
-    }
-
-    getLastPosition() {
-      return new Point(this.getLastX(), this.getLastY());
-    }
-
-    getLastX() {
-      return this._lastX;
-    }
-
-    getLastY() {
-      return this._lastY;
-    }
-
-    getSpeedX() {
-      return this._speedX;
-    }
-
-    getSpeedY() {
-      return this._speedY;
+    getPosition() {
+      return new Point(this.getX(), this.getY());
     }
 
     getX() {
@@ -956,42 +890,6 @@
 
     getY() {
       return this._y;
-    }
-
-    move(width, height) {
-      this.moveX(width);
-      this.moveY(height);
-      return this;
-    }
-
-    moveX(width) {
-      this.setX(this.getX() + width);
-      return this;
-    }
-
-    moveY(height) {
-      this.setY(this.getY() + height);
-      return this;
-    }
-
-    setAccelerationX(accelerationX) {
-      this._accelerationX = accelerationX || 0;
-      return this;
-    }
-
-    setAccelerationY(accelerationY) {
-      this._accelerationY = accelerationY || 0;
-      return this;
-    }
-
-    setMaxSpeedX(maxSpeedX) {
-      this._maxSpeedX = maxSpeedX || 0;
-      return this;
-    }
-
-    setMaxSpeedY(maxSpeedY) {
-      this._maxSpeedY = maxSpeedY || 0;
-      return this;
     }
 
     setPosition(pointOrX, y) {
@@ -1006,30 +904,6 @@
       return this;
     }
 
-    setSpeedToAngle(speed, degrees) {
-      const RADIANS = toRadians(degrees);
-      this.setSpeedX(speed * Math.cos(RADIANS));
-      this.setSpeedY(speed * Math.sin(RADIANS));
-      return this;
-    }
-
-    setSpeedToPoint(speed, point) {
-      const SQUARE_DISTANCE = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
-      this.setSpeedX((point.getX() - this.getCenterX()) * speed / SQUARE_DISTANCE);
-      this.setSpeedY((point.getY() - this.getCenterY()) * speed / SQUARE_DISTANCE);
-      return this;
-    }
-
-    setSpeedX(speedX) {
-      this._speedX = speedX || 0;
-      return this;
-    }
-
-    setSpeedY(speedY) {
-      this._speedY = speedY || 0;
-      return this;
-    }
-
     setX(x) {
       this._x = x || 0;
       return this;
@@ -1038,33 +912,6 @@
     setY(y) {
       this._y = y || 0;
       return this;
-    }
-
-    stop() {
-      this.setSpeedX(0);
-      this.setSpeedY(0);
-      return this;
-    }
-
-    sync() {
-      this.setSpeedX(this.getSpeedX() + this._accelerationX);
-
-      if (this._maxSpeedX && Math.abs(this.getSpeedX()) > this._maxSpeedX) {
-        const SIGNAL = this.getSpeedX() / Math.abs(this.getSpeedX());
-        this.setSpeedX(this._maxSpeedX * SIGNAL);
-      }
-
-      this.setSpeedY(this.getSpeedY() + this._accelerationY);
-
-      if (this._maxSpeedY && Math.abs(this.getSpeedY()) > this._maxSpeedY) {
-        const SIGNAL = this.getSpeedY() / Math.abs(this.getSpeedY());
-        this.setSpeedY(this._maxSpeedY * SIGNAL);
-      }
-
-      this._lastX = this.getX();
-      this._lastY = this.getY();
-      this.move(this.getSpeedX(), this.getSpeedY());
-      return false;
     }
   }
 
@@ -1336,6 +1183,7 @@
       this._color = null;
       this._expiration = 0;
       this._layerIndex = 0;
+      this._lastPosition = this.getPosition();
       this._isEssential = false;
       this._isExpired = false;
       this._isSolid = false;
@@ -1343,10 +1191,28 @@
       this._scene = null;
       this._tags = {};
       this._tick = 0;
+      this.setAccelerationX();
+      this.setAccelerationY();
+      this.setMaxSpeedX();
+      this.setMaxSpeedY();
+      this.setSpeedX();
+      this.setSpeedY();
     }
 
     addTag(tag) {
       this._tags[tag] = true;
+      return this;
+    }
+
+    bounceX() {
+      this.setSpeedX(this.getSpeedX() * -1);
+      this.moveX(this.getSpeedX());
+      return this;
+    }
+
+    bounceY() {
+      this.setSpeedY(this.getSpeedY() * -1);
+      this.moveY(this.getSpeedY());
       return this;
     }
 
@@ -1355,8 +1221,38 @@
       return this;
     }
 
+    getAccelerationX() {
+      return this._accelerationX;
+    }
+
+    getAccelerationY() {
+      return this._accelerationY;
+    }
+
+    getAngle() {
+      return toDegrees(Math.atan2(this.getSpeedY(), this.getSpeedX()));
+    }
+
     getColor() {
       return this._color;
+    }
+
+    getDirection() {
+      const DIRECTION = new Direction();
+
+      if (this.getX() < this.getLastPosition().getX()) {
+        DIRECTION.setLeft();
+      } else if (this.getX() > this.getLastPosition().getX()) {
+        DIRECTION.setRight();
+      }
+
+      if (this.getY() < this.getLastPosition().getY()) {
+        DIRECTION.setTop();
+      } else if (this.getY() > this.getLastPosition().getY()) {
+        DIRECTION.setBottom();
+      }
+
+      return DIRECTION;
     }
 
     getEssential() {
@@ -1371,8 +1267,20 @@
       return this._animation.getImage();
     }
 
+    getLastPosition() {
+      return this._lastPosition;
+    }
+
     getLayerIndex() {
       return this._layerIndex;
+    }
+
+    getSpeedX() {
+      return this._speedX;
+    }
+
+    getSpeedY() {
+      return this._speedY;
     }
 
     getParentX() {
@@ -1407,6 +1315,22 @@
       this._delegate && this._delegate.init && this._delegate.init(scene);
     }
 
+    move(width, height) {
+      this.moveX(width);
+      this.moveY(height);
+      return this;
+    }
+
+    moveX(width) {
+      this.setX(this.getX() + width);
+      return this;
+    }
+
+    moveY(height) {
+      this.setY(this.getY() + height);
+      return this;
+    }
+
     offBoundary() {
       if (this._delegate && this._delegate.offBoundary) {
         this._delegate.offBoundary();
@@ -1436,6 +1360,16 @@
         const IMAGE = this.getImage();
         context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
       }
+    }
+
+    setAccelerationX(accelerationX) {
+      this._accelerationX = accelerationX || 0;
+      return this;
+    }
+
+    setAccelerationY(accelerationY) {
+      this._accelerationY = accelerationY || 0;
+      return this;
     }
 
     setAnimation(animation) {
@@ -1485,6 +1419,16 @@
       return this;
     }
 
+    setMaxSpeedX(maxSpeedX) {
+      this._maxSpeedX = maxSpeedX || 0;
+      return this;
+    }
+
+    setMaxSpeedY(maxSpeedY) {
+      this._maxSpeedY = maxSpeedY || 0;
+      return this;
+    }
+
     setScene(scene) {
       this._scene = scene;
       return this;
@@ -1495,8 +1439,38 @@
       return this;
     }
 
+    setSpeedToAngle(speed, degrees) {
+      const RADIANS = toRadians(degrees);
+      this.setSpeedX(speed * Math.cos(RADIANS));
+      this.setSpeedY(speed * Math.sin(RADIANS));
+      return this;
+    }
+
+    setSpeedToPoint(speed, point) {
+      const SQUARE_DISTANCE = Math.abs(this.getCenterX() - point.getX()) + Math.abs(this.getCenterY() - point.getY());
+      this.setSpeedX((point.getX() - this.getCenterX()) * speed / SQUARE_DISTANCE);
+      this.setSpeedY((point.getY() - this.getCenterY()) * speed / SQUARE_DISTANCE);
+      return this;
+    }
+
+    setSpeedX(speedX) {
+      this._speedX = speedX || 0;
+      return this;
+    }
+
+    setSpeedY(speedY) {
+      this._speedY = speedY || 0;
+      return this;
+    }
+
     setVisible(isVisible) {
       this._isVisible = isVisible == undefined || isVisible;
+      return this;
+    }
+
+    stop() {
+      this.setSpeedX(0);
+      this.setSpeedY(0);
       return this;
     }
 
@@ -1517,7 +1491,23 @@
         this.offBoundary();
       }
 
-      return Rect.prototype.sync.call(this);
+      this.setSpeedX(this.getSpeedX() + this._accelerationX);
+
+      if (this._maxSpeedX && Math.abs(this.getSpeedX()) > this._maxSpeedX) {
+        const SIGNAL = this.getSpeedX() / Math.abs(this.getSpeedX());
+        this.setSpeedX(this._maxSpeedX * SIGNAL);
+      }
+
+      this.setSpeedY(this.getSpeedY() + this._accelerationY);
+
+      if (this._maxSpeedY && Math.abs(this.getSpeedY()) > this._maxSpeedY) {
+        const SIGNAL = this.getSpeedY() / Math.abs(this.getSpeedY());
+        this.setSpeedY(this._maxSpeedY * SIGNAL);
+      }
+
+      this._lastPosition = this.getPosition();
+      this.move(this.getSpeedX(), this.getSpeedY());
+      return false;
     }
 
     update() {
