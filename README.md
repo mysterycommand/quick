@@ -21,7 +21,7 @@ Quick includes all requirements for a full-featured game included in a single li
 Please check the [Wiki](https://github.com/diogoschneider/quick/wiki) for more information and feel free to make a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=diogo%2eschneider%40me%2ecom&lc=US&item_name=Diogo%20Schneider&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) to this project.
 
 ## How to use
-All you need is to add Quick to your HTML file and make sure you have a canvas element somewhere in your page. Please [check the wiki for further information](https://github.com/diogoschneider/quick/wiki/How-to-Use).
+All you need is to add Quick to your HTML file and make sure you have a canvas element somewhere in your page. You can use the [latest release](https://github.com/diogoschneider/quick/releases) right away from [RawGit](https://rawgit.com). Please [check the wiki for further information](https://github.com/diogoschneider/quick/wiki/How-to-Use).
 
 ## Related
   * [quick-assets](https://github.com/diogoschneider/quick-assets) assets for games
