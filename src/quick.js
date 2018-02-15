@@ -1524,9 +1524,9 @@
     }
 
     add(sprite) {
+      this._spritesQueue.push(sprite);
       sprite.setScene(this);
       sprite.init(this);
-      this._spritesQueue.push(sprite);
       sprite.move(sprite.getSpeedX() * -1, sprite.getSpeedY() * -1);
     }
 
