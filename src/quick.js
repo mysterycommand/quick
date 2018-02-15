@@ -1565,6 +1565,7 @@
     }
 
     sync() {
+      Quick.paint(this, this.getLayerIndex());
       let sprites = [];
       const SOLID_SPRITES = [];
 
