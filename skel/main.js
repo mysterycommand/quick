@@ -2,10 +2,10 @@
 
 // imports
 const CommandEnum = quick.CommandEnum;
+const Controllable = quickPlugins.respond.Controllable;
 const Quick = quick.Quick;
 const Sprite = quick.Sprite;
 const Scene = quick.Scene;
-const Controllable = quickPlugins.respond.Controllable;
 
 // classes
 class GameScene extends Scene {
