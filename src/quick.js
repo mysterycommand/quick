@@ -918,21 +918,8 @@
   class Rect extends Point {
     constructor(x, y, width, height) {
       super(x, y);
-      this._delegate = null;
       this.setHeight(height);
       this.setWidth(width);
-    }
-
-    bounceFrom(direction) {
-      if ((this.getSpeedX() < 0 && direction.getLeft()) || (this.getSpeedX() > 0 && direction.getRight())) {
-        this.bounceX();
-      }
-
-      if ((this.getSpeedY() < 0 && direction.getTop()) || (this.getSpeedY() > 0 && direction.getBottom())) {
-        this.bounceY();
-      }
-
-      return this;
     }
 
     getBottom() {
@@ -1032,10 +1019,6 @@
       return this;
     }
 
-    onCollision(rect) {
-      this._delegate && this._delegate.onCollision && this._delegate.onCollision(rect);
-    }
-
     setBottom(y) {
       this.setY(y - this.getHeight() + 1);
       return this;
@@ -1054,11 +1037,6 @@
 
     setCenterY(y) {
       this.setY(y - this.getHalfHeight());
-      return this;
-    }
-
-    setDelegate(delegate) {
-      this._delegate = delegate;
       return this;
     }
 
@@ -1181,6 +1159,7 @@
       this._animation = null;
       this._boundary = null;
       this._color = null;
+      this._delegate = null;
       this._expiration = 0;
       this._layerIndex = 0;
       this._lastPosition = this.getPosition();
@@ -1201,6 +1180,18 @@
 
     addTag(tag) {
       this._tags[tag] = true;
+      return this;
+    }
+
+    bounceFrom(direction) {
+      if ((this.getSpeedX() < 0 && direction.getLeft()) || (this.getSpeedX() > 0 && direction.getRight())) {
+        this.bounceX();
+      }
+
+      if ((this.getSpeedY() < 0 && direction.getTop()) || (this.getSpeedY() > 0 && direction.getBottom())) {
+        this.bounceY();
+      }
+
       return this;
     }
 
@@ -1343,6 +1334,10 @@
       this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
     }
 
+    onCollision(rect) {
+      this._delegate && this._delegate.onCollision && this._delegate.onCollision(rect);
+    }
+
     render(context) {
       if (!this._isVisible) {
         return;
@@ -1391,6 +1386,11 @@
 
     setColor(color) {
       this._color = color;
+      return this;
+    }
+
+    setDelegate(delegate) {
+      this._delegate = delegate;
       return this;
     }
 
