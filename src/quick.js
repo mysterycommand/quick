@@ -893,7 +893,7 @@
     }
 
     setPosition(pointOrX, y) {
-      if (y) {
+      if (y != null) {
         this.setX(pointOrX);
         this.setY(y);
       } else {
@@ -1056,7 +1056,7 @@
     }
 
     setSize(rectOrWidth, height) {
-      if (height) {
+      if (height != null) {
         this.setWidth(rectOrWidth);
         this.setHeight(height);
       } else {
@@ -1539,11 +1539,14 @@
 
           if (ID) {
             const TILE = tileFactory(ID);
-            const X = offsetX ? offsetX : TILE.getWidth();
-            const Y = offsetY ? offsetY : TILE.getHeight();
-            TILE.setTop(i * Y);
-            TILE.setLeft(j * X);
-            this.add(TILE);
+
+            if (TILE) {
+              const X = offsetX || TILE.getWidth();
+              const Y = offsetY || TILE.getHeight();
+              TILE.setTop(i * Y);
+              TILE.setLeft(j * X);
+              this.add(TILE);
+            }
           }
         }
       }

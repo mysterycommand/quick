@@ -37,6 +37,7 @@ mouseTest();
 pointTest();
 quickTest();
 rectTest();
+sceneTest();
 spriteTest();
 textTest();
 
@@ -126,6 +127,9 @@ function pointTest() {
   subject.setPosition(10, 11);
   assert.equal(10, subject.getX());
   assert.equal(11, subject.getY());
+  subject.setPosition(0, 0);
+  assert.equal(0, subject.getX());
+  assert.equal(0, subject.getY());
   subject.setX(8);
   assert.equal(8, subject.getX());
   subject.setY(9);
@@ -213,6 +217,10 @@ function rectTest() {
   assert.equal(19, rect.getWidth());
   assert.equal(19, rect.getHeight());
 
+  rect.setSize(0, 0);
+  assert.equal(0, rect.getWidth());
+  assert.equal(0, rect.getHeight());
+
   rect.setSize(new quick.Rect(0, 0, 20, 21));
   assert.equal(20, rect.getWidth());
   assert.equal(21, rect.getHeight());
@@ -267,6 +275,13 @@ function rectTest() {
   let collision = rect1.getCollision(rect2);
   assert.equal(true, collision.getRight());
   assert.equal(true, collision.getBottom());
+}
+
+function sceneTest() {
+  let subject = new quick.Scene();
+
+  // build empty tiles
+  subject.build([["a", "b", "c"], ["d", "e", "f"]], () => { return null; });
 }
 
 function spriteTest() {
