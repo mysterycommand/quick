@@ -228,7 +228,15 @@
     }
 
     static load() {
-      return localStorage.saveData && JSON.parse(localStorage.saveData);
+      let result;
+
+      try {
+        result = localStorage.saveData && JSON.parse(localStorage.saveData);
+      } catch (error) {
+        console.log('Could not load previous game: ' + error);
+      }
+
+      return result;
     }
 
     static mute() {
@@ -253,7 +261,11 @@
     }
 
     static save(data) {
-      localStorage.saveData = JSON.stringify(data);
+      try {
+        localStorage.saveData = JSON.stringify(data);
+      } catch (error) {
+        console.log('Could not save current game: ' + error);
+      }
     }
 
     static setAutoScale(customAutoScale) {
@@ -330,13 +342,12 @@
 
   class Mouse {
     constructor(event) {
-      event.preventDefault();
-      this._isDown = true;
+      console.log('Mouse detected.');
       this._position = new Point();
+      this.down(event);
 
       addEventListener('mousedown', (event) => {
-        event.preventDefault();
-        this._isDown = true;
+        this.down(event);
       }, false);
 
       addEventListener('mousemove', (event) => {
@@ -348,6 +359,12 @@
         event.preventDefault();
         this._isDown = false;
       }, false);
+    }
+
+    down(event) {
+      event.preventDefault();
+      this._isDown = true;
+      canvas && canvas.focus();
     }
 
     getCommand() {
@@ -370,6 +387,7 @@
 
   class Touch {
     constructor(event) {
+      console.log('Touch detected.');
       event.preventDefault();
       this._isDown = true;
       this._position = new Point();
@@ -497,6 +515,7 @@
 
   class GamePad {
     constructor(id) {
+      console.log('Game pad detected.');
       this._id = id || 0;
     }
 
@@ -644,6 +663,7 @@
 
   class Keyboard {
     constructor(event) {
+      console.log('Keyboard detected.');
       this._buffer = {};
       this.onKeyDown(event);
 
@@ -1487,10 +1507,6 @@
         this.onAnimationLoop();
       }
 
-      if (this._boundary && !this.hasCollision(this._boundary)) {
-        this.offBoundary();
-      }
-
       this.setSpeedX(this.getSpeedX() + this._accelerationX);
 
       if (this._maxSpeedX && Math.abs(this.getSpeedX()) > this._maxSpeedX) {
@@ -1507,6 +1523,11 @@
 
       this._lastPosition = this.getPosition();
       this.move(this.getSpeedX(), this.getSpeedY());
+
+      if (this._boundary && !this.hasCollision(this._boundary)) {
+        this.offBoundary();
+      }
+
       return false;
     }
 
