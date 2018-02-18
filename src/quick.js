@@ -342,7 +342,6 @@
 
   class Mouse {
     constructor(event) {
-      console.log('Mouse detected.');
       this._position = new Point();
       this.down(event);
 
@@ -387,7 +386,6 @@
 
   class Touch {
     constructor(event) {
-      console.log('Touch detected.');
       event.preventDefault();
       this._isDown = true;
       this._position = new Point();
@@ -515,7 +513,6 @@
 
   class GamePad {
     constructor(id) {
-      console.log('Game pad detected.');
       this._id = id || 0;
     }
 
@@ -559,16 +556,19 @@
 
       const ON_KEY_DOWN = (event) => {
         removeEventListener('keydown', ON_KEY_DOWN);
+        console.log('Keyboard detected.');
         this.addController(new Keyboard(event));
       };
 
       const ON_MOUSE_DOWN = (event) => {
         removeEventListener('mousedown', ON_MOUSE_DOWN);
+        console.log('Mouse detected.');
         this.addPointer(new Mouse(event));
       };
 
       const ON_TOUCH_START = (event) => {
         removeEventListener('touchstart', ON_TOUCH_START);
+        console.log('Touch detected.');
         this.addPointer(new Touch(event));
       };
 
@@ -602,6 +602,7 @@
 
     checkGamePads() {
       if (getGamePads()[this._gamePads]) {
+        console.log('Game pad detected.');
         this.addController(new GamePad(this._gamePads++));
       }
     }
@@ -663,7 +664,6 @@
 
   class Keyboard {
     constructor(event) {
-      console.log('Keyboard detected.');
       this._buffer = {};
       this.onKeyDown(event);
 
@@ -1754,7 +1754,13 @@
       }
     }
 
+    window.onload = () => {
+      canvas.focus();
+    };
+
     scene = sceneFactory();
+    canvas.focus();
+
     loop();
 
     function onTimeout() {
