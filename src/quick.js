@@ -478,6 +478,18 @@
       this._active = {};
       this._device = null;
       this._hold = {};
+      this._sequence = [];
+    }
+
+    didPerform(commands) {
+      for (let i = 1; i <= commands.length; ++i) {
+        if (this._sequence[this._sequence.length - i] != commands[commands.length - i]) {
+          return false;
+        }
+      }
+
+      this._sequence = [];
+      return true;
     }
 
     keyDown(commandEnum) {
@@ -505,6 +517,16 @@
         if (this._active.hasOwnProperty(i)) {
           if (LAST[i]) {
             this._hold[i] = true;
+          }
+        }
+      }
+
+      for (let i in CommandEnum) {
+        if (CommandEnum.hasOwnProperty(i)) {
+          const COMMAND = CommandEnum[i];
+
+          if (this.keyPush(COMMAND)) {
+            this._sequence.push(COMMAND);
           }
         }
       }
