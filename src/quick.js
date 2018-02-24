@@ -348,6 +348,59 @@
     }
   }
 
+  class Point {
+    constructor(x, y) {
+      this.setX(x);
+      this.setY(y);
+    }
+
+    getCenter() {
+      return this;
+    }
+
+    getCenterX() {
+      return this._x;
+    }
+
+    getCenterY() {
+      return this._y;
+    }
+
+    getPosition() {
+      return new Point(this.getX(), this.getY());
+    }
+
+    getX() {
+      return this._x;
+    }
+
+    getY() {
+      return this._y;
+    }
+
+    setPosition(pointOrX, y) {
+      if (y != null) {
+        this.setX(pointOrX);
+        this.setY(y);
+      } else {
+        this.setX(pointOrX.getX());
+        this.setY(pointOrX.getY());
+      }
+
+      return this;
+    }
+
+    setX(x) {
+      this._x = x || 0;
+      return this;
+    }
+
+    setY(y) {
+      this._y = y || 0;
+      return this;
+    }
+  }
+
   class Mouse {
     constructor(event) {
       this._position = new Point();
@@ -908,59 +961,6 @@
 
     setTop(isTop) {
       this._isTop = isTop == undefined || isTop;
-      return this;
-    }
-  }
-
-  class Point {
-    constructor(x, y) {
-      this.setX(x);
-      this.setY(y);
-    }
-
-    getCenter() {
-      return this;
-    }
-
-    getCenterX() {
-      return this._x;
-    }
-
-    getCenterY() {
-      return this._y;
-    }
-
-    getPosition() {
-      return new Point(this.getX(), this.getY());
-    }
-
-    getX() {
-      return this._x;
-    }
-
-    getY() {
-      return this._y;
-    }
-
-    setPosition(pointOrX, y) {
-      if (y != null) {
-        this.setX(pointOrX);
-        this.setY(y);
-      } else {
-        this.setX(pointOrX.getX());
-        this.setY(pointOrX.getY());
-      }
-
-      return this;
-    }
-
-    setX(x) {
-      this._x = x || 0;
-      return this;
-    }
-
-    setY(y) {
-      this._y = y || 0;
       return this;
     }
   }
