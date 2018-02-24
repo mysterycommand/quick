@@ -1176,7 +1176,8 @@
       this._delegate = null;
       this._expiration = 0;
       this._layerIndex = 0;
-      this._lastPosition = this.getPosition();
+      this._lastX = this.getX();
+      this._lastY = this.getY();
       this._isEssential = false;
       this._isExpired = false;
       this._isSolid = false;
@@ -1245,15 +1246,15 @@
     getDirection() {
       const DIRECTION = new Direction();
 
-      if (this.getX() < this.getLastPosition().getX()) {
+      if (this.getX() < this._lastX) {
         DIRECTION.setLeft();
-      } else if (this.getX() > this.getLastPosition().getX()) {
+      } else if (this.getX() > this._lastX) {
         DIRECTION.setRight();
       }
 
-      if (this.getY() < this.getLastPosition().getY()) {
+      if (this.getY() < this._lastY) {
         DIRECTION.setTop();
-      } else if (this.getY() > this.getLastPosition().getY()) {
+      } else if (this.getY() > this._lastY) {
         DIRECTION.setBottom();
       }
 
@@ -1270,10 +1271,6 @@
 
     getImage() {
       return this._animation.getImage();
-    }
-
-    getLastPosition() {
-      return this._lastPosition;
     }
 
     getLayerIndex() {
@@ -1531,7 +1528,8 @@
         this.setSpeedY(this._maxSpeedY * SIGNAL);
       }
 
-      this._lastPosition = this.getPosition();
+      this._lastX = this.getX();
+      this._lastY = this.getY();
       this.move(this.getSpeedX(), this.getSpeedY());
 
       if (this._boundary && !this.hasCollision(this._boundary)) {

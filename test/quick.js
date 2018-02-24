@@ -439,25 +439,6 @@ function spriteTest() {
   assert.equal(-2, subject.getSpeedX());
   assert.equal(-4, subject.getSpeedY());
 
-  // last position
-  subject = new quick.Sprite();
-  assert.equal(0, subject.getX());
-  assert.equal(0, subject.getY());
-  assert.equal(0, subject.getLastPosition().getX());
-  assert.equal(0, subject.getLastPosition().getY());
-  subject.sync();
-  subject.setX(20);
-  subject.setY(30);
-  assert.equal(20, subject.getX());
-  assert.equal(30, subject.getY());
-  assert.equal(0, subject.getLastPosition().getX());
-  assert.equal(0, subject.getLastPosition().getY());
-  subject.sync();
-  assert.equal(20, subject.getX());
-  assert.equal(30, subject.getY());
-  assert.equal(20, subject.getLastPosition().getX());
-  assert.equal(30, subject.getLastPosition().getY());
-
   // direction
   subject = new quick.Sprite();
   assert.equal(false, subject.getDirection().getLeft());
