@@ -98,8 +98,6 @@ function pointTest() {
   // no args constructor
   subject = new quick.Point();
   assert.equal(subject, subject.getCenter());
-  assert.equal(subject.getX(), subject.getPosition().getX());
-  assert.equal(subject.getY(), subject.getPosition().getY());
   assert.equal(0, subject.getCenterX());
   assert.equal(0, subject.getCenterY());
   assert.equal(0, subject.getX());
@@ -108,8 +106,6 @@ function pointTest() {
   // all args constructor
   subject = new quick.Point(1, 2);
   assert.equal(subject, subject.getCenter());
-  assert.equal(subject.getX(), subject.getPosition().getX());
-  assert.equal(subject.getY(), subject.getPosition().getY());
   assert.equal(1, subject.getCenterX());
   assert.equal(2, subject.getCenterY());
   assert.equal(1, subject.getX());
@@ -121,15 +117,6 @@ function pointTest() {
   assert.equal(0, subject.getY());
 
   // getters & setters
-  subject.setPosition(new quick.Point(10, 11));
-  assert.equal(10, subject.getX());
-  assert.equal(11, subject.getY());
-  subject.setPosition(10, 11);
-  assert.equal(10, subject.getX());
-  assert.equal(11, subject.getY());
-  subject.setPosition(0, 0);
-  assert.equal(0, subject.getX());
-  assert.equal(0, subject.getY());
   subject.setX(8);
   assert.equal(8, subject.getX());
   subject.setY(9);
@@ -312,6 +299,8 @@ function spriteTest() {
   assert.equal(4, subject.getTop());
   assert.equal(8, subject.getWidth());
   assert.equal(16, subject.getHeight());
+  assert.equal(subject.getX(), subject.getPosition().getX());
+  assert.equal(subject.getY(), subject.getPosition().getY());
 
   // getters & setters
   subject.setAccelerationX(4);
@@ -322,6 +311,15 @@ function spriteTest() {
   assert.equal(6, subject.getSpeedX());
   subject.setSpeedY(7);
   assert.equal(7, subject.getSpeedY());
+  subject.setPosition(new quick.Point(10, 11));
+  assert.equal(10, subject.getX());
+  assert.equal(11, subject.getY());
+  subject.setPosition(10, 11);
+  assert.equal(10, subject.getX());
+  assert.equal(11, subject.getY());
+  subject.setPosition(0, 0);
+  assert.equal(0, subject.getX());
+  assert.equal(0, subject.getY());
 
   // on boundary
   subject = new quick.Sprite();

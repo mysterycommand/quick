@@ -366,28 +366,12 @@
       return this._y;
     }
 
-    getPosition() {
-      return new Point(this.getX(), this.getY());
-    }
-
     getX() {
       return this._x;
     }
 
     getY() {
       return this._y;
-    }
-
-    setPosition(pointOrX, y) {
-      if (y != null) {
-        this.setX(pointOrX);
-        this.setY(y);
-      } else {
-        this.setX(pointOrX.getX());
-        this.setY(pointOrX.getY());
-      }
-
-      return this;
     }
 
     setX(x) {
@@ -1296,6 +1280,10 @@
       return this._layerIndex;
     }
 
+    getPosition() {
+      return new Point(this.getX(), this.getY());
+    }
+
     getSpeedX() {
       return this._speedX;
     }
@@ -1456,6 +1444,18 @@
 
     setMaxSpeedY(maxSpeedY) {
       this._maxSpeedY = maxSpeedY || 0;
+      return this;
+    }
+
+    setPosition(pointOrX, y) {
+      if (y != null) {
+        this.setX(pointOrX);
+        this.setY(y);
+      } else {
+        this.setX(pointOrX.getX());
+        this.setY(pointOrX.getY());
+      }
+
       return this;
     }
 
