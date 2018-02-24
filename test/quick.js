@@ -77,19 +77,19 @@ function mouseTest() {
 
   // no args constructor
   mouse = new quick.Mouse(event);
-  assert.equal(0, mouse.getX());
-  assert.equal(0, mouse.getY());
+  assert.equal(0, mouse.x);
+  assert.equal(0, mouse.y);
   assert.equal(true, mouse.getCommand());
 
   // updateCoordinates
   mouse.updateCoordinates({ x: 1, y: 2 });
-  assert.equal(1, mouse.getX());
-  assert.equal(2, mouse.getY());
+  assert.equal(1, mouse.x);
+  assert.equal(2, mouse.y);
 
   // updateCoordinates on Firefox
   mouse.updateCoordinates({ clientX: 3, clientY: 4 });
-  assert.equal(3, mouse.getX());
-  assert.equal(4, mouse.getY());
+  assert.equal(3, mouse.x);
+  assert.equal(4, mouse.y);
 }
 
 function pointTest() {
@@ -97,24 +97,24 @@ function pointTest() {
 
   // no args constructor
   subject = new quick.Point();
-  assert.equal(0, subject.getX());
-  assert.equal(0, subject.getY());
+  assert.equal(0, subject.x);
+  assert.equal(0, subject.y);
 
   // all args constructor
   subject = new quick.Point(1, 2);
-  assert.equal(1, subject.getX());
-  assert.equal(2, subject.getY());
+  assert.equal(1, subject.x);
+  assert.equal(2, subject.y);
 
   // partial args constructor
   subject = new quick.Point(3);
-  assert.equal(3, subject.getX());
-  assert.equal(0, subject.getY());
+  assert.equal(3, subject.x);
+  assert.equal(0, subject.y);
 
   // getters & setters
   subject.setX(8);
-  assert.equal(8, subject.getX());
+  assert.equal(8, subject.x);
   subject.setY(9);
-  assert.equal(9, subject.getY());
+  assert.equal(9, subject.y);
 }
 
 function quickTest() {
@@ -133,51 +133,51 @@ function rectTest() {
   rect = new quick.Rect();
   assert.equal(0, rect.getHeight());
   assert.equal(0, rect.getWidth());
-  assert.equal(0, rect.getX());
-  assert.equal(0, rect.getY());
+  assert.equal(0, rect.x);
+  assert.equal(0, rect.y);
 
   // all args constructor
   rect = new quick.Rect(1, 2, 3, 4);
-  assert.equal(1, rect.getX());
-  assert.equal(2, rect.getY());
+  assert.equal(1, rect.x);
+  assert.equal(2, rect.y);
   assert.equal(3, rect.getWidth());
   assert.equal(4, rect.getHeight());
 
   // partial args constructor
   rect = new quick.Rect(5);
-  assert.equal(5, rect.getX());
-  assert.equal(0, rect.getY());
+  assert.equal(5, rect.x);
+  assert.equal(0, rect.y);
   assert.equal(0, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
   rect = new quick.Rect(6, 7);
-  assert.equal(6, rect.getX());
-  assert.equal(7, rect.getY());
+  assert.equal(6, rect.x);
+  assert.equal(7, rect.y);
   assert.equal(0, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
   rect = new quick.Rect(8, 9, 10);
-  assert.equal(8, rect.getX());
-  assert.equal(9, rect.getY());
+  assert.equal(8, rect.x);
+  assert.equal(9, rect.y);
   assert.equal(10, rect.getWidth());
   assert.equal(0, rect.getHeight());
 
   // getters & setters
   rect = new quick.Rect(0, 0, 5, 5);
-  assert.equal(2, rect.getHalfWidth());
-  assert.equal(2, rect.getHalfHeight());
+  assert.equal(2, rect.getCenterX());
+  assert.equal(2, rect.getCenterY());
 
   rect = new quick.Rect(0, 0, 6, 6);
-  assert.equal(3, rect.getHalfWidth());
-  assert.equal(3, rect.getHalfHeight());
+  assert.equal(3, rect.getCenterX());
+  assert.equal(3, rect.getCenterY());
 
   rect.setBottom(11);
   assert.equal(11, rect.getBottom());
 
   rect.setCenter(new quick.Point(12, 13));
   let point = rect.getCenter();
-  assert.equal(12, point.getX());
-  assert.equal(13, point.getY());
+  assert.equal(12, point.x);
+  assert.equal(13, point.y);
 
   rect.setCenterX(14);
   assert.equal(14, rect.getCenterX());
@@ -193,18 +193,6 @@ function rectTest() {
 
   rect.setRight(18);
   assert.equal(18, rect.getRight());
-
-  rect.setSize(19, 19);
-  assert.equal(19, rect.getWidth());
-  assert.equal(19, rect.getHeight());
-
-  rect.setSize(0, 0);
-  assert.equal(0, rect.getWidth());
-  assert.equal(0, rect.getHeight());
-
-  rect.setSize(new quick.Rect(0, 0, 20, 21));
-  assert.equal(20, rect.getWidth());
-  assert.equal(21, rect.getHeight());
 
   rect.setTop(22);
   assert.equal(22, rect.getTop());
@@ -231,31 +219,21 @@ function rectTest() {
 
   rect.setRight(rect.getRight());
   rect.setBottom(rect.getBottom());
-  assert.equal(0, rect.getX());
-  assert.equal(0, rect.getY());
+  assert.equal(0, rect.x);
+  assert.equal(0, rect.y);
 
   // multiple objects
   let rect1 = new quick.Rect(0, 1, 2, 3);
-  assert.equal(0, rect1.getX());
-  assert.equal(1, rect1.getY());
+  assert.equal(0, rect1.x);
+  assert.equal(1, rect1.y);
   assert.equal(2, rect1.getWidth());
   assert.equal(3, rect1.getHeight());
 
   let rect2 = new quick.Rect(4, 5, 6, 7);
-  assert.equal(4, rect2.getX());
-  assert.equal(5, rect2.getY());
+  assert.equal(4, rect2.x);
+  assert.equal(5, rect2.y);
   assert.equal(6, rect2.getWidth());
   assert.equal(7, rect2.getHeight());
-
-  // collision detection
-  rect1 = new quick.Rect(0, 0, 2, 2);
-  rect2 = new quick.Rect(1, 1, 2, 2);
-  let rect3 = new quick.Rect(2, 2, 2, 2);
-  assert.equal(true, rect1.hasCollision(rect2));
-  assert.equal(false, rect1.hasCollision(rect3));
-  let collision = rect1.getCollision(rect2);
-  assert.equal(true, collision.getRight());
-  assert.equal(true, collision.getBottom());
 }
 
 function sceneTest() {
@@ -279,8 +257,8 @@ function spriteTest() {
   assert.equal(0, subject.getSpeedY());
   assert.equal(0, subject.getHeight());
   assert.equal(0, subject.getWidth());
-  assert.equal(0, subject.getX());
-  assert.equal(0, subject.getY());
+  assert.equal(0, subject.x);
+  assert.equal(0, subject.y);
   assert.equal(null, subject.getColor());
   assert.equal(0, subject.getLayerIndex());
   assert.equal(false, subject.getEssential());
@@ -293,8 +271,8 @@ function spriteTest() {
   assert.equal(4, subject.getTop());
   assert.equal(8, subject.getWidth());
   assert.equal(16, subject.getHeight());
-  assert.equal(subject.getX(), subject.getPosition().getX());
-  assert.equal(subject.getY(), subject.getPosition().getY());
+  assert.equal(subject.x, subject.getPosition().x);
+  assert.equal(subject.y, subject.getPosition().y);
 
   // getters & setters
   subject.setAccelerationX(4);
@@ -306,14 +284,34 @@ function spriteTest() {
   subject.setSpeedY(7);
   assert.equal(7, subject.getSpeedY());
   subject.setPosition(new quick.Point(10, 11));
-  assert.equal(10, subject.getX());
-  assert.equal(11, subject.getY());
+  assert.equal(10, subject.x);
+  assert.equal(11, subject.y);
   subject.setPosition(10, 11);
-  assert.equal(10, subject.getX());
-  assert.equal(11, subject.getY());
+  assert.equal(10, subject.x);
+  assert.equal(11, subject.y);
   subject.setPosition(0, 0);
-  assert.equal(0, subject.getX());
-  assert.equal(0, subject.getY());
+  assert.equal(0, subject.x);
+  assert.equal(0, subject.y);
+  subject.setSize(19, 19);
+  assert.equal(19, subject.getWidth());
+  assert.equal(19, subject.getHeight());
+  subject.setSize(0, 0);
+  assert.equal(0, subject.getWidth());
+  assert.equal(0, subject.getHeight());
+  subject.setSize(new quick.Rect(0, 0, 20, 21));
+  assert.equal(20, subject.getWidth());
+  assert.equal(21, subject.getHeight());
+
+
+  // collision detection
+  let subject1 = new quick.Sprite(0, 0, 2, 2);
+  let subject2 = new quick.Sprite(1, 1, 2, 2);
+  let subject3 = new quick.Sprite(2, 2, 2, 2);
+  assert.equal(true, subject1.hasCollision(subject2));
+  assert.equal(false, subject1.hasCollision(subject3));
+  let collision = subject1.getCollision(subject2);
+  assert.equal(true, collision.getRight());
+  assert.equal(true, collision.getBottom());
 
   // on boundary
   subject = new quick.Sprite();
@@ -396,8 +394,8 @@ function spriteTest() {
   assert.equal(-45, subject.getAngle());
 
   // speed to subject
-  let subject1 = new quick.Sprite();
-  let subject2 = new quick.Sprite(100, 50);
+  subject1 = new quick.Sprite();
+  subject2 = new quick.Sprite(100, 50);
   subject1.setSpeedToPoint(2, subject2);
   subject2.setSpeedToPoint(2, subject1);
   assert.equal(100 / 150 * 2, subject1.getSpeedX());

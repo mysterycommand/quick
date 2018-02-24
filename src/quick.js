@@ -176,11 +176,11 @@
     }
 
     static getCenterX() {
-      return Math.floor(this.getWidth() / 2);
+      return Math.floor(this.width / 2);
     }
 
     static getCenterY() {
-      return Math.floor(this.getHeight() / 2);
+      return Math.floor(this.height / 2);
     }
 
     static getHeight() {
@@ -483,8 +483,8 @@
 
       const REAL_X = this._device.x - Quick.getOffsetLeft();
       const REAL_Y = this._device.y - Quick.getOffsetTop();
-      this.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
-      this.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
+      this.setX(Math.floor(REAL_X * Quick.width / Quick.getRealWidth()));
+      this.setY(Math.floor(REAL_Y * Quick.height / Quick.getRealHeight()));
     }
   }
 
@@ -920,14 +920,14 @@
   }
 
   class Rect extends Point {
-    constructor(x, y, width, height) {
+    constructor(x, y, width = 0, height = 0) {
       super(x, y);
-      this.setHeight(height);
-      this.setWidth(width);
+      this.height = height;
+      this.width = width;
     }
 
     getBottom() {
-      return this.y + this.getHeight() - 1;
+      return this.y + this.height - 1;
     }
 
     getCenter() {
@@ -935,51 +935,16 @@
     }
 
     getCenterX() {
-      return this.x + this.getHalfWidth();
+      return this.x + Math.floor(this.width / 2);
     }
 
     getCenterY() {
-      return this.y + this.getHalfHeight();
+      return this.y + Math.floor(this.height / 2);
     }
 
-    getCollision(rect) {
-      const DIRECTION = new Direction();
-      const TA = this.getTop();
-      const RA = this.getRight();
-      const BA = this.getBottom();
-      const LA = this.getLeft();
-      const XA = this.getCenterX();
-      const YA = this.getCenterY();
-      const TB = rect.getTop();
-      const RB = rect.getRight();
-      const BB = rect.getBottom();
-      const LB = rect.getLeft();
-
-      if (XA <= LB && RA < RB) {
-        DIRECTION.setRight();
-      } else if (XA >= RB && LA > LB) {
-        DIRECTION.setLeft();
-      }
-
-      if (YA <= TB && BA < BB) {
-        DIRECTION.setBottom();
-      } else if (YA >= BB && TA > TB) {
-        DIRECTION.setTop();
-      }
-
-      return DIRECTION;
-    }
-
-    getHalfHeight() {
-      return Math.floor(this.getHeight() / 2);
-    }
-
-    getHalfWidth() {
-      return Math.floor(this.getWidth() / 2);
-    }
-
+    // deprecated
     getHeight() {
-      return this._height;
+      return this.height;
     }
 
     getLeft() {
@@ -987,44 +952,20 @@
     }
 
     getRight() {
-      return this.x + this.getWidth() - 1;
+      return this.x + this.width - 1;
     }
 
     getTop() {
       return this.y;
     }
 
+    // deprecated
     getWidth() {
-      return this._width;
-    }
-
-    hasCollision(rect) {
-      return !(
-        this.getLeft() > rect.getRight() ||
-        this.getRight() < rect.getLeft() ||
-        this.getTop() > rect.getBottom() ||
-        this.getBottom() < rect.getTop()
-      );
-    }
-
-    increase(width, height) {
-      this.increaseWidth(width);
-      this.increaseHeight(height);
-      return this;
-    }
-
-    increaseHeight(height) {
-      this.setHeight(this.getHeight() + height);
-      return this;
-    }
-
-    increaseWidth(width) {
-      this.setWidth(this.getWidth() + width);
-      return this;
+      return this.width;
     }
 
     setBottom(y) {
-      this.setY(y - this.getHeight() + 1);
+      this.setY(y - this.height + 1);
       return this;
     }
 
@@ -1035,17 +976,17 @@
     }
 
     setCenterX(x) {
-      this.setX(x - this.getHalfWidth());
+      this.setX(x - Math.floor(this.width / 2));
       return this;
     }
 
     setCenterY(y) {
-      this.setY(y - this.getHalfHeight());
+      this.setY(y - Math.floor(this.height / 2));
       return this;
     }
 
     setHeight(height) {
-      this._height = height || 0;
+      this.height = height;
       return this;
     }
 
@@ -1055,19 +996,7 @@
     }
 
     setRight(x) {
-      this.setX(x - this.getWidth() + 1);
-      return this;
-    }
-
-    setSize(rectOrWidth, height) {
-      if (height != null) {
-        this.setWidth(rectOrWidth);
-        this.setHeight(height);
-      } else {
-        this.setWidth(rectOrWidth.getWidth());
-        this.setHeight(rectOrWidth.getHeight());
-      }
-
+      this.setX(x - this.width + 1);
       return this;
     }
 
@@ -1077,7 +1006,7 @@
     }
 
     setWidth(width) {
-      this._width = width || 0;
+      this.width = width;
       return this;
     }
   }
@@ -1111,7 +1040,7 @@
     }
 
     getHeight() {
-      return this._frame.getHeight();
+      return this._frame.height;
     }
 
     getImage() {
@@ -1119,7 +1048,7 @@
     }
 
     getWidth() {
-      return this._frame.getWidth();
+      return this._frame.width;
     }
 
     setFrames(frames) {
@@ -1229,6 +1158,34 @@
       return toDegrees(Math.atan2(this.getSpeedY(), this.getSpeedX()));
     }
 
+    getCollision(sprite) {
+      const DIRECTION = new Direction();
+      const TA = this.getTop();
+      const RA = this.getRight();
+      const BA = this.getBottom();
+      const LA = this.getLeft();
+      const XA = this.getCenterX();
+      const YA = this.getCenterY();
+      const TB = sprite.getTop();
+      const RB = sprite.getRight();
+      const BB = sprite.getBottom();
+      const LB = sprite.getLeft();
+
+      if (XA <= LB && RA < RB) {
+        DIRECTION.setRight();
+      } else if (XA >= RB && LA > LB) {
+        DIRECTION.setLeft();
+      }
+
+      if (YA <= TB && BA < BB) {
+        DIRECTION.setBottom();
+      } else if (YA >= BB && TA > TB) {
+        DIRECTION.setTop();
+      }
+
+      return DIRECTION;
+    }
+
     getColor() {
       return this._color;
     }
@@ -1303,6 +1260,15 @@
       return this._isVisible;
     }
 
+    hasCollision(rect) {
+      return !(
+        this.getLeft() > rect.getRight() ||
+        this.getRight() < rect.getLeft() ||
+        this.getTop() > rect.getBottom() ||
+        this.getBottom() < rect.getTop()
+      );
+    }
+
     hasTag(tag) {
       return this._tags[tag];
     }
@@ -1339,8 +1305,8 @@
       this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
     }
 
-    onCollision(rect) {
-      this._delegate && this._delegate.onCollision && this._delegate.onCollision(rect);
+    onCollision(sprite) {
+      this._delegate && this._delegate.onCollision && this._delegate.onCollision(sprite);
     }
 
     render(context) {
@@ -1353,12 +1319,12 @@
 
       if (this._color) {
         context.fillStyle = this._color;
-        context.fillRect(X, Y, this.getWidth(), this.getHeight());
+        context.fillRect(X, Y, this.width, this.height);
       }
 
       if (this._animation) {
         const IMAGE = this.getImage();
-        context.drawImage(IMAGE, X, Y, this.getWidth(), this.getHeight());
+        context.drawImage(IMAGE, X, Y, this.width, this.height);
       }
     }
 
@@ -1379,8 +1345,8 @@
 
       this._animation = animation;
       this._animation.updateFrameIndex(0);
-      this.setHeight(this._animation.getHeight());
-      this.setWidth(this._animation.getWidth());
+      this.setHeight(this._animation.height);
+      this.setWidth(this._animation.width);
       return this;
     }
 
@@ -1448,6 +1414,18 @@
 
     setScene(scene) {
       this._scene = scene;
+      return this;
+    }
+
+    setSize(rectOrWidth, height) {
+      if (height != null) {
+        this.setWidth(rectOrWidth);
+        this.setHeight(height);
+      } else {
+        this.setWidth(rectOrWidth.width);
+        this.setHeight(rectOrWidth.height);
+      }
+
       return this;
     }
 
@@ -1535,7 +1513,7 @@
   }
 
   class Scene extends Sprite {
-    constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
+    constructor(x, y, width = Quick.width, height = Quick.height) {
       super(x, y, width, height);
       this._sprites = [];
       this._spritesQueue = [];
@@ -1560,8 +1538,8 @@
             const TILE = tileFactory(ID);
 
             if (TILE) {
-              const X = offsetX || TILE.getWidth();
-              const Y = offsetY || TILE.getHeight();
+              const X = offsetX || TILE.width;
+              const Y = offsetY || TILE.height;
               TILE.setTop(i * Y);
               TILE.setLeft(j * X);
               this.add(TILE);
@@ -1572,7 +1550,7 @@
     }
 
     getBoundary() {
-      return new Rect(0, 0, this.getWidth(), this.getHeight());
+      return new Rect(0, 0, this.width, this.height);
     }
 
     getParentX() {
@@ -1658,16 +1636,16 @@
       const COLOR = 'Black';
       const FRAMES = 32;
       this.setColor(COLOR);
-      this.setHeight(Quick.getHeight());
-      this._increase = Quick.getWidth() / FRAMES;
+      this.setHeight(Quick.height);
+      this._increase = Quick.width / FRAMES;
     }
 
     sync() {
-      if (this.getWidth() > Quick.getWidth()) {
+      if (this.width > Quick.width) {
         return true;
       }
 
-      this.increaseWidth(this._increase);
+      this.width += this._increase;
       Quick.paint(this);
       return Sprite.prototype.sync.call(this);
     }
@@ -1766,18 +1744,18 @@
     }
   }
 
-  function checkCollisions(rects) {
-    const LENGTH = rects.length;
+  function checkCollisions(sprites) {
+    const LENGTH = sprites.length;
 
     for (let i = 0; i < LENGTH - 1; ++i) {
-      const LEFT_RECT = rects[i];
+      const LEFT_SPRITE = sprites[i];
 
       for (let j = i + 1; j < LENGTH; ++j) {
-        const RIGHT_RECT = rects[j];
+        const RIGHT_SPRITE = sprites[j];
 
-        if (LEFT_RECT.hasCollision(RIGHT_RECT)) {
-          LEFT_RECT.onCollision(RIGHT_RECT);
-          RIGHT_RECT.onCollision(LEFT_RECT);
+        if (LEFT_SPRITE.hasCollision(RIGHT_SPRITE)) {
+          LEFT_SPRITE.onCollision(RIGHT_SPRITE);
+          RIGHT_SPRITE.onCollision(LEFT_SPRITE);
         }
       }
     }
