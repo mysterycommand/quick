@@ -233,7 +233,7 @@
       try {
         result = localStorage.saveData && JSON.parse(localStorage.saveData);
       } catch (error) {
-        console.log('Could not load previous game: ' + error);
+        console.log('Could not load saved game: ' + error);
       }
 
       return result;
@@ -261,10 +261,18 @@
     }
 
     static save(data) {
-      try {
-        localStorage.saveData = JSON.stringify(data);
-      } catch (error) {
-        console.log('Could not save current game: ' + error);
+      if (data != null) {
+        try {
+          localStorage.saveData = JSON.stringify(data);
+        } catch (error) {
+          console.log('Could not save current game: ' + error);
+        }
+      } else {
+        try {
+          localStorage.clear();
+        } catch (error) {
+          console.log('Could not clear saved game: ' + error);
+        }
       }
     }
 
