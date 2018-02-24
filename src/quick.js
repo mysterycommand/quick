@@ -401,9 +401,9 @@
     }
   }
 
-  class Mouse {
+  class Mouse extends Point {
     constructor(event) {
-      this._position = new Point();
+      super();
       this.down(event);
 
       addEventListener('mousedown', (event) => {
@@ -431,17 +431,9 @@
       return this._isDown;
     }
 
-    getX() {
-      return this._position.getX();
-    }
-
-    getY() {
-      return this._position.getY();
-    }
-
     updateCoordinates(event) {
-      this._position.setX(event.x || event.clientX);
-      this._position.setY(event.y || event.clientY);
+      this.setX(event.x || event.clientX);
+      this.setY(event.y || event.clientY);
     }
   }
 
