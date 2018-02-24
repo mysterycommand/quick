@@ -474,12 +474,12 @@
     }
   }
 
-  class Pointer {
+  class Pointer extends Point {
     constructor() {
+      super();
       this._active = false;
       this._device = null;
       this._hold = false;
-      this._position = new Point();
     }
 
     getDown() {
@@ -509,12 +509,8 @@
 
       const REAL_X = this._device.getX() - Quick.getOffsetLeft();
       const REAL_Y = this._device.getY() - Quick.getOffsetTop();
-      this._position.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
-      this._position.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
-    }
-
-    getPosition() {
-      return this._position;
+      this.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
+      this.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
     }
   }
 
