@@ -437,11 +437,11 @@
     }
   }
 
-  class Touch {
+  class Touch extends Point {
     constructor(event) {
+      super();
       event.preventDefault();
       this._isDown = true;
-      this._position = new Point();
       this.updateCoordinates(event);
 
       addEventListener('touchend', (event) => {
@@ -466,19 +466,11 @@
       return this._isDown;
     }
 
-    getX() {
-      return this._position.getX();
-    }
-
-    getY() {
-      return this._position.getY();
-    }
-
     updateCoordinates(event) {
       const TOUCHES = event['changedTouches'];
       const TOUCH = TOUCHES[0];
-      this._position.setX(TOUCH.pageX);
-      this._position.setY(TOUCH.pageY);
+      this.setX(TOUCH.pageX);
+      this.setY(TOUCH.pageY);
     }
   }
 
