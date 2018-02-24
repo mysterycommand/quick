@@ -349,21 +349,9 @@
   }
 
   class Point {
-    constructor(x, y) {
+    constructor(x = 0, y = 0) {
       this.setX(x);
       this.setY(y);
-    }
-
-    getCenter() {
-      return this;
-    }
-
-    getCenterX() {
-      return this._x;
-    }
-
-    getCenterY() {
-      return this._y;
     }
 
     getX() {
@@ -375,12 +363,12 @@
     }
 
     setX(x) {
-      this._x = x || 0;
+      this._x = x;
       return this;
     }
 
     setY(y) {
-      this._y = y || 0;
+      this._y = y;
       return this;
     }
   }

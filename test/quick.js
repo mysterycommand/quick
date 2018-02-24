@@ -97,17 +97,11 @@ function pointTest() {
 
   // no args constructor
   subject = new quick.Point();
-  assert.equal(subject, subject.getCenter());
-  assert.equal(0, subject.getCenterX());
-  assert.equal(0, subject.getCenterY());
   assert.equal(0, subject.getX());
   assert.equal(0, subject.getY());
 
   // all args constructor
   subject = new quick.Point(1, 2);
-  assert.equal(subject, subject.getCenter());
-  assert.equal(1, subject.getCenterX());
-  assert.equal(2, subject.getCenterY());
   assert.equal(1, subject.getX());
   assert.equal(2, subject.getY());
 
