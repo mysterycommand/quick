@@ -145,6 +145,9 @@
       input = new Input();
       lastRender = Date.now();
       sound = new Sound();
+      addEventListener('blur', focus, false);
+      addEventListener('focus', focus, false);
+      addEventListener('load', focus, false);
       addEventListener('resize', scale, false);
       autoScale && scale();
 
@@ -152,6 +155,7 @@
         renderableLists.push(new RenderableList());
       }
 
+      focus();
       boot();
     }
 
@@ -398,7 +402,6 @@
     down(event) {
       event.preventDefault();
       this._isDown = true;
-      canvas && canvas.focus();
     }
 
     getCommand() {
@@ -1730,13 +1733,7 @@
       }
     }
 
-    window.onload = () => {
-      canvas.focus();
-    };
-
     scene = sceneFactory();
-    canvas.focus();
-
     loop();
 
     function onTimeout() {
@@ -1759,6 +1756,10 @@
         }
       }
     }
+  }
+
+  function focus() {
+    canvas && canvas.focus();
   }
 
   function getGamePads() {
