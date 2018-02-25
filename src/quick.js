@@ -486,8 +486,8 @@
 
       const REAL_X = this._device.x - Quick.getOffsetLeft();
       const REAL_Y = this._device.y - Quick.getOffsetTop();
-      this.setX(Math.floor(REAL_X * Quick.width / Quick.getRealWidth()));
-      this.setY(Math.floor(REAL_Y * Quick.height / Quick.getRealHeight()));
+      this.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
+      this.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
     }
   }
 
@@ -879,45 +879,49 @@
 
   class Direction {
     constructor() {
-      this._isBottom = false;
-      this._isLeft = false;
-      this._isRight = false;
-      this._isTop = false;
+      this.bottom = false;
+      this.left = false;
+      this.right = false;
+      this.top = false;
     }
 
+    // deprecated
     getBottom() {
-      return this._isBottom;
+      return this.bottom;
     }
 
+    // deprecated
     getLeft() {
-      return this._isLeft;
+      return this.left;
     }
 
+    // deprecated
     getRight() {
-      return this._isRight;
+      return this.right;
     }
 
+    // deprecated
     getTop() {
-      return this._isTop;
+      return this.top;
     }
 
     setBottom(isBottom) {
-      this._isBottom = isBottom == undefined || isBottom;
+      this.bottom = isBottom == undefined || isBottom;
       return this;
     }
 
     setLeft(isLeft) {
-      this._isLeft = isLeft == undefined || isLeft;
+      this.left = isLeft == undefined || isLeft;
       return this;
     }
 
     setRight(isRight) {
-      this._isRight = isRight == undefined || isRight;
+      this.right = isRight == undefined || isRight;
       return this;
     }
 
     setTop(isTop) {
-      this._isTop = isTop == undefined || isTop;
+      this.top = isTop == undefined || isTop;
       return this;
     }
   }
@@ -1011,6 +1015,34 @@
     setWidth(width) {
       this.width = width;
       return this;
+    }
+
+    get bottom() {
+      return this.y + this.height - 1;
+    }
+
+    get center() {
+      return new Point(this.getCenterX(), this.getCenterY());
+    }
+
+    get centerX() {
+      return this.x + Math.floor(this.width / 2);
+    }
+
+    get centerY() {
+      return this.y + Math.floor(this.height / 2);
+    }
+
+    get left() {
+      return this.x;
+    }
+
+    get right() {
+      return this.x + this.width - 1;
+    }
+
+    get top() {
+      return this.y;
     }
   }
 
@@ -1121,11 +1153,11 @@
     }
 
     bounceFrom(direction) {
-      if ((this.getSpeedX() < 0 && direction.getLeft()) || (this.getSpeedX() > 0 && direction.getRight())) {
+      if ((this.getSpeedX() < 0 && direction.left) || (this.getSpeedX() > 0 && direction.right)) {
         this.bounceX();
       }
 
-      if ((this.getSpeedY() < 0 && direction.getTop()) || (this.getSpeedY() > 0 && direction.getBottom())) {
+      if ((this.getSpeedY() < 0 && direction.top) || (this.getSpeedY() > 0 && direction.bottom)) {
         this.bounceY();
       }
 
@@ -1163,16 +1195,16 @@
 
     getCollision(sprite) {
       const DIRECTION = new Direction();
-      const TA = this.getTop();
-      const RA = this.getRight();
-      const BA = this.getBottom();
-      const LA = this.getLeft();
+      const TA = this.top;
+      const RA = this.right;
+      const BA = this.bottom;
+      const LA = this.left;
       const XA = this.getCenterX();
       const YA = this.getCenterY();
-      const TB = sprite.getTop();
-      const RB = sprite.getRight();
-      const BB = sprite.getBottom();
-      const LB = sprite.getLeft();
+      const TB = sprite.top;
+      const RB = sprite.right;
+      const BB = sprite.bottom;
+      const LB = sprite.left;
 
       if (XA <= LB && RA < RB) {
         DIRECTION.setRight();
@@ -1265,10 +1297,10 @@
 
     hasCollision(rect) {
       return !(
-        this.getLeft() > rect.getRight() ||
-        this.getRight() < rect.getLeft() ||
-        this.getTop() > rect.getBottom() ||
-        this.getBottom() < rect.getTop()
+        this.left > rect.right ||
+        this.right < rect.left ||
+        this.top > rect.bottom ||
+        this.bottom < rect.top
       );
     }
 
@@ -1516,7 +1548,7 @@
   }
 
   class Scene extends Sprite {
-    constructor(x, y, width = Quick.width, height = Quick.height) {
+    constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
       super(x, y, width, height);
       this._sprites = [];
       this._spritesQueue = [];
@@ -1639,12 +1671,12 @@
       const COLOR = 'Black';
       const FRAMES = 32;
       this.setColor(COLOR);
-      this.setHeight(Quick.height);
-      this._increase = Quick.width / FRAMES;
+      this.setHeight(Quick.getHeight());
+      this._increase = Quick.getWidth() / FRAMES;
     }
 
     sync() {
-      if (this.width > Quick.width) {
+      if (this.width > Quick.getWidth()) {
         return true;
       }
 
