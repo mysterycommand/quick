@@ -5,7 +5,7 @@ Quick
 Open multi-platform game engine.
 
 ## Latest release
-[Download or link directly to this file.](https://cdn.rawgit.com/diogoschneider/quick/v5.3.0/src/quick.js)
+[Download or link directly to this file.](https://cdn.rawgit.com/diogoschneider/quick/v5.4.0/src/quick.js)
 
 ## About
 Quick aims to provide a multi-platform, lightweight, easy-to-use engine to be used on game development, focusing in performance, quick development and maintainability. Based on the original engine used in Starship and Ms. Starship, it has evolved with the continuous addition of new features.
