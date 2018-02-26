@@ -493,10 +493,12 @@
 
   class Controller {
     constructor() {
+      this.tolerance = 0;
       this._active = {};
       this._device = null;
       this._hold = {};
       this._sequence = [];
+      this._tick = 0;
     }
 
     didPerform(commands) {
@@ -539,12 +541,18 @@
         }
       }
 
+      if (this.tolerance && ++this._tick > this.tolerance) {
+        this._sequence = [];
+        this._tick = 0;
+      }
+
       for (let i in CommandEnum) {
         if (CommandEnum.hasOwnProperty(i)) {
           const COMMAND = CommandEnum[i];
 
           if (this.keyPush(COMMAND)) {
             this._sequence.push(COMMAND);
+            this._tick = 0;
           }
         }
       }
