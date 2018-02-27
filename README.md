@@ -46,7 +46,10 @@ The skeleton is written with classes, keeping your code very clean and organized
 This skeleton provide a sample Quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [[API]] and [quick-demos](https://github.com/diogoschneider/quick-demos) to harness the full potential of the library.
 
 ## Input
-Quick's input subsystem dynamically attaches physical devices to virtual controllers. In order to be accessible and ergonomic to the majority of players without configuration hassles, Quick convenes to a common set of abstract commands, which are:
+Quick's input subsystem dynamically attaches physical devices such as gamepads, keyboards, mice and touch screens to virtual devices. Gamepads and keyboards are known to the game as controllers via the Controller class, while mice and touch screens are known to the game as pointers, via the Pointer class. Games can use one or more devices, such as a controller and a pointer to command a more complex game or even multiple controllers for multiplayer games.
+
+### Controllers
+In order to be accessible and ergonomic to the majority of players without configuration hassles, Quick convenes to a common set of commands. which are:
   * Up
   * Down
   * Left
@@ -60,7 +63,7 @@ Quick's input subsystem dynamically attaches physical devices to virtual control
 
 These commands can be easily referenced to using the [CommandEnum](API#commandenum) enumeration. Physical devices which implement [Controller](API#controller) then map to these commands, as follows:
 
-### Keyboard
+#### Keyboard
 The keyboard mapping allows both left and right handed players to use a comfortable set of keys:
   * Up arrow, E or I - Up
   * Down arrow, D or K - Down
@@ -73,7 +76,7 @@ The keyboard mapping allows both left and right handed players to use a comforta
   * Esc - Select
   * Enter - Start
 
-### Gamepad
+#### Gamepad
 The gamepad mapping allows both digital and analog controls to be properly mapped to a game command:
   * Up (digital / analog) - Up
   * Down (digital / analog) - Down
@@ -85,6 +88,9 @@ The gamepad mapping allows both digital and analog controls to be properly mappe
   * Y or 4 - Y
   * Select - Select
   * Start - Start
+
+### Pointers
+While mice and touch screens have different capabilities, they share a few common concepts which we can leverage to interact them in an uniform way. Bot can provide clicks and position coordinates.
 
 ## Related projects
   * [quick-assets](https://github.com/diogoschneider/quick-assets) assets for games
