@@ -1052,6 +1052,34 @@
     get top() {
       return this.y;
     }
+
+    set bottom(y) {
+      this.setBottom(y);
+    }
+
+    set center(point) {
+      this.setCenter(point);
+    }
+
+    set centerX(x) {
+      this.setCenterX(x);
+    }
+
+    set centerY(y) {
+      this.setCenterY(y);
+    }
+
+    set left(x) {
+      this.setLeft(x);
+    }
+
+    set right(x) {
+      this.setRight(x);
+    }
+
+    set top(y) {
+      this.setY(y);
+    }
   }
 
   class Frame {
