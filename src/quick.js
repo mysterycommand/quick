@@ -1722,17 +1722,45 @@
     }
   }
 
-  class TextObject extends Sprite {
-    constructor(string) {
+  class FontSprite extends Sprite {
+    constructor(text) {
       super();
-      this.setString(string || '');
+      this._text = text;
     }
 
+    // deprecated
     getString() {
-      return this._string;
+      return this._text;
     }
 
-    parse(context) {
+    render(context) {
+      if (context) {
+        Sprite.prototype.render.call(this, context);
+      }
+
+      this._parse(context);
+    }
+
+    // deprecated
+    setString(string) {
+      return this.setText(string);
+    }
+
+    setText(text) {
+      this._text = text;
+      this._parse();
+      return this;
+    }
+
+    get text() {
+      return this._text;
+    }
+
+    set text(text) {
+      this.setText(text);
+    }
+
+    _parse(context) {
       const SPACE = 4;
       const SPACING = 0;
       let height = 0;
@@ -1740,8 +1768,8 @@
       let x = 0;
       let y = 0;
 
-      for (let i = 0; i < this._string.length; ++i) {
-        let character = this._string[i];
+      for (let i = 0; i < this._text.length; ++i) {
+        let character = this._text[i];
 
         if (character == ' ') {
           x += SPACE + SPACING;
@@ -1770,14 +1798,21 @@
       this.setWidth(width);
       this.setHeight(y + height);
     }
+  }
 
-    render(context) {
-      this.parse(context);
+  class TextSprite extends Sprite {
+    constructor(x, y, width, height, text) {
+      super(x, y, width, height);
+      this.text = text;
     }
 
-    setString(string) {
-      this._string = string;
-      this.parse();
+    render(context) {
+      Sprite.prototype.render.call(this, context);
+      context.fillText(this.text, this.x, this.y, this.width);
+    }
+
+    setText(text) {
+      this.text = text;
       return this;
     }
   }
@@ -1910,6 +1945,7 @@
     BaseTransition,
     CommandEnum,
     Controller,
+    FontSprite,
     Frame,
     ImageFactory,
     Mouse,
@@ -1918,7 +1954,8 @@
     Rect,
     Scene,
     Sprite,
-    TextObject,
+    TextObject: FontSprite, // deprecated
+    TextSprite,
   };
 
   if (typeof(window) == 'object') {
