@@ -1382,7 +1382,7 @@
 
     render(context) {
       if (!this._isVisible) {
-        return;
+        return false;
       }
 
       const X = Math.floor(this.x + this.getParentX());
@@ -1397,6 +1397,8 @@
         const IMAGE = this.getImage();
         context.drawImage(IMAGE, X, Y, this.width, this.height);
       }
+
+      return true;
     }
 
     setAccelerationX(accelerationX) {
@@ -1734,11 +1736,7 @@
     }
 
     render(context) {
-      if (context) {
-        Sprite.prototype.render.call(this, context);
-      }
-
-      this._parse(context);
+      Sprite.prototype.render.call(this, context) && this._parse(context);
     }
 
     // deprecated
@@ -1807,8 +1805,7 @@
     }
 
     render(context) {
-      Sprite.prototype.render.call(this, context);
-      context.fillText(this.text, this.x, this.y, this.width);
+      Sprite.prototype.render.call(this, context) && context.fillText(this.text, this.x, this.y, this.width);
     }
 
     setText(text) {
