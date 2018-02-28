@@ -30,7 +30,7 @@ Please check the [Wiki](https://github.com/diogoschneider/quick/wiki) for more i
 These are some games made with Quick (in alphabetical order):
   * [Alpha](http://diogoschneider.github.io/games/alpha/)
   * [Asteroids Remake](http://chamun.github.io/asteroids-remake/)
-  * [Cityscape](http://diogoschneider.github.io/cityscape/)
+  * [Cityscape](https://www.kongregate.com/games/diogoschneider/cityscape/)
   * [Colda Kasar's Domain](http://coldmass.com.br/coldakasar/)
   * [Cucurbita's Halloween](http://www.kongregate.com/games/bbastudios/cucurbitas-halloween)
   * [Dragonfire](http://staudt.github.io/dragonfire/)
