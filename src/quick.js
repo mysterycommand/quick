@@ -339,11 +339,11 @@
     }
 
     static getCenterX() {
-      return Math.floor(this.width / 2);
+      return Math.floor(this.getWidth() / 2);
     }
 
     static getCenterY() {
-      return Math.floor(this.height / 2);
+      return Math.floor(this.getHeight() / 2);
     }
 
     static getHeight() {
@@ -1319,27 +1319,49 @@
   class Sprite extends Rect {
     constructor(x, y, width, height) {
       super(x, y, width, height);
+      this.accelerationX = 0;
+      this.accelerationY = 0;
+      this.maxSpeedX = 0;
+      this.maxSpeedY = 0;
+      this.speedX = 0;
+      this.speedY = 0;
+      this.color = null;
+      this.delegate = null;
+      this.expiration = 0;
+      this.layerIndex = 0;
+      this.essential = false;
+      this.expired = false;
+      this.solid = false;
+      this.visible = true;
+      this.scene = null;
       this._animation = null;
       this._boundary = null;
-      this._color = null;
-      this._delegate = null;
-      this._expiration = 0;
-      this._layerIndex = 0;
       this._lastX = this.x;
       this._lastY = this.y;
-      this._isEssential = false;
-      this._isExpired = false;
-      this._isSolid = false;
-      this._isVisible = true;
-      this._scene = null;
       this._tags = {};
       this._tick = 0;
-      this.setAccelerationX();
-      this.setAccelerationY();
-      this.setMaxSpeedX();
-      this.setMaxSpeedY();
-      this.setSpeedX();
-      this.setSpeedY();
+    }
+
+    get angle() {
+      return toDegrees(Math.atan2(this.speedY, this.speedX));
+    }
+
+    get direction() {
+      const DIRECTION = new Direction();
+
+      if (this.x < this._lastX) {
+        DIRECTION.setLeft();
+      } else if (this.x > this._lastX) {
+        DIRECTION.setRight();
+      }
+
+      if (this.y < this._lastY) {
+        DIRECTION.setTop();
+      } else if (this.y > this._lastY) {
+        DIRECTION.setBottom();
+      }
+
+      return DIRECTION;
     }
 
     addTag(tag) {
@@ -1372,20 +1394,23 @@
     }
 
     expire() {
-      this._isExpired = true;
+      this.expired = true;
       return this;
     }
 
+    // deprecated
     getAccelerationX() {
-      return this._accelerationX;
+      return this.accelerationX;
     }
 
+    // deprecated
     getAccelerationY() {
-      return this._accelerationY;
+      return this.accelerationY;
     }
 
+    // deprecated
     getAngle() {
-      return toDegrees(Math.atan2(this.getSpeedY(), this.getSpeedX()));
+      return this.angle;
     }
 
     getCollision(sprite) {
@@ -1416,78 +1441,77 @@
       return DIRECTION;
     }
 
+    // deprecated
     getColor() {
-      return this._color;
+      return this.color;
     }
 
+    // deprecated
     getDirection() {
-      const DIRECTION = new Direction();
-
-      if (this.x < this._lastX) {
-        DIRECTION.setLeft();
-      } else if (this.x > this._lastX) {
-        DIRECTION.setRight();
-      }
-
-      if (this.y < this._lastY) {
-        DIRECTION.setTop();
-      } else if (this.y > this._lastY) {
-        DIRECTION.setBottom();
-      }
-
-      return DIRECTION;
+      return this.direction;
     }
 
+    // deprecated
     getEssential() {
-      return this._isEssential;
+      return this.essential;
     }
 
+    // deprecated
     getExpired() {
-      return this._isExpired;
+      return this.expired;
     }
 
+    // deprecated
     getImage() {
       return this._animation.getImage();
     }
 
+    // deprecated
     getLayerIndex() {
-      return this._layerIndex;
+      return this.layerIndex;
     }
 
+    // deprecated
     getPosition() {
       return new Point(this.x, this.y);
     }
 
+    // deprecated
     getSpeedX() {
-      return this._speedX;
+      return this.speedX;
     }
 
+    // deprecated
     getSpeedY() {
-      return this._speedY;
+      return this.speedY;
     }
 
     getParentX() {
-      return this._scene && this._scene.getParentX() || 0;
+      return this.scene && this.scene.getParentX() || 0;
     }
 
     getParentY() {
-      return this._scene && this._scene.getParentY() || 0;
+      return this.scene && this.scene.getParentY() || 0;
     }
 
+    // deprecated
     getScene() {
-      return this._scene;
+      return this.scene;
     }
 
+    // deprecated
     getSolid() {
-      return this._isSolid;
+      return this.solid;
     }
 
+    // deprecated
     getTick() {
       return this._tick;
     }
 
+    // deprecated
     getVisible() {
-      return this._isVisible;
+      return this.visible;
     }
 
     hasCollision(rect) {
@@ -1504,7 +1528,7 @@
     }
 
     init(scene) {
-      this._delegate && this._delegate.init && this._delegate.init(scene);
+      this.delegate && this.delegate.init && this.delegate.init(scene);
     }
 
     move(width, height) {
@@ -1524,31 +1548,31 @@
     }
 
     offBoundary() {
-      if (this._delegate && this._delegate.offBoundary) {
-        this._delegate.offBoundary();
+      if (this.delegate && this.delegate.offBoundary) {
+        this.delegate.offBoundary();
       } else {
         this.expire();
       }
     }
 
     onAnimationLoop() {
-      this._delegate && this._delegate.onAnimationLoop && this._delegate.onAnimationLoop();
+      this.delegate && this.delegate.onAnimationLoop && this.delegate.onAnimationLoop();
     }
 
     onCollision(sprite) {
-      this._delegate && this._delegate.onCollision && this._delegate.onCollision(sprite);
+      this.delegate && this.delegate.onCollision && this.delegate.onCollision(sprite);
     }
 
     render(context) {
-      if (!this._isVisible) {
+      if (!this.visible) {
         return false;
       }
 
       const X = Math.floor(this.x + this.getParentX());
       const Y = Math.floor(this.y + this.getParentY());
 
-      if (this._color) {
-        context.fillStyle = this._color;
+      if (this.color) {
+        context.fillStyle = this.color;
         context.fillRect(X, Y, this.width, this.height);
       }
 
@@ -1561,12 +1585,12 @@
     }
 
     setAccelerationX(accelerationX) {
-      this._accelerationX = accelerationX || 0;
+      this.accelerationX = accelerationX;
       return this;
     }
 
     setAccelerationY(accelerationY) {
-      this._accelerationY = accelerationY || 0;
+      this.accelerationY = accelerationY || 0;
       return this;
     }
 
@@ -1583,27 +1607,27 @@
     }
 
     setBoundary(rect) {
-      this._boundary = rect || this._scene && this._scene.getBoundary();
+      this._boundary = rect || this.scene && this.scene.getBoundary();
       return this;
     }
 
     setColor(color) {
-      this._color = color;
+      this.color = color;
       return this;
     }
 
     setDelegate(delegate) {
-      this._delegate = delegate;
+      this.delegate = delegate;
       return this;
     }
 
     setEssential(isEssential) {
-      this._isEssential = isEssential == undefined || isEssential;
+      this.essential = isEssential == undefined || isEssential;
       return this;
     }
 
     setExpiration(expiration) {
-      this._expiration = expiration;
+      this.expiration = expiration;
       return this;
     }
 
@@ -1618,17 +1642,17 @@
     }
 
     setLayerIndex(layerIndex) {
-      this._layerIndex = layerIndex || 0;
+      this.layerIndex = layerIndex || 0;
       return this;
     }
 
     setMaxSpeedX(maxSpeedX) {
-      this._maxSpeedX = maxSpeedX || 0;
+      this.masSpeedX = maxSpeedX || 0;
       return this;
     }
 
     setMaxSpeedY(maxSpeedY) {
-      this._maxSpeedY = maxSpeedY || 0;
+      this.masSpeedY = maxSpeedY || 0;
       return this;
     }
 
@@ -1645,7 +1669,7 @@
     }
 
     setScene(scene) {
-      this._scene = scene;
+      this.scene = scene;
       return this;
     }
 
@@ -1662,7 +1686,7 @@
     }
 
     setSolid(isSolid) {
-      this._isSolid = isSolid == undefined || isSolid;
+      this.solid = isSolid == undefined || isSolid;
       return this;
     }
 
@@ -1681,17 +1705,17 @@
     }
 
     setSpeedX(speedX) {
-      this._speedX = speedX || 0;
+      this.speedX = speedX || 0;
       return this;
     }
 
     setSpeedY(speedY) {
-      this._speedY = speedY || 0;
+      this.speedY = speedY || 0;
       return this;
     }
 
     setVisible(isVisible) {
-      this._isVisible = isVisible == undefined || isVisible;
+      this.visible = isVisible == undefined || isVisible;
       return this;
     }
 
@@ -1706,7 +1730,7 @@
         return true;
       }
 
-      if (++this._tick == this._expiration) {
+      if (++this._tick == this.expiration) {
         this.expire();
       }
 
@@ -1714,18 +1738,18 @@
         this.onAnimationLoop();
       }
 
-      this.setSpeedX(this.getSpeedX() + this._accelerationX);
+      this.setSpeedX(this.getSpeedX() + this.accelerationX);
 
-      if (this._maxSpeedX && Math.abs(this.getSpeedX()) > this._maxSpeedX) {
+      if (this.masSpeedX && Math.abs(this.getSpeedX()) > this.masSpeedX) {
         const SIGNAL = this.getSpeedX() / Math.abs(this.getSpeedX());
-        this.setSpeedX(this._maxSpeedX * SIGNAL);
+        this.setSpeedX(this.masSpeedX * SIGNAL);
       }
 
-      this.setSpeedY(this.getSpeedY() + this._accelerationY);
+      this.setSpeedY(this.getSpeedY() + this.accelerationY);
 
-      if (this._maxSpeedY && Math.abs(this.getSpeedY()) > this._maxSpeedY) {
+      if (this.masSpeedY && Math.abs(this.getSpeedY()) > this.masSpeedY) {
         const SIGNAL = this.getSpeedY() / Math.abs(this.getSpeedY());
-        this.setSpeedY(this._maxSpeedY * SIGNAL);
+        this.setSpeedY(this.masSpeedY * SIGNAL);
       }
 
       this._lastX = this.x;
@@ -1740,7 +1764,7 @@
     }
 
     update() {
-      this._delegate && this._delegate.update && this._delegate.update();
+      this.delegate && this.delegate.update && this.delegate.update();
     }
   }
 
@@ -1823,8 +1847,8 @@
     }
 
     getNext() {
-      if (this._delegate && this._delegate.getNext) {
-        return this._delegate.getNext();
+      if (this.delegate && this.delegate.getNext) {
+        return this.delegate.getNext();
       }
     }
 
@@ -1847,7 +1871,7 @@
     }
 
     setExpiration(expiration) {
-      this._expiration = expiration;
+      this.expiration = expiration;
     }
 
     setTransition(transition) {
