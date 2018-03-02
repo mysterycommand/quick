@@ -13,7 +13,7 @@ Quick includes all requirements for a full-featured game included in a single li
 [Click here for the wiki-based API](https://github.com/diogoschneider/quick/wiki)
 
 ### Latest release
-[Download or link directly to this file.](https://cdn.rawgit.com/diogoschneider/quick/v5.4.0/src/quick.js)
+[Download or link directly to this file.](https://cdn.rawgit.com/diogoschneider/quick/v5.3.0/src/quick.js)
 
 ## Advantages
   * Virtual resolution - run your game in any screen size without affecting your development or game logic
