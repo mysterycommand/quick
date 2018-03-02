@@ -1,13 +1,13 @@
 Quick
 =====
-![Quick](http://diogoschneider.github.io/assets/quick.png)
-
 Open multi-platform game engine.
 
 ## About
 Quick aims to provide a multi-platform, lightweight, easy-to-use engine to be used on game development, focusing in performance, quick development and maintainability. Based on the original engine used in Starship and Ms. Starship, it has evolved with the continuous addition of new features.
 
 Quick includes all requirements for a full-featured game included in a single library. It's the whole thing in a tiny package. It runs on any modern JavaScript runtime, from personal computers with gamepads and keyboards to personal digital assistants with touch screens. Write once, run everywhere... now for real.
+
+![Quick](http://diogoschneider.github.io/assets/quick.png)
 
 ### API
 [Click here for the wiki-based API](https://github.com/diogoschneider/quick/wiki)
@@ -29,7 +29,6 @@ Please check the [Wiki](https://github.com/diogoschneider/quick/wiki) for more i
 ## Games
 These are some games made with Quick (in alphabetical order):
   * [Alpha](http://diogoschneider.github.io/games/alpha/)
-  * [Asteroids Remake](http://chamun.github.io/asteroids-remake/)
   * [Cityscape](https://www.kongregate.com/games/diogoschneider/cityscape/)
   * [Colda Kasar's Domain](http://coldmass.com.br/coldakasar/)
   * [Cucurbita's Halloween](http://www.kongregate.com/games/bbastudios/cucurbitas-halloween)
