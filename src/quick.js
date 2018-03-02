@@ -1909,7 +1909,7 @@
   class FontSprite extends Sprite {
     constructor(text) {
       super();
-      this._text = text;
+      this.text = text;
     }
 
     // deprecated
