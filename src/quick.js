@@ -1270,7 +1270,7 @@
     }
 
     getHeight() {
-      return this._frame.height;
+      return this._frame.getHeight();
     }
 
     getImage() {
@@ -1278,7 +1278,7 @@
     }
 
     getWidth() {
-      return this._frame.width;
+      return this._frame.getWidth();
     }
 
     setFrames(frames) {
@@ -1601,8 +1601,8 @@
 
       this._animation = animation;
       this._animation.updateFrameIndex(0);
-      this.setHeight(this._animation.height);
-      this.setWidth(this._animation.width);
+      this.setHeight(this._animation.getHeight());
+      this.setWidth(this._animation.getWidth());
       return this;
     }
 
