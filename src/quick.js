@@ -1907,7 +1907,7 @@
   }
 
   class FontSprite extends Sprite {
-    constructor(text) {
+    constructor(text = '') {
       super();
       this.text = text;
     }
