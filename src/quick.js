@@ -1248,8 +1248,10 @@
 
       if (typeof(image) == 'string') {
         this._image = document.getElementById(image);
-      } else {
+      } else if (typeof(image) == 'object') {
         this._image = image;
+      } else {
+        this._image = new Image();
       }
     }
 
@@ -1332,7 +1334,6 @@
       this.speedX = 0;
       this.speedY = 0;
       this.color = null;
-      this.delegate = null;
       this.expiration = 0;
       this.layerIndex = 0;
       this.essential = false;
@@ -1534,7 +1535,7 @@
     }
 
     init(scene) {
-      this.delegate && this.delegate.init && this.delegate.init(scene);
+      // no default behavior
     }
 
     move(width, height) {
@@ -1554,19 +1555,15 @@
     }
 
     offBoundary() {
-      if (this.delegate && this.delegate.offBoundary) {
-        this.delegate.offBoundary();
-      } else {
-        this.expire();
-      }
+      this.expire();
     }
 
     onAnimationLoop() {
-      this.delegate && this.delegate.onAnimationLoop && this.delegate.onAnimationLoop();
+      // no default behavior
     }
 
     onCollision(sprite) {
-      this.delegate && this.delegate.onCollision && this.delegate.onCollision(sprite);
+      // no default behavior
     }
 
     render(context) {
@@ -1596,7 +1593,7 @@
     }
 
     setAccelerationY(accelerationY) {
-      this.accelerationY = accelerationY || 0;
+      this.accelerationY = accelerationY;
       return this;
     }
 
@@ -1607,8 +1604,8 @@
 
       this._animation = animation;
       this._animation.updateFrameIndex(0);
-      this.setHeight(this._animation.getHeight());
-      this.setWidth(this._animation.getWidth());
+      this.height = this._animation.getHeight();
+      this.width = this._animation.getWidth();
       return this;
     }
 
@@ -1619,11 +1616,6 @@
 
     setColor(color) {
       this.color = color;
-      return this;
-    }
-
-    setDelegate(delegate) {
-      this.delegate = delegate;
       return this;
     }
 
@@ -1674,6 +1666,7 @@
       return this;
     }
 
+    // deprecated
     setScene(scene) {
       this.scene = scene;
       return this;
@@ -1770,7 +1763,7 @@
     }
 
     update() {
-      this.delegate && this.delegate.update && this.delegate.update();
+      // no default behavior
     }
   }
 
@@ -1784,9 +1777,9 @@
 
     add(sprite) {
       this._spritesQueue.push(sprite);
-      sprite.setScene(this);
+      sprite.scene = this;
       sprite.init(this);
-      sprite.move(sprite.getSpeedX() * -1, sprite.getSpeedY() * -1);
+      sprite.move(sprite.speedX * -1, sprite.speedY * -1);
     }
 
     build(map, tileFactory = baseTileFactory, offsetX, offsetY) {
@@ -1853,9 +1846,7 @@
     }
 
     getNext() {
-      if (this.delegate && this.delegate.getNext) {
-        return this.delegate.getNext();
-      }
+      throw 'You must implement the getNext method of your scene.'
     }
 
     getObjectsWithTag(tag) {

@@ -341,11 +341,9 @@ function spriteTest() {
   subject.setSize(16, 16);
   offBoundaryCalled = false;
 
-  subject.setDelegate({
-    offBoundary: function () {
-      offBoundaryCalled = true;
-    }
-  });
+  subject.offBoundary = () => {
+    offBoundaryCalled = true;
+  };
 
   subject.setBoundary(new quick.Rect(0, 0, 200, 200));
   subject.sync();
@@ -356,11 +354,9 @@ function spriteTest() {
   subject.setSize(16, 16);
   offBoundaryCalled = false;
 
-  subject.setDelegate({
-    offBoundary: function () {
-      offBoundaryCalled = true;
-    }
-  });
+  subject.offBoundary = () => {
+    offBoundaryCalled = true;
+  };
 
   subject.setBoundary(new quick.Rect(20, 20, 100, 100));
   subject.sync();
