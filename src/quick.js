@@ -204,12 +204,13 @@
   };
 
   const FontFamily = makeSet([
-    "cursive",
-    "fantsy",
-    "monospace",
-    "sans-serif",
-    "serif",
+    'cursive',
+    'fantsy',
+    'monospace',
+    'serif',
   ]);
+
+  FontFamily.sansSerif = 'sans-serif';
 
   const KeyEnum = {
     ENTER: 13,
