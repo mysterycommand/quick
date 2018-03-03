@@ -1248,11 +1248,11 @@
 
       if (typeof(image) == 'string') {
         this._image = document.getElementById(image);
-      } else if (typeof(image) == 'object') {
-        this._image = image;
       } else {
-        this._image = new Image();
+        this._image = image;
       }
+
+      this._image = this._image || new Image();
     }
 
     getDuration() {
