@@ -569,8 +569,8 @@
     }
 
     updateCoordinates(event) {
-      this.setX(event.x || event.clientX);
-      this.setY(event.y || event.clientY);
+      this.x = event.x || event.clientX;
+      this.y = event.y || event.clientY;
     }
   }
 
@@ -606,8 +606,8 @@
     updateCoordinates(event) {
       const TOUCHES = event['changedTouches'];
       const TOUCH = TOUCHES[0];
-      this.setX(TOUCH.pageX);
-      this.setY(TOUCH.pageY);
+      this.x = TOUCH.pageX;
+      this.y = TOUCH.pageY;
     }
   }
 
@@ -646,8 +646,8 @@
 
       const REAL_X = this._device.x - Quick.getOffsetLeft();
       const REAL_Y = this._device.y - Quick.getOffsetTop();
-      this.setX(Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth()));
-      this.setY(Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight()));
+      this.x = Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth());
+      this.y = Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight());
     }
   }
 
@@ -1151,12 +1151,12 @@
     }
 
     setCenterX(x) {
-      this.setX(x - Math.floor(this.width / 2));
+      this.x = x - Math.floor(this.width / 2);
       return this;
     }
 
     setCenterY(y) {
-      this.setY(y - Math.floor(this.height / 2));
+      this.y = y - Math.floor(this.height / 2);
       return this;
     }
 
@@ -1544,12 +1544,12 @@
     }
 
     moveX(width) {
-      this.setX(this.x + width);
+      this.x += width;
       return this;
     }
 
     moveY(height) {
-      this.setY(this.y + height);
+      this.y += height;
       return this;
     }
 
@@ -1664,11 +1664,11 @@
 
     setPosition(pointOrX, y) {
       if (y != null) {
-        this.setX(pointOrX);
-        this.setY(y);
+        this.x = pointOrX;
+        this.y = y;
       } else {
-        this.setX(pointOrX.x);
-        this.setY(pointOrX.y);
+        this.x = pointOrX.x;
+        this.y = pointOrX.y;
       }
 
       return this;
