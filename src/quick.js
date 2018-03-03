@@ -1140,7 +1140,7 @@
     }
 
     setBottom(y) {
-      this.setY(y - this.height + 1);
+      this.y = y - this.height + 1;
       return this;
     }
 
@@ -1166,17 +1166,17 @@
     }
 
     setLeft(x) {
-      this.setX(x);
+      this.x = x;
       return this;
     }
 
     setRight(x) {
-      this.setX(x - this.width + 1);
+      this.x = x - this.width + 1;
       return this;
     }
 
     setTop(y) {
-      this.setY(y);
+      this.y = y;
       return this;
     }
 
@@ -1243,9 +1243,14 @@
   }
 
   class Frame {
-    constructor(image, duration) {
-      this._duration = duration || 0;
-      this._image = image || new Image();
+    constructor(image, duration = 0) {
+      this._duration = duration;
+
+      if (typeof(image) == 'string') {
+        this._image = document.getElementById(image);
+      } else {
+        this._image = image;
+      }
     }
 
     getDuration() {
@@ -1987,7 +1992,7 @@
       this.fontColor = Color.White;
       this.text = text;
       this._fontFamily = FontFamily.monospace;
-      this._fontSize = 8;
+      this._fontSize = 16;
       this._updateFont();
     }
 
@@ -1995,7 +2000,7 @@
       if (Sprite.prototype.render.call(this, context)) {
         context.fillStyle = this.fontColor;
         context.font = this._font;
-        context.fillText(this.text, this.x, this.y, this.width);
+        context.fillText(this.text, this.left, this.bottom, this.width);
       }
     }
 
