@@ -13,14 +13,14 @@
   const DEFAULT_FRAME_TIME = 16;
   const DEFAULT_SOUND_EFFECTS_VOLUME = 0.3;
 
-  const AxisEnum = {
+  const Axis = {
     LEFT_X: 0,
     LEFT_Y: 1,
     RIGHT_X: 2,
     RIGHT_Y: 3
   };
 
-  const ButtonEnum = {
+  const Button = {
     A: 0,
     B: 1,
     X: 2,
@@ -190,7 +190,7 @@
     'YellowGreen',
   ]);
 
-  const CommandEnum = {
+  const Command = {
     UP: 0,
     DOWN: 1,
     LEFT: 2,
@@ -200,19 +200,18 @@
     X: 6,
     Y: 7,
     SELECT: 8,
-    START: 9
+    START: 9,
   };
 
-  const FontFamily = makeSet([
-    'cursive',
-    'fantsy',
-    'monospace',
-    'serif',
-  ]);
+  const FontFamily = {
+    Cursive: 'cursive',
+    Fantasy: 'fantasy',
+    Monospace: 'monospace',
+    SansSerif: 'sans-serif',
+    Serif: 'serif',
+  };
 
-  FontFamily.sansSerif = 'sans-serif';
-
-  const KeyEnum = {
+  const Key = {
     ENTER: 13,
     SHIFT: 16,
     CTRL: 17,
@@ -233,274 +232,292 @@
     S: 83,
     F5: 116,
     F11: 122,
-    F12: 123
+    F12: 123,
   };
 
   const ButtonToCommandMap = {};
-    ButtonToCommandMap[ButtonEnum.UP] = CommandEnum.UP;
-    ButtonToCommandMap[ButtonEnum.DOWN] = CommandEnum.DOWN;
-    ButtonToCommandMap[ButtonEnum.LEFT] = CommandEnum.LEFT;
-    ButtonToCommandMap[ButtonEnum.RIGHT] = CommandEnum.RIGHT;
-    ButtonToCommandMap[ButtonEnum.A] = CommandEnum.A;
-    ButtonToCommandMap[ButtonEnum.B] = CommandEnum.B;
-    ButtonToCommandMap[ButtonEnum.X] = CommandEnum.X;
-    ButtonToCommandMap[ButtonEnum.Y] = CommandEnum.Y;
-    ButtonToCommandMap[ButtonEnum.START] = CommandEnum.START;
-    ButtonToCommandMap[ButtonEnum.SELECT] = CommandEnum.SELECT;
+  ButtonToCommandMap[Button.UP] = Command.UP;
+  ButtonToCommandMap[Button.DOWN] = Command.DOWN;
+  ButtonToCommandMap[Button.LEFT] = Command.LEFT;
+  ButtonToCommandMap[Button.RIGHT] = Command.RIGHT;
+  ButtonToCommandMap[Button.A] = Command.A;
+  ButtonToCommandMap[Button.B] = Command.B;
+  ButtonToCommandMap[Button.X] = Command.X;
+  ButtonToCommandMap[Button.Y] = Command.Y;
+  ButtonToCommandMap[Button.START] = Command.START;
+  ButtonToCommandMap[Button.SELECT] = Command.SELECT;
 
   const KeyToCommandMap = {};
-    KeyToCommandMap[KeyEnum.UP] = CommandEnum.UP;
-    KeyToCommandMap[KeyEnum.E] = CommandEnum.UP;
-    KeyToCommandMap[KeyEnum.I] = CommandEnum.UP;
-    KeyToCommandMap[KeyEnum.DOWN] = CommandEnum.DOWN;
-    KeyToCommandMap[KeyEnum.D] = CommandEnum.DOWN;
-    KeyToCommandMap[KeyEnum.K] = CommandEnum.DOWN;
-    KeyToCommandMap[KeyEnum.LEFT] = CommandEnum.LEFT;
-    KeyToCommandMap[KeyEnum.S] = CommandEnum.LEFT;
-    KeyToCommandMap[KeyEnum.J] = CommandEnum.LEFT;
-    KeyToCommandMap[KeyEnum.RIGHT] = CommandEnum.RIGHT;
-    KeyToCommandMap[KeyEnum.F] = CommandEnum.RIGHT;
-    KeyToCommandMap[KeyEnum.L] = CommandEnum.RIGHT;
-    KeyToCommandMap[KeyEnum.SPACE] = CommandEnum.A;
-    KeyToCommandMap[KeyEnum.ALT] = CommandEnum.B;
-    KeyToCommandMap[KeyEnum.CTRL] = CommandEnum.X;
-    KeyToCommandMap[KeyEnum.SHIFT] = CommandEnum.Y;
-    KeyToCommandMap[KeyEnum.ENTER] = CommandEnum.START;
-    KeyToCommandMap[KeyEnum.ESC] = CommandEnum.SELECT;
+  KeyToCommandMap[Key.UP] = Command.UP;
+  KeyToCommandMap[Key.E] = Command.UP;
+  KeyToCommandMap[Key.I] = Command.UP;
+  KeyToCommandMap[Key.DOWN] = Command.DOWN;
+  KeyToCommandMap[Key.D] = Command.DOWN;
+  KeyToCommandMap[Key.K] = Command.DOWN;
+  KeyToCommandMap[Key.LEFT] = Command.LEFT;
+  KeyToCommandMap[Key.S] = Command.LEFT;
+  KeyToCommandMap[Key.J] = Command.LEFT;
+  KeyToCommandMap[Key.RIGHT] = Command.RIGHT;
+  KeyToCommandMap[Key.F] = Command.RIGHT;
+  KeyToCommandMap[Key.L] = Command.RIGHT;
+  KeyToCommandMap[Key.SPACE] = Command.A;
+  KeyToCommandMap[Key.ALT] = Command.B;
+  KeyToCommandMap[Key.CTRL] = Command.X;
+  KeyToCommandMap[Key.SHIFT] = Command.Y;
+  KeyToCommandMap[Key.ENTER] = Command.START;
+  KeyToCommandMap[Key.ESC] = Command.SELECT;
 
   const PassThrough = [];
-    PassThrough[KeyEnum.F5] = true;
-    PassThrough[KeyEnum.F11] = true;
-    PassThrough[KeyEnum.F12] = true;
+  PassThrough[Key.F5] = true;
+  PassThrough[Key.F11] = true;
+  PassThrough[Key.F12] = true;
 
-  let autoScale = true;
-  let canvas;
-  let context;
-  let everyOther = true;
-  let frameTime = DEFAULT_FRAME_TIME;
-  let keepAspect = false;
-  let input;
-  let isTransitioning = false;
-  let lastRender;
-  let name = 'Quick Game';
-  let numberOfLayers = 1;
-  let realWidth = 0;
-  let realHeight = 0;
-  let renderableLists = [];
-  let scene;
-  let sceneFactory;
-  let sound;
-  let transition;
-  let width = 0, height = 0;
+  const Quick = (() => {
+    let _autoScale = true;
+    let _canvas;
+    let _context;
+    let _everyOther = true;
+    let _frameTime = DEFAULT_FRAME_TIME;
+    let _height;
+    let _keepAspect = false;
+    let _input;
+    let _lastRender;
+    let _realHeight = 0;
+    let _realWidth = 0;
+    let _renderableLists = [];
+    let _scene;
+    let _sound;
+    let _transition;
+    let _width;
 
-  class Quick {
-    static init(firstSceneFactory, canvasElement) {
-      sceneFactory = firstSceneFactory;
-      canvas = canvasElement || document.getElementsByTagName('canvas')[0];
-      context = canvas.getContext('2d');
-      width = canvas.width;
-      height = canvas.height;
-      realWidth = width;
-      realHeight = height;
-      input = new Input();
-      lastRender = Date.now();
-      sound = new Sound();
-      addEventListener('blur', focus, false);
-      addEventListener('focus', focus, false);
-      addEventListener('load', focus, false);
-      addEventListener('resize', scale, false);
-      autoScale && scale();
+    class Quick {
+      static init(scene, canvas) {
+        _canvas = canvas || document.getElementsByTagName('canvas')[0];
+        _context = _canvas.getContext('2d');
+        _input = new Input();
+        _lastRender = Date.now();
+        _realHeight = _height = _canvas.height;
+        _realWidth = _width = _canvas.width;
+        _sound = new Sound();
+        _scene = scene;
+        addEventListener('blur', focus, false);
+        addEventListener('focus', focus, false);
+        addEventListener('load', focus, false);
+        addEventListener('resize', scale, false);
+        _autoScale && scale();
+        boot();
+      }
 
-      for (let i = 0; i < numberOfLayers; ++i) {
-        renderableLists.push(new RenderableList());
+      static get bottom() {
+        return _height - 1;
+      }
+
+      static get center() {
+        return new Point(this.centerX, this.centerY);
+      }
+
+      static get centerX() {
+        return Math.floor(_width / 2);
+      }
+
+      static get centerY() {
+        return Math.floor(_height / 2);
+      }
+
+      static get height() {
+        return _height;
+      }
+
+      static get offsetLeft() {
+        return _canvas.offsetLeft;
+      }
+
+      static get offsetTop() {
+        return _canvas.offsetTop;
+      }
+
+      static get right() {
+        return _width - 1;
+      }
+
+      static get everyOther() {
+        return _everyOther;
+      }
+
+      static get frameTime() {
+        return _frameTime;
+      }
+
+      static get realHeight() {
+        return _realHeight;
+      }
+
+      static get realWidth() {
+        return _realWidth;
+      }
+
+      static get width() {
+        return _width;
+      }
+
+      static addControllerDevice(device) {
+        _input.addController(device);
+      }
+
+      static clear() {
+        _context.clearRect(0, 0, _width, _height);
+      }
+
+      static fadeOut() {
+        _sound.fadeOut();
+      }
+
+      static flip(image) {
+        return invert(image, false, true);
+      }
+
+      static getController(id) {
+        return _input.getController(id);
+      }
+
+      static getPointer(id) {
+        return _input.getPointer(id);
+      }
+
+      static load() {
+        let result;
+
+        try {
+          result = localStorage.saveData && JSON.parse(localStorage.saveData);
+        } catch (error) {
+          console.log('Could not load saved game: ' + error);
+        }
+
+        return result;
+      }
+
+      static mirror(image) {
+        return invert(image, true, false);
+      }
+
+      static mute() {
+        _sound.mute();
+      }
+
+      static paint(renderable, index = 0) {
+        if (index >= _renderableLists.length) {
+          for (let i = _renderableLists.length; i <= index; ++i) {
+            _renderableLists.push(new RenderableList());
+          }
+        }
+
+        _renderableLists[index].add(renderable);
+      }
+
+      static play(id) {
+        _sound.play(id);
+      }
+
+      static playTheme(name) {
+        _sound.playTheme(name);
+      }
+
+      static random(ceil) {
+        const RANDOM = Math.random() * (ceil + 1);
+        return Math.floor(RANDOM);
+      }
+
+      static rotate(image, degrees) {
+        if (degrees % 360 == 0 ) {
+          return image;
+        }
+
+        const RADIANS = toRadians(degrees);
+        const IMAGE = document.createElement('canvas');
+        let sideA = image.width;
+        let sideB = image.height;
+
+        if (degrees == 90 || degrees == 270) {
+          sideA = image.height;
+          sideB = image.width;
+        }
+
+        IMAGE.width = sideA;
+        IMAGE.height = sideB;
+        const CONTEXT = IMAGE.getContext('2d');
+        CONTEXT.translate(IMAGE.width / 2, IMAGE.height / 2);
+        CONTEXT.rotate(RADIANS);
+        CONTEXT.drawImage(image, -image.width / 2, -image.height / 2);
+        return IMAGE;
+      }
+
+      static save(data) {
+        if (data != null) {
+          try {
+            localStorage.saveData = JSON.stringify(data);
+          } catch (error) {
+            console.log('Could not save current game: ' + error);
+          }
+        } else {
+          try {
+            localStorage.clear();
+          } catch (error) {
+            console.log('Could not clear saved game: ' + error);
+          }
+        }
+      }
+
+      static setAutoScale(customAutoScale = true) {
+        _autoScale = customAutoScale;
+      }
+
+      static setFrameTime(frameTime) {
+        _frameTime = frameTime || DEFAULT_FRAME_TIME;
+      }
+
+      static setKeepAspect(customKeepAspect = true) {
+        _keepAspect = customKeepAspect;
+      }
+
+      static setName(name) {
+        document.title = name;
+      }
+
+      static stopTheme() {
+        _sound.stopTheme();
+      }
+    }
+
+    function boot() {
+      const IMAGES = Array.from(document.getElementsByTagName('img'));
+
+      for (let i = 0; i < IMAGES.length; ++i) {
+        const IMAGE = IMAGES[i];
+
+        if (IMAGE.complete) {
+          IMAGES.shift();
+        } else {
+          setTimeout(boot, 100);
+          return;
+        }
       }
 
       focus();
-      boot();
+      initScene();
+      loop();
     }
 
-    static addControllerDevice(device) {
-      input.addController(device);
+    function focus() {
+      _canvas && _canvas.focus();
     }
 
-    static clear() {
-      context.clearRect(0, 0, width, height);
+    function initScene() {
+      _scene.height = _height;
+      _scene.width = _width;
+      _scene.init();
     }
 
-    static fadeOut() {
-      sound.fadeOut();
-    }
-
-    static getBottom() {
-      return height - 1;
-    }
-
-    static getCenter() {
-      return new Point(this.getCenterX(), this.getCenterY());
-    }
-
-    static getCenterX() {
-      return Math.floor(this.getWidth() / 2);
-    }
-
-    static getCenterY() {
-      return Math.floor(this.getHeight() / 2);
-    }
-
-    static getHeight() {
-      return height;
-    }
-
-    static getOffsetLeft() {
-      return canvas.offsetLeft;
-    }
-
-    static getOffsetTop() {
-      return canvas.offsetTop;
-    }
-
-    static getRight() {
-      return width - 1;
-    }
-
-    static getController(id) {
-      return input.getController(id);
-    }
-
-    static getEveryOther() {
-      return everyOther;
-    }
-
-    static getFrameTime() {
-      return frameTime;
-    }
-
-    static getPointer(id) {
-      return input.getPointer(id);
-    }
-
-    static getRealHeight() {
-      return realHeight;
-    }
-
-    static getRealWidth() {
-      return realWidth;
-    }
-
-    static getWidth() {
-      return width;
-    }
-
-    static load() {
-      let result;
-
-      try {
-        result = localStorage.saveData && JSON.parse(localStorage.saveData);
-      } catch (error) {
-        console.log('Could not load saved game: ' + error);
-      }
-
-      return result;
-    }
-
-    static mute() {
-      sound.mute();
-    }
-
-    static paint(renderable, index) {
-      renderableLists[index || 0].add(renderable);
-    }
-
-    static play(id) {
-      sound.play(id);
-    }
-
-    static playTheme(name) {
-      sound.playTheme(name);
-    }
-
-    static random(ceil) {
-      const RANDOM = Math.random() * (ceil + 1);
-      return Math.floor(RANDOM);
-    }
-
-    static save(data) {
-      if (data != null) {
-        try {
-          localStorage.saveData = JSON.stringify(data);
-        } catch (error) {
-          console.log('Could not save current game: ' + error);
-        }
-      } else {
-        try {
-          localStorage.clear();
-        } catch (error) {
-          console.log('Could not clear saved game: ' + error);
-        }
-      }
-    }
-
-    static setAutoScale(customAutoScale) {
-      autoScale = customAutoScale == undefined || customAutoScale;
-    }
-
-    static setFrameTime(customFrameTime) {
-      frameTime = customFrameTime || DEFAULT_FRAME_TIME;
-    }
-
-    static setKeepAspect(customKeepAspect) {
-      keepAspect = customKeepAspect == undefined || customKeepAspect;
-    }
-
-    static setName(customName) {
-      name = customName;
-      document.title = name;
-    }
-
-    static setNumberOfLayers(customNumberOfLayers) {
-      numberOfLayers = customNumberOfLayers;
-    }
-
-    static stopTheme() {
-      sound.stopTheme();
-    }
-
-  }
-
-  class ImageFactory {
-    static flip(image) {
-      return ImageFactory.invert(image, false, true);
-    }
-
-    static mirror(image) {
-      return ImageFactory.invert(image, true, false);
-    }
-
-    static rotate(image, degrees) {
-      if (degrees % 360 == 0 ) {
-        return image;
-      }
-
-      const RADIANS = toRadians(degrees);
-      const IMAGE = document.createElement('canvas');
-      let sideA = image.width;
-      let sideB = image.height;
-
-      if (degrees == 90 || degrees == 270) {
-        sideA = image.height;
-        sideB = image.width;
-      }
-
-      IMAGE.width = sideA;
-      IMAGE.height = sideB;
-      const CONTEXT = IMAGE.getContext('2d');
-      CONTEXT.translate(IMAGE.width / 2, IMAGE.height / 2);
-      CONTEXT.rotate(RADIANS);
-      CONTEXT.drawImage(image, -image.width / 2, -image.height / 2);
-      return IMAGE;
-    };
-
-    static invert(image, isMirror, isFlip) {
+    function invert(image, isMirror, isFlip) {
       const IMAGE = document.createElement('canvas');
       IMAGE.width = image.width;
       IMAGE.height = image.height;
@@ -510,22 +527,68 @@
       CONTEXT.drawImage(image, 0, 0);
       return IMAGE;
     }
-  }
+
+    function loop() {
+      _everyOther = !_everyOther;
+      _input.update();
+
+      if (_transition != null) {
+        if (_transition.sync()) {
+          _transition = null;
+        }
+      } else {
+        if (_scene.sync()) {
+          _transition = _scene.transition;
+          _scene = _scene.next;
+          initScene();
+        } else {
+          _scene.update();
+        }
+      }
+
+      _sound.update();
+      window.requestAnimationFrame && window.requestAnimationFrame(render) || render();
+    }
+
+    function render() {
+      for (let i = 0; i < _renderableLists.length; ++i) {
+        _renderableLists[i].render(_context);
+      }
+
+      setTimeout(loop, _frameTime + _lastRender - Date.now());
+      _lastRender = Date.now();
+    }
+
+    function scale() {
+      let width, height;
+
+      if (_keepAspect) {
+        let proportion = window.innerWidth / _canvas.width;
+
+        if (window.innerHeight < _canvas.height * proportion) {
+          proportion = window.innerHeight / _canvas.height;
+        }
+
+        width = _canvas.width * proportion;
+        height = _canvas.height * proportion
+      } else {
+        width = window.innerWidth;
+        height = window.innerHeight;
+      }
+
+      _realWidth = width;
+      _realHeight = height;
+      _canvas.style.width = width + 'px';
+      _canvas.style.height = height + 'px';
+    }
+
+    return Quick;
+  })();
 
   class Point {
     constructor(x = 0, y = 0) {
       this.x = x;
       this.y = y;
-    }
-
-    // deprecated
-    getX() {
-      return this.x;
-    }
-
-    // deprecated
-    getY() {
-      return this.y;
     }
 
     setX(x) {
@@ -564,7 +627,7 @@
       this._isDown = true;
     }
 
-    getCommand() {
+    get command() {
       return this._isDown;
     }
 
@@ -599,7 +662,7 @@
       }, false);
     }
 
-    getCommand() {
+    get command() {
       return this._isDown;
     }
 
@@ -638,16 +701,16 @@
 
       this._hold = false;
       const LAST = this._active;
-      this._active = this._device.getCommand();
+      this._active = this._device.command;
 
       if (this._active && LAST) {
         this._hold = true;
       }
 
-      const REAL_X = this._device.x - Quick.getOffsetLeft();
-      const REAL_Y = this._device.y - Quick.getOffsetTop();
-      this.x = Math.floor(REAL_X * Quick.getWidth() / Quick.getRealWidth());
-      this.y = Math.floor(REAL_Y * Quick.getHeight() / Quick.getRealHeight());
+      const REAL_X = this._device.x - Quick.offsetLeft;
+      const REAL_Y = this._device.y - Quick.offsetTop;
+      this.x = Math.floor(REAL_X * Quick.width / Quick.realWidth);
+      this.y = Math.floor(REAL_Y * Quick.height / Quick.realHeight);
     }
   }
 
@@ -672,12 +735,12 @@
       return true;
     }
 
-    keyDown(commandEnum) {
-      return this._active[commandEnum];
+    keyDown(command) {
+      return this._active[command];
     }
 
-    keyPush(commandEnum) {
-      return this._active[commandEnum] && !this._hold[commandEnum];
+    keyPush(command) {
+      return this._active[command] && !this._hold[command];
     }
 
     setDevice(device) {
@@ -691,7 +754,7 @@
 
       this._hold = {};
       const LAST = this._active;
-      this._active = this._device.getCommands();
+      this._active = this._device.commands;
 
       for (let i in this._active) {
         if (this._active.hasOwnProperty(i)) {
@@ -706,9 +769,9 @@
         this._tick = 0;
       }
 
-      for (let i in CommandEnum) {
-        if (CommandEnum.hasOwnProperty(i)) {
-          const COMMAND = CommandEnum[i];
+      for (let i in Command) {
+        if (Command.hasOwnProperty(i)) {
+          const COMMAND = Command[i];
 
           if (this.keyPush(COMMAND)) {
             this._sequence.push(COMMAND);
@@ -720,24 +783,24 @@
   }
 
   class GamePad {
-    constructor(id) {
-      this._id = id || 0;
+    constructor(id = 0) {
+      this._id = id;
     }
 
-    getCommands() {
+    get commands() {
       const BUTTONS = Input.getGamePadButtons(this._id);
       const RESULT = {};
 
-      if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_Y] < - ANALOG_THRESHOLD) {
-        RESULT[CommandEnum.UP] = true;
-      } else if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_Y] > ANALOG_THRESHOLD) {
-        RESULT[CommandEnum.DOWN] = true;
+      if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] < - ANALOG_THRESHOLD) {
+        RESULT[Command.UP] = true;
+      } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] > ANALOG_THRESHOLD) {
+        RESULT[Command.DOWN] = true;
       }
 
-      if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_X] < - ANALOG_THRESHOLD) {
-        RESULT[CommandEnum.LEFT] = true;
-      } else if (Input.getGamePadAxes(this._id)[AxisEnum.LEFT_X] > ANALOG_THRESHOLD) {
-        RESULT[CommandEnum.RIGHT] = true;
+      if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] < - ANALOG_THRESHOLD) {
+        RESULT[Command.LEFT] = true;
+      } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] > ANALOG_THRESHOLD) {
+        RESULT[Command.RIGHT] = true;
       }
 
       for (let i in ButtonToCommandMap) {
@@ -786,15 +849,15 @@
     }
 
     static getGamePadAxes(id) {
-      if (getGamePads()[id]) {
-        return getGamePads()[id]['axes'];
+      if (this._getGamePads()[id]) {
+        return this._getGamePads()[id]['axes'];
       }
 
       return [];
     }
 
     static getGamePadButtons(id) {
-      const GAME_PAD = getGamePads()[id];
+      const GAME_PAD = this._getGamePads()[id];
       return GAME_PAD && GAME_PAD.buttons || [];
     }
 
@@ -809,7 +872,7 @@
     }
 
     checkGamePads() {
-      if (getGamePads()[this._gamePads]) {
+      if (this._getGamePads()[this._gamePads]) {
         console.log('Game pad detected.');
         this.addController(new GamePad(this._gamePads++));
       }
@@ -868,6 +931,14 @@
         }
       }
     }
+
+    _getGamePads() {
+      if (navigator.getGamepads) {
+        return navigator.getGamepads();
+      }
+
+      return [];
+    }
   }
 
   class Keyboard {
@@ -884,7 +955,7 @@
       }, false);
     }
 
-    getCommands() {
+    get commands() {
       const RESULT = {};
 
       for (let i in this._buffer) {
@@ -1053,43 +1124,23 @@
       this.top = false;
     }
 
-    // deprecated
-    getBottom() {
-      return this.bottom;
-    }
-
-    // deprecated
-    getLeft() {
-      return this.left;
-    }
-
-    // deprecated
-    getRight() {
-      return this.right;
-    }
-
-    // deprecated
-    getTop() {
-      return this.top;
-    }
-
-    setBottom(isBottom) {
-      this.bottom = isBottom == undefined || isBottom;
+    setBottom(isBottom = true) {
+      this.bottom = isBottom;
       return this;
     }
 
-    setLeft(isLeft) {
-      this.left = isLeft == undefined || isLeft;
+    setLeft(isLeft = true) {
+      this.left = isLeft;
       return this;
     }
 
-    setRight(isRight) {
-      this.right = isRight == undefined || isRight;
+    setRight(isRight = true) {
+      this.right = isRight;
       return this;
     }
 
-    setTop(isTop) {
-      this.top = isTop == undefined || isTop;
+    setTop(isTop = true) {
+      this.top = isTop;
       return this;
     }
   }
@@ -1101,42 +1152,32 @@
       this.width = width;
     }
 
-    getBottom() {
+    get bottom() {
       return this.y + this.height - 1;
     }
 
-    getCenter() {
-      return new Point(this.getCenterX(), this.getCenterY());
+    get center() {
+      return new Point(this.centerX, this.centerY);
     }
 
-    getCenterX() {
+    get centerX() {
       return this.x + Math.floor(this.width / 2);
     }
 
-    getCenterY() {
+    get centerY() {
       return this.y + Math.floor(this.height / 2);
     }
 
-    // deprecated
-    getHeight() {
-      return this.height;
-    }
-
-    getLeft() {
+    get left() {
       return this.x;
     }
 
-    getRight() {
+    get right() {
       return this.x + this.width - 1;
     }
 
-    getTop() {
+    get top() {
       return this.y;
-    }
-
-    // deprecated
-    getWidth() {
-      return this.width;
     }
 
     setBottom(y) {
@@ -1185,34 +1226,6 @@
       return this;
     }
 
-    get bottom() {
-      return this.y + this.height - 1;
-    }
-
-    get center() {
-      return new Point(this.getCenterX(), this.getCenterY());
-    }
-
-    get centerX() {
-      return this.x + Math.floor(this.width / 2);
-    }
-
-    get centerY() {
-      return this.y + Math.floor(this.height / 2);
-    }
-
-    get left() {
-      return this.x;
-    }
-
-    get right() {
-      return this.x + this.width - 1;
-    }
-
-    get top() {
-      return this.y;
-    }
-
     set bottom(y) {
       this.setBottom(y);
     }
@@ -1244,61 +1257,60 @@
 
   class Frame {
     constructor(image, duration = 0) {
-      this._duration = duration;
+      this.duration = duration;
 
       if (typeof(image) == 'string') {
-        this._image = document.getElementById(image);
+        this.image = document.getElementById(image);
       } else {
-        this._image = image;
+        this.image = image;
       }
-
-      this._image = this._image || new Image();
     }
 
     getDuration() {
-      return this._duration;
+      return this.duration;
     }
 
     getHeight() {
-      return this._image.height;
-    }
-
-    getImage() {
-      return this._image;
+      return this.image.height;
     }
 
     getWidth() {
-      return this._image.width;
+      return this.image.width;
+    }
+
+    get height() {
+      return this.image.height;
+    }
+
+    get width() {
+      return this.image.width;
     }
   }
 
   class Animation {
     constructor(frames) {
-      this.setFrames(frames);
+      this._frames = frames;
+      this._frame = this._frames[0];
+      this._frameIndex = 0;
+      this._tick = 0;
     }
 
-    getHeight() {
-      return this._frame.getHeight();
+    get height() {
+      return this._frame.height;
     }
 
-    getImage() {
-      return this._frame.getImage();
+    get image() {
+      return this._frame.image;
     }
 
-    getWidth() {
-      return this._frame.getWidth();
-    }
-
-    setFrames(frames) {
-      this._frames = frames || [new Frame()];
-      this.updateFrameIndex(0);
-      return this;
+    get width() {
+      return this._frame.width;
     }
 
     update() {
       let hasLooped = false;
 
-      if (this._frame.getDuration() && ++this._tick > this._frame.getDuration()) {
+      if (this._frame.duration && ++this._tick > this._frame.duration) {
         let index = this._frameIndex + 1;
 
         if (index == this._frames.length) {
@@ -1306,27 +1318,28 @@
           index = 0;
         }
 
-        this.updateFrameIndex(index);
+        this.setFrameIndex(index);
       }
 
       return hasLooped;
     }
 
-    updateFrameIndex(frameIndex) {
+    setFrameIndex(frameIndex) {
       if (frameIndex < this._frames.length && frameIndex > -1) {
         this._frameIndex = frameIndex;
         this._tick = 0;
         this._frame = this._frames[frameIndex];
-        return true;
       }
+    }
 
-      return false;
+    set frameIndex(frameIndex) {
+      this.setFrameIndex(frameIndex);
     }
   }
 
   class Sprite extends Rect {
-    constructor(x, y, width, height) {
-      super(x, y, width, height);
+    constructor() {
+      super();
       this.accelerationX = 0;
       this.accelerationY = 0;
       this.maxSpeedX = 0;
@@ -1371,17 +1384,21 @@
       return DIRECTION;
     }
 
+    get tick() {
+      return this._tick;
+    }
+
     addTag(tag) {
       this._tags[tag] = true;
       return this;
     }
 
     bounceFrom(direction) {
-      if ((this.getSpeedX() < 0 && direction.left) || (this.getSpeedX() > 0 && direction.right)) {
+      if ((this.speedX < 0 && direction.left) || (this.speedX > 0 && direction.right)) {
         this.bounceX();
       }
 
-      if ((this.getSpeedY() < 0 && direction.top) || (this.getSpeedY() > 0 && direction.bottom)) {
+      if ((this.speedY < 0 && direction.top) || (this.speedY > 0 && direction.bottom)) {
         this.bounceY();
       }
 
@@ -1389,14 +1406,14 @@
     }
 
     bounceX() {
-      this.setSpeedX(this.getSpeedX() * -1);
-      this.moveX(this.getSpeedX());
+      this.setSpeedX(this.speedX * -1);
+      this.x += this.speedX;
       return this;
     }
 
     bounceY() {
-      this.setSpeedY(this.getSpeedY() * -1);
-      this.moveY(this.getSpeedY());
+      this.setSpeedY(this.speedY * -1);
+      this.y += this.speedY;
       return this;
     }
 
@@ -1405,29 +1422,14 @@
       return this;
     }
 
-    // deprecated
-    getAccelerationX() {
-      return this.accelerationX;
-    }
-
-    // deprecated
-    getAccelerationY() {
-      return this.accelerationY;
-    }
-
-    // deprecated
-    getAngle() {
-      return this.angle;
-    }
-
     getCollision(sprite) {
       const DIRECTION = new Direction();
       const TA = this.top;
       const RA = this.right;
       const BA = this.bottom;
       const LA = this.left;
-      const XA = this.getCenterX();
-      const YA = this.getCenterY();
+      const XA = this.centerX;
+      const YA = this.centerY;
       const TB = sprite.top;
       const RB = sprite.right;
       const BB = sprite.bottom;
@@ -1448,79 +1450,6 @@
       return DIRECTION;
     }
 
-    // deprecated
-    getColor() {
-      return this.color;
-    }
-
-    // deprecated
-    getDirection() {
-      return this.direction;
-    }
-
-    // deprecated
-    getEssential() {
-      return this.essential;
-    }
-
-    // deprecated
-    getExpired() {
-      return this.expired;
-    }
-
-    // deprecated
-    getImage() {
-      return this._animation.getImage();
-    }
-
-    // deprecated
-    getLayerIndex() {
-      return this.layerIndex;
-    }
-
-    // deprecated
-    getPosition() {
-      return new Point(this.x, this.y);
-    }
-
-    // deprecated
-    getSpeedX() {
-      return this.speedX;
-    }
-
-    // deprecated
-    getSpeedY() {
-      return this.speedY;
-    }
-
-    getParentX() {
-      return this.scene && this.scene.getParentX() || 0;
-    }
-
-    getParentY() {
-      return this.scene && this.scene.getParentY() || 0;
-    }
-
-    // deprecated
-    getScene() {
-      return this.scene;
-    }
-
-    // deprecated
-    getSolid() {
-      return this.solid;
-    }
-
-    // deprecated
-    getTick() {
-      return this._tick;
-    }
-
-    // deprecated
-    getVisible() {
-      return this.visible;
-    }
-
     hasCollision(rect) {
       return !(
         this.left > rect.right ||
@@ -1534,24 +1463,8 @@
       return this._tags[tag];
     }
 
-    init(scene) {
+    init() {
       // no default behavior
-    }
-
-    move(width, height) {
-      this.moveX(width);
-      this.moveY(height);
-      return this;
-    }
-
-    moveX(width) {
-      this.x += width;
-      return this;
-    }
-
-    moveY(height) {
-      this.y += height;
-      return this;
     }
 
     offBoundary() {
@@ -1571,8 +1484,8 @@
         return false;
       }
 
-      const X = Math.floor(this.x + this.getParentX());
-      const Y = Math.floor(this.y + this.getParentY());
+      const X = Math.floor(this.x + this.scene.x);
+      const Y = Math.floor(this.y + this.scene.y);
 
       if (this.color) {
         context.fillStyle = this.color;
@@ -1580,19 +1493,18 @@
       }
 
       if (this._animation) {
-        const IMAGE = this.getImage();
-        context.drawImage(IMAGE, X, Y, this.width, this.height);
+        context.drawImage(this._animation.image, X, Y, this.width, this.height);
       }
 
       return true;
     }
 
-    setAccelerationX(accelerationX) {
+    setAccelerationX(accelerationX = 0) {
       this.accelerationX = accelerationX;
       return this;
     }
 
-    setAccelerationY(accelerationY) {
+    setAccelerationY(accelerationY = 0) {
       this.accelerationY = accelerationY;
       return this;
     }
@@ -1603,14 +1515,14 @@
       }
 
       this._animation = animation;
-      this._animation.updateFrameIndex(0);
-      this.height = this._animation.getHeight();
-      this.width = this._animation.getWidth();
+      this._animation.setFrameIndex(0);
+      this.height = this._animation.height;
+      this.width = this._animation.width;
       return this;
     }
 
     setBoundary(rect) {
-      this._boundary = rect || this.scene && this.scene.getBoundary();
+      this._boundary = rect || this.scene && this.scene.boundary;
       return this;
     }
 
@@ -1619,12 +1531,12 @@
       return this;
     }
 
-    setEssential(isEssential) {
-      this.essential = isEssential == undefined || isEssential;
+    setEssential(isEssential = true) {
+      this.essential = isEssential;
       return this;
     }
 
-    setExpiration(expiration) {
+    setExpiration(expiration = 0) {
       this.expiration = expiration;
       return this;
     }
@@ -1639,18 +1551,18 @@
       return this;
     }
 
-    setLayerIndex(layerIndex) {
-      this.layerIndex = layerIndex || 0;
+    setLayerIndex(layerIndex = 0) {
+      this.layerIndex = layerIndex;
       return this;
     }
 
-    setMaxSpeedX(maxSpeedX) {
-      this.masSpeedX = maxSpeedX || 0;
+    setMaxSpeedX(maxSpeedX = 0) {
+      this.maxSpeedX = maxSpeedX;
       return this;
     }
 
-    setMaxSpeedY(maxSpeedY) {
-      this.masSpeedY = maxSpeedY || 0;
+    setMaxSpeedY(maxSpeedY = 0) {
+      this.maxSpeedY = maxSpeedY;
       return this;
     }
 
@@ -1666,12 +1578,6 @@
       return this;
     }
 
-    // deprecated
-    setScene(scene) {
-      this.scene = scene;
-      return this;
-    }
-
     setSize(rectOrWidth, height) {
       if (height != null) {
         this.setWidth(rectOrWidth);
@@ -1684,8 +1590,8 @@
       return this;
     }
 
-    setSolid(isSolid) {
-      this.solid = isSolid == undefined || isSolid;
+    setSolid(isSolid = true) {
+      this.solid = isSolid;
       return this;
     }
 
@@ -1697,35 +1603,35 @@
     }
 
     setSpeedToPoint(speed, point) {
-      const SQUARE_DISTANCE = Math.abs(this.getCenterX() - point.x) + Math.abs(this.getCenterY() - point.y);
-      this.setSpeedX((point.x - this.getCenterX()) * speed / SQUARE_DISTANCE);
-      this.setSpeedY((point.y - this.getCenterY()) * speed / SQUARE_DISTANCE);
+      const SQUARE_DISTANCE = Math.abs(this.centerX - point.x) + Math.abs(this.centerY - point.y);
+      this.setSpeedX((point.x - this.centerX) * speed / SQUARE_DISTANCE);
+      this.setSpeedY((point.y - this.centerY) * speed / SQUARE_DISTANCE);
       return this;
     }
 
-    setSpeedX(speedX) {
-      this.speedX = speedX || 0;
+    setSpeedX(speedX = 0) {
+      this.speedX = speedX;
       return this;
     }
 
-    setSpeedY(speedY) {
-      this.speedY = speedY || 0;
+    setSpeedY(speedY = 0) {
+      this.speedY = speedY;
       return this;
     }
 
-    setVisible(isVisible) {
-      this.visible = isVisible == undefined || isVisible;
+    setVisible(isVisible = true) {
+      this.visible = isVisible;
       return this;
     }
 
     stop() {
-      this.setSpeedX(0);
-      this.setSpeedY(0);
+      this.speedX = 0;
+      this.speedY = 0;
       return this;
     }
 
     sync() {
-      if (this.getExpired()) {
+      if (this.expired) {
         return true;
       }
 
@@ -1737,23 +1643,23 @@
         this.onAnimationLoop();
       }
 
-      this.setSpeedX(this.getSpeedX() + this.accelerationX);
+      this.speedX += this.accelerationX;
+      this.speedY += this.accelerationY;
 
-      if (this.masSpeedX && Math.abs(this.getSpeedX()) > this.masSpeedX) {
-        const SIGNAL = this.getSpeedX() / Math.abs(this.getSpeedX());
-        this.setSpeedX(this.masSpeedX * SIGNAL);
+      if (this.maxSpeedX && Math.abs(this.speedX) > this.maxSpeedX) {
+        const SIGNAL = this.speedX / Math.abs(this.speedX);
+        this.speedX = this.maxSpeedX * SIGNAL;
       }
 
-      this.setSpeedY(this.getSpeedY() + this.accelerationY);
-
-      if (this.masSpeedY && Math.abs(this.getSpeedY()) > this.masSpeedY) {
-        const SIGNAL = this.getSpeedY() / Math.abs(this.getSpeedY());
-        this.setSpeedY(this.masSpeedY * SIGNAL);
+      if (this.maxSpeedY && Math.abs(this.speedY) > this.maxSpeedY) {
+        const SIGNAL = this.speedY / Math.abs(this.speedY);
+        this.speedY = this.maxSpeedY * SIGNAL;
       }
 
       this._lastX = this.x;
       this._lastY = this.y;
-      this.move(this.getSpeedX(), this.getSpeedY());
+      this.x += this.speedX;
+      this.y += this.speedY;
 
       if (this._boundary && !this.hasCollision(this._boundary)) {
         this.offBoundary();
@@ -1768,21 +1674,31 @@
   }
 
   class Scene extends Sprite {
-    constructor(x, y, width = Quick.getWidth(), height = Quick.getHeight()) {
-      super(x, y, width, height);
+    constructor() {
+      super();
+      this.scene = {x: 0, y: 0};
+      this.transition = null;
       this._sprites = [];
       this._spritesQueue = [];
-      this._transition = null;
+    }
+
+    init() {
+      // no default behavior
     }
 
     add(sprite) {
       this._spritesQueue.push(sprite);
       sprite.scene = this;
-      sprite.init(this);
-      sprite.move(sprite.speedX * -1, sprite.speedY * -1);
+      sprite.init();
+      sprite.x -= sprite.speedX;
+      sprite.y -= sprite.speedY;
     }
 
-    build(map, tileFactory = baseTileFactory, offsetX, offsetY) {
+    build(map, tileFactory = null, offsetX = 0, offsetY = 0) {
+      tileFactory = tileFactory || function (id) {
+        return new BaseTile(id);
+      };
+
       for (let i = 0; i < map.length; ++i) {
         const LINE = map[i];
 
@@ -1795,8 +1711,8 @@
             if (TILE) {
               const X = offsetX || TILE.width;
               const Y = offsetY || TILE.height;
-              TILE.setTop(i * Y);
-              TILE.setLeft(j * X);
+              TILE.y = i * Y;
+              TILE.x = j * X;
               this.add(TILE);
             }
           }
@@ -1804,20 +1720,12 @@
       }
     }
 
-    getBoundary() {
+    get boundary() {
       return new Rect(0, 0, this.width, this.height);
     }
 
-    getParentX() {
-      return this.x * -1;
-    }
-
-    getParentY() {
-      return this.y * -1;
-    }
-
     sync() {
-      Quick.paint(this, this.getLayerIndex());
+      Quick.paint(this, this.layerIndex);
       let sprites = [];
       const SOLID_SPRITES = [];
 
@@ -1826,16 +1734,16 @@
         SPRITE.update();
 
         if (SPRITE.sync()) {
-          if (SPRITE.getEssential()) {
+          if (SPRITE.essential) {
             this.expire();
           }
         } else {
-          if (SPRITE.getSolid()) {
+          if (SPRITE.solid) {
             SOLID_SPRITES.push(SPRITE);
           }
 
           sprites.push(SPRITE);
-          Quick.paint(SPRITE, SPRITE.getLayerIndex());
+          Quick.paint(SPRITE, SPRITE.layerIndex);
         }
       }
 
@@ -1845,8 +1753,8 @@
       return Sprite.prototype.sync.call(this);
     }
 
-    getNext() {
-      throw 'You must implement the getNext method of your scene.'
+    get next() {
+      throw 'Your scene must respond to the next property.'
     }
 
     getObjectsWithTag(tag) {
@@ -1863,16 +1771,13 @@
       return RESULT;
     }
 
-    getTransition() {
-      return this._transition;
-    }
-
     setExpiration(expiration) {
       this.expiration = expiration;
     }
 
     setTransition(transition) {
-      this._transition = transition;
+      this.transition = transition;
+      return this;
     }
   }
 
@@ -1886,14 +1791,14 @@
   class BaseTransition extends Sprite {
     constructor() {
       super();
-      const FRAMES = 32;
+      this.scene = {x: 0, y: 0};
       this.setColor(Color.Black);
-      this.setHeight(Quick.getHeight());
-      this._increase = Quick.getWidth() / FRAMES;
+      this.setHeight(Quick.height);
+      this._increase = Quick.width / 32;
     }
 
     sync() {
-      if (this.width > Quick.getWidth()) {
+      if (this.width > Quick.width) {
         return true;
       }
 
@@ -1909,18 +1814,8 @@
       this.text = text;
     }
 
-    // deprecated
-    getString() {
-      return this._text;
-    }
-
     render(context) {
       Sprite.prototype.render.call(this, context) && this._parse(context);
-    }
-
-    // deprecated
-    setString(string) {
-      return this.setText(string);
     }
 
     setText(text) {
@@ -1957,7 +1852,7 @@
           const IMAGE = document.getElementById(character + 'Font');
 
           if (context) {
-            context.drawImage(IMAGE, this.x + x, this.y + y, IMAGE.width, IMAGE.height);
+            context.drawImage(IMAGE, this.x + this.scene.x + x, this.y + this.scene.y + y, IMAGE.width, IMAGE.height);
           }
 
           x += IMAGE.width + SPACING;
@@ -1991,7 +1886,7 @@
       if (Sprite.prototype.render.call(this, context)) {
         context.fillStyle = this.fontColor;
         context.font = this._font;
-        context.fillText(this.text, this.left, this.bottom, this.width);
+        context.fillText(this.text, this.left + this.scene.x, this.bottom + this.scene.y, this.width);
       }
     }
 
@@ -2033,33 +1928,6 @@
     }
   }
 
-  function baseTileFactory(id) {
-    return new BaseTile(id)
-  }
-
-  function boot() {
-    const LOADING_TIMEOUT = 100;
-    const IMAGES = Array.from(document.getElementsByTagName('img'));
-
-    for (let i = 0; i < IMAGES.length; ++i) {
-      const IMAGE = IMAGES[i];
-
-      if (IMAGE.complete) {
-        IMAGES.shift();
-      } else {
-        setTimeout(onTimeout, LOADING_TIMEOUT);
-        return;
-      }
-    }
-
-    scene = sceneFactory();
-    loop();
-
-    function onTimeout() {
-      boot();
-    }
-  }
-
   function checkCollisions(sprites) {
     const LENGTH = sprites.length;
 
@@ -2075,76 +1943,6 @@
         }
       }
     }
-  }
-
-  function focus() {
-    canvas && canvas.focus();
-  }
-
-  function getGamePads() {
-    if (navigator.getGamepads) {
-      return navigator.getGamepads();
-    }
-
-    return [];
-  }
-
-  function loop() {
-    everyOther = !everyOther;
-    input.update();
-
-    if (transition != null) {
-      if (transition.sync()) {
-        transition = null;
-      }
-    } else {
-      if (isTransitioning) {
-        isTransitioning = false;
-        scene = scene.getNext();
-      }
-
-      if (scene.sync()) {
-        isTransitioning = true;
-        transition = scene.getTransition();
-      } else {
-        scene.update();
-      }
-    }
-
-    sound.update();
-    window.requestAnimationFrame && window.requestAnimationFrame(render) || render();
-  }
-
-  function render() {
-    for (let i = 0; i < renderableLists.length; ++i) {
-      renderableLists[i].render(context);
-    }
-
-    setTimeout(loop, frameTime + lastRender - Date.now());
-    lastRender = Date.now();
-  }
-
-  function scale() {
-    let width, height;
-
-    if (keepAspect) {
-      let proportion = window.innerWidth / canvas.width;
-
-      if (window.innerHeight < canvas.height * proportion) {
-        proportion = window.innerHeight / canvas.height;
-      }
-
-      width = canvas.width * proportion;
-      height = canvas.height * proportion
-    } else {
-      width = window.innerWidth;
-      height = window.innerHeight;
-    }
-
-    realWidth = width;
-    realHeight = height;
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
   }
 
   function makeSet(array) {
@@ -2171,19 +1969,17 @@
     BaseTile,
     BaseTransition,
     Color,
-    CommandEnum,
+    Command,
     Controller,
     FontFamily,
     FontSprite,
     Frame,
-    ImageFactory,
     Mouse,
     Point,
     Quick,
     Rect,
     Scene,
     Sprite,
-    TextObject: FontSprite, // deprecated
     TextSprite,
   };
 
