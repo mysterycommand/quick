@@ -380,8 +380,16 @@
         return _input.getController(id);
       }
 
+      static get controller() {
+        return this.getController();
+      }
+
       static getPointer(id) {
         return _input.getPointer(id);
+      }
+
+      static get pointer() {
+        return this.getPointer();
       }
 
       static load() {
@@ -682,11 +690,11 @@
       this._hold = false;
     }
 
-    getDown() {
+    get down() {
       return this._active;
     }
 
-    getPush() {
+    get push() {
       return this._active && !this._hold;
     }
 
@@ -815,131 +823,131 @@
     };
   }
 
-  class Input {
-    constructor() {
-      this._controllers = [];
-      this._controllerQueue = [];
-      this._controllerRequestQueue = [];
-      this._pointers = [];
-      this._pointerQueue = [];
-      this._pointerRequestQueue = [];
-      this._gamePads = 0;
+  const Input = (() => {
+    class Input {
+      constructor() {
+        this._controllers = [];
+        this._controllerQueue = [];
+        this._controllerRequestQueue = [];
+        this._pointers = [];
+        this._pointerQueue = [];
+        this._pointerRequestQueue = [];
+        this._gamePads = 0;
 
-      const ON_KEY_DOWN = (event) => {
-        removeEventListener('keydown', ON_KEY_DOWN);
-        console.log('Keyboard detected.');
-        this.addController(new Keyboard(event));
-      };
+        const ON_KEY_DOWN = (event) => {
+          removeEventListener('keydown', ON_KEY_DOWN);
+          console.log('Keyboard detected.');
+          this.addController(new Keyboard(event));
+        };
 
-      const ON_MOUSE_DOWN = (event) => {
-        removeEventListener('mousedown', ON_MOUSE_DOWN);
-        console.log('Mouse detected.');
-        this.addPointer(new Mouse(event));
-      };
+        const ON_MOUSE_DOWN = (event) => {
+          removeEventListener('mousedown', ON_MOUSE_DOWN);
+          console.log('Mouse detected.');
+          this.addPointer(new Mouse(event));
+        };
 
-      const ON_TOUCH_START = (event) => {
-        removeEventListener('touchstart', ON_TOUCH_START);
-        console.log('Touch detected.');
-        this.addPointer(new Touch(event));
-      };
+        const ON_TOUCH_START = (event) => {
+          removeEventListener('touchstart', ON_TOUCH_START);
+          console.log('Touch detected.');
+          this.addPointer(new Touch(event));
+        };
 
-      addEventListener('keydown', ON_KEY_DOWN, false);
-      addEventListener('mousedown', ON_MOUSE_DOWN, false);
-      addEventListener('touchstart', ON_TOUCH_START, false);
-    }
-
-    static getGamePadAxes(id) {
-      if (this._getGamePads()[id]) {
-        return this._getGamePads()[id]['axes'];
+        addEventListener('keydown', ON_KEY_DOWN, false);
+        addEventListener('mousedown', ON_MOUSE_DOWN, false);
+        addEventListener('touchstart', ON_TOUCH_START, false);
       }
 
-      return [];
-    }
+      static getGamePadAxes(id) {
+        if (getGamePads()[id]) {
+          return getGamePads()[id]['axes'];
+        }
 
-    static getGamePadButtons(id) {
-      const GAME_PAD = this._getGamePads()[id];
-      return GAME_PAD && GAME_PAD.buttons || [];
-    }
-
-    addController(device) {
-      this._controllerQueue.push(device);
-      this.checkControllerQueues();
-    }
-
-    addPointer(device) {
-      this._pointerQueue.push(device);
-      this.checkPointerQueues();
-    }
-
-    checkGamePads() {
-      if (this._getGamePads()[this._gamePads]) {
-        console.log('Game pad detected.');
-        this.addController(new GamePad(this._gamePads++));
+        return [];
       }
-    }
 
-    checkControllerQueues() {
-      if (this._controllerRequestQueue.length > 0 && this._controllerQueue.length > 0) {
-        const REQUESTER = this._controllerRequestQueue.shift();
-        const DEVICE = this._controllerQueue.shift();
-        REQUESTER.setDevice(DEVICE);
+      static getGamePadButtons(id) {
+        const GAME_PAD = getGamePads()[id];
+        return GAME_PAD && GAME_PAD.buttons || [];
       }
-    }
 
-    checkPointerQueues() {
-      if (this._pointerRequestQueue.length > 0 && this._pointerQueue.length > 0) {
-        const REQUESTER = this._pointerRequestQueue.shift();
-        const DEVICE = this._pointerQueue.shift();
-        REQUESTER.setDevice(DEVICE);
-      }
-    }
-
-    getController(id = 0) {
-      if (this._controllers.length < id + 1) {
-        const CONTROLLER = new Controller();
-        this._controllers.push(CONTROLLER);
-        this._controllerRequestQueue.push(CONTROLLER);
+      addController(device) {
+        this._controllerQueue.push(device);
         this.checkControllerQueues();
       }
 
-      return this._controllers[id];
-    }
-
-    getPointer(id = 0) {
-      if (this._pointers.length < id + 1) {
-        const POINTER = new Pointer();
-        this._pointers.push(POINTER);
-        this._pointerRequestQueue.push(POINTER);
+      addPointer(device) {
+        this._pointerQueue.push(device);
         this.checkPointerQueues();
       }
 
-      return this._pointers[id];
-    }
-
-    update() {
-      this.checkGamePads();
-
-      for (let i in this._controllers) {
-        if (this._controllers.hasOwnProperty(i)) {
-          this._controllers[i].update();
+      checkGamePads() {
+        if (getGamePads()[this._gamePads]) {
+          console.log('Game pad detected.');
+          this.addController(new GamePad(this._gamePads++));
         }
       }
 
-      for (let j in this._pointers) {
-        if (this._pointers.hasOwnProperty(j)) {
-          this._pointers[j].update();
+      checkControllerQueues() {
+        if (this._controllerRequestQueue.length > 0 && this._controllerQueue.length > 0) {
+          const REQUESTER = this._controllerRequestQueue.shift();
+          const DEVICE = this._controllerQueue.shift();
+          REQUESTER.setDevice(DEVICE);
+        }
+      }
+
+      checkPointerQueues() {
+        if (this._pointerRequestQueue.length > 0 && this._pointerQueue.length > 0) {
+          const REQUESTER = this._pointerRequestQueue.shift();
+          const DEVICE = this._pointerQueue.shift();
+          REQUESTER.setDevice(DEVICE);
+        }
+      }
+
+      getController(id = 0) {
+        if (this._controllers.length < id + 1) {
+          const CONTROLLER = new Controller();
+          this._controllers.push(CONTROLLER);
+          this._controllerRequestQueue.push(CONTROLLER);
+          this.checkControllerQueues();
+        }
+
+        return this._controllers[id];
+      }
+
+      getPointer(id = 0) {
+        if (this._pointers.length < id + 1) {
+          const POINTER = new Pointer();
+          this._pointers.push(POINTER);
+          this._pointerRequestQueue.push(POINTER);
+          this.checkPointerQueues();
+        }
+
+        return this._pointers[id];
+      }
+
+      update() {
+        this.checkGamePads();
+
+        for (let i in this._controllers) {
+          if (this._controllers.hasOwnProperty(i)) {
+            this._controllers[i].update();
+          }
+        }
+
+        for (let j in this._pointers) {
+          if (this._pointers.hasOwnProperty(j)) {
+            this._pointers[j].update();
+          }
         }
       }
     }
 
-    _getGamePads() {
-      if (navigator.getGamepads) {
-        return navigator.getGamepads();
-      }
-
-      return [];
+    function getGamePads() {
+      return navigator.getGamepads && navigator.getGamepads() || [];
     }
-  }
+
+    return Input;
+  })();
 
   class Keyboard {
     constructor(event) {
@@ -1264,26 +1272,9 @@
       } else {
         this.image = image;
       }
-    }
 
-    getDuration() {
-      return this.duration;
-    }
-
-    getHeight() {
-      return this.image.height;
-    }
-
-    getWidth() {
-      return this.image.width;
-    }
-
-    get height() {
-      return this.image.height;
-    }
-
-    get width() {
-      return this.image.width;
+      this.height = this.image.height;
+      this.width = this.image.width;
     }
   }
 
