@@ -294,7 +294,7 @@
       static init(scene, canvas = null) {
         _canvas = canvas || document.getElementsByTagName('canvas')[0];
         _context = _canvas.getContext('2d');
-        _input = new Input();
+        // _input = new Input();
         _lastRender = Date.now();
         _realHeight = _height = _canvas.height;
         _realWidth = _width = _canvas.width;
@@ -361,7 +361,7 @@
       }
 
       static addControllerDevice(device) {
-        _input.addController(device);
+        getInput().addController(device);
       }
 
       static clear() {
@@ -377,7 +377,7 @@
       }
 
       static getController(id) {
-        return _input.getController(id);
+        return getInput().getController(id);
       }
 
       static get controller() {
@@ -385,7 +385,7 @@
       }
 
       static getPointer(id) {
-        return _input.getPointer(id);
+        return getInput().getPointer(id);
       }
 
       static get pointer() {
@@ -497,13 +497,13 @@
     }
 
     function boot() {
-      const IMAGES = Array.from(document.getElementsByTagName('img'));
+      const ASSETS = Array.from(document.getElementsByTagName('img'));
 
-      for (let i = 0; i < IMAGES.length; ++i) {
-        const IMAGE = IMAGES[i];
+      for (let i = 0; i < ASSETS.length; ++i) {
+        const ASSET = ASSETS[i];
 
-        if (IMAGE.complete) {
-          IMAGES.shift();
+        if (ASSET.complete) {
+          ASSETS.shift();
         } else {
           setTimeout(boot, 100);
           return;
@@ -517,6 +517,10 @@
 
     function focus() {
       _canvas && _canvas.focus();
+    }
+
+    function getInput() {
+      return _input || (_input = new Input()) && _input;
     }
 
     function initScene() {
@@ -538,7 +542,7 @@
 
     function loop() {
       _everyOther = !_everyOther;
-      _input.update();
+      getInput().update();
 
       if (_transition != null) {
         if (_transition.sync()) {

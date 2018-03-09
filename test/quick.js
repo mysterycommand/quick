@@ -10,10 +10,27 @@ global.addEventListener = () => {};
 global.document = {
   getElementById: () => {
     return {};
+  },
+  getElementsByTagName: (name) => {
+    if (name == 'canvas') {
+      return [{
+        focus: () => {},
+
+        getContext: () => {
+          return {};
+        },
+
+        style: {}
+      }];
+    } else {
+      return [];
+    }
   }
 };
 
 global.localStorage = {};
+global.navigator = {};
+global.window = {};
 
 const deviceMock = {
   commands: (() => {
@@ -31,9 +48,13 @@ const event = {
   preventDefault: () => {}
 }
 
+// const SCENE = new quick.Scene();
+// SCENE.expiration = 1;
+// quick.Quick.init(SCENE);
+
 // run tests
 controllerTest();
-mouseTest();
+//mouseTest();
 pointTest();
 quickTest();
 rectTest();
@@ -46,7 +67,7 @@ function controllerTest() {
   let controller;
 
   // no args constructor
-  controller = new quick.Controller();
+  controller = quick.Quick.getController();
 
   for (let i in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(i)) {
     let value = quick.CommandEnum[i];
