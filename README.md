@@ -95,9 +95,6 @@ The gamepad mapping allows both digital and analog controls to be properly mappe
 While mice and touch screens have different capabilities, they share a few common concepts which we can leverage to interact them in an uniform way. Bot can provide clicks and position coordinates.
 
 ## Related projects
-  * [quick-assets](https://github.com/diogoschneider/quick-assets) assets for games
-  * [quick-demos](https://github.com/diogoschneider/quick-demos) demos that showcase quick
-  * [quick-developers](https://facebook.com/groups/quick.developers) developer community
-  * [quick-plugins](https://github.com/diogoschneider/quick-plugins) reusable game components
+Click [here](https://github.com/quick-developers) for the full list of projects including demos and reusable plugins.
 
 [![VanillaJS](http://vanilla-js.com/assets/button.png)](http://vanilla-js.com)
