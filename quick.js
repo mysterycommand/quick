@@ -291,7 +291,7 @@
     let _width;
 
     class Quick {
-      static init(scene, canvas) {
+      static init(scene, canvas = null) {
         _canvas = canvas || document.getElementsByTagName('canvas')[0];
         _context = _canvas.getContext('2d');
         _input = new Input();
@@ -610,220 +610,108 @@
     }
   }
 
-  class Mouse extends Point {
-    constructor(event) {
-      super();
-      this.down(event);
-
-      addEventListener('mousedown', (event) => {
-        this.down(event);
-      }, false);
-
-      addEventListener('mousemove', (event) => {
-        event.preventDefault();
-        this.updateCoordinates(event);
-      }, false);
-
-      addEventListener('mouseup', (event) => {
-        event.preventDefault();
-        this._isDown = false;
-      }, false);
-    }
-
-    down(event) {
-      event.preventDefault();
-      this._isDown = true;
-    }
-
-    get command() {
-      return this._isDown;
-    }
-
-    updateCoordinates(event) {
-      this.x = event.x || event.clientX;
-      this.y = event.y || event.clientY;
-    }
-  }
-
-  class Touch extends Point {
-    constructor(event) {
-      super();
-      event.preventDefault();
-      this._isDown = true;
-      this.updateCoordinates(event);
-
-      addEventListener('touchend', (event) => {
-        event.preventDefault();
-        this._isDown = false;
-        this.updateCoordinates(event);
-      }, false);
-
-      addEventListener('touchmove', (event) => {
-        event.preventDefault();
-        this.updateCoordinates(event);
-      }, false);
-
-      addEventListener('touchstart', () => {
-        event.preventDefault();
-        this._isDown = true;
-        this.updateCoordinates(event);
-      }, false);
-    }
-
-    get command() {
-      return this._isDown;
-    }
-
-    updateCoordinates(event) {
-      const TOUCHES = event['changedTouches'];
-      const TOUCH = TOUCHES[0];
-      this.x = TOUCH.pageX;
-      this.y = TOUCH.pageY;
-    }
-  }
-
-  class Pointer extends Point {
-    constructor() {
-      super();
-      this._active = false;
-      this._device = null;
-      this._hold = false;
-    }
-
-    get down() {
-      return this._active;
-    }
-
-    get push() {
-      return this._active && !this._hold;
-    }
-
-    setDevice(device) {
-      this._device = device;
-    }
-
-    update() {
-      if (!this._device) {
-        return;
-      }
-
-      this._hold = false;
-      const LAST = this._active;
-      this._active = this._device.command;
-
-      if (this._active && LAST) {
-        this._hold = true;
-      }
-
-      const REAL_X = this._device.x - Quick.offsetLeft;
-      const REAL_Y = this._device.y - Quick.offsetTop;
-      this.x = Math.floor(REAL_X * Quick.width / Quick.realWidth);
-      this.y = Math.floor(REAL_Y * Quick.height / Quick.realHeight);
-    }
-  }
-
-  class Controller {
-    constructor() {
-      this.tolerance = 0;
-      this._active = {};
-      this._device = null;
-      this._hold = {};
-      this._sequence = [];
-      this._tick = 0;
-    }
-
-    didPerform(commands) {
-      for (let i = 1; i <= commands.length; ++i) {
-        if (this._sequence[this._sequence.length - i] != commands[commands.length - i]) {
-          return false;
-        }
-      }
-
-      this._sequence = [];
-      return true;
-    }
-
-    keyDown(command) {
-      return this._active[command];
-    }
-
-    keyPush(command) {
-      return this._active[command] && !this._hold[command];
-    }
-
-    setDevice(device) {
-      this._device = device;
-    }
-
-    update() {
-      if (!this._device) {
-        return;
-      }
-
-      this._hold = {};
-      const LAST = this._active;
-      this._active = this._device.commands;
-
-      for (let i in this._active) {
-        if (this._active.hasOwnProperty(i)) {
-          if (LAST[i]) {
-            this._hold[i] = true;
-          }
-        }
-      }
-
-      if (this.tolerance && ++this._tick > this.tolerance) {
+  const Input = (() => {
+    class Controller {
+      constructor() {
+        this.tolerance = 0;
+        this._active = {};
+        this._device = null;
+        this._hold = {};
         this._sequence = [];
         this._tick = 0;
       }
 
-      for (let i in Command) {
-        if (Command.hasOwnProperty(i)) {
-          const COMMAND = Command[i];
+      didPerform(commands) {
+        for (let i = 1; i <= commands.length; ++i) {
+          if (this._sequence[this._sequence.length - i] != commands[commands.length - i]) {
+            return false;
+          }
+        }
 
-          if (this.keyPush(COMMAND)) {
-            this._sequence.push(COMMAND);
-            this._tick = 0;
+        this._sequence = [];
+        return true;
+      }
+
+      keyDown(command) {
+        return this._active[command];
+      }
+
+      keyPush(command) {
+        return this._active[command] && !this._hold[command];
+      }
+
+      setDevice(device) {
+        this._device = device;
+      }
+
+      update() {
+        if (!this._device) {
+          return;
+        }
+
+        this._hold = {};
+        const LAST = this._active;
+        this._active = this._device.commands;
+
+        for (let i in this._active) {
+          if (this._active.hasOwnProperty(i)) {
+            if (LAST[i]) {
+              this._hold[i] = true;
+            }
+          }
+        }
+
+        if (this.tolerance && ++this._tick > this.tolerance) {
+          this._sequence = [];
+          this._tick = 0;
+        }
+
+        for (let i in Command) {
+          if (Command.hasOwnProperty(i)) {
+            const COMMAND = Command[i];
+
+            if (this.keyPush(COMMAND)) {
+              this._sequence.push(COMMAND);
+              this._tick = 0;
+            }
           }
         }
       }
     }
-  }
 
-  class GamePad {
-    constructor(id = 0) {
-      this._id = id;
-    }
-
-    get commands() {
-      const BUTTONS = Input.getGamePadButtons(this._id);
-      const RESULT = {};
-
-      if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] < - ANALOG_THRESHOLD) {
-        RESULT[Command.UP] = true;
-      } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] > ANALOG_THRESHOLD) {
-        RESULT[Command.DOWN] = true;
+    class GamePad {
+      constructor(id = 0) {
+        this._id = id;
       }
 
-      if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] < - ANALOG_THRESHOLD) {
-        RESULT[Command.LEFT] = true;
-      } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] > ANALOG_THRESHOLD) {
-        RESULT[Command.RIGHT] = true;
-      }
+      get commands() {
+        const BUTTONS = Input.getGamePadButtons(this._id);
+        const RESULT = {};
 
-      for (let i in ButtonToCommandMap) {
-        if (ButtonToCommandMap.hasOwnProperty(i)) {
-          if (BUTTONS[i] && BUTTONS[i]['pressed']) {
-            RESULT[ButtonToCommandMap[i]] = true;
+        if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] < - ANALOG_THRESHOLD) {
+          RESULT[Command.UP] = true;
+        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] > ANALOG_THRESHOLD) {
+          RESULT[Command.DOWN] = true;
+        }
+
+        if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] < - ANALOG_THRESHOLD) {
+          RESULT[Command.LEFT] = true;
+        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] > ANALOG_THRESHOLD) {
+          RESULT[Command.RIGHT] = true;
+        }
+
+        for (let i in ButtonToCommandMap) {
+          if (ButtonToCommandMap.hasOwnProperty(i)) {
+            if (BUTTONS[i] && BUTTONS[i]['pressed']) {
+              RESULT[ButtonToCommandMap[i]] = true;
+            }
           }
         }
-      }
 
-      return RESULT;
-    };
-  }
+        return RESULT;
+      };
+    }
 
-  const Input = (() => {
     class Input {
       constructor() {
         this._controllers = [];
@@ -942,50 +830,162 @@
       }
     }
 
+    class Keyboard {
+      constructor(event) {
+        this._buffer = {};
+        this.onKeyDown(event);
+
+        addEventListener('keydown', (event) => {
+          this.onKeyDown(event);
+        }, false);
+
+        addEventListener('keyup', (event) => {
+          this.onKey(event.keyCode, false);
+        }, false);
+      }
+
+      get commands() {
+        const RESULT = {};
+
+        for (let i in this._buffer) {
+          if (this._buffer.hasOwnProperty(i)) {
+            if (this._buffer[i]) {
+              RESULT[i] = true;
+            }
+          }
+        }
+
+        return RESULT;
+      }
+
+      onKey(keyCode, isDown) {
+        this._buffer[KeyToCommandMap[keyCode]] = isDown;
+      }
+
+      onKeyDown(event) {
+        PassThrough[event.keyCode] || event.preventDefault();
+        this.onKey(event.keyCode, true);
+      }
+    }
+
+    class Mouse extends Point {
+      constructor(event) {
+        super();
+        this.down(event);
+
+        addEventListener('mousedown', (event) => {
+          this.down(event);
+        }, false);
+
+        addEventListener('mousemove', (event) => {
+          event.preventDefault();
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('mouseup', (event) => {
+          event.preventDefault();
+          this._isDown = false;
+        }, false);
+      }
+
+      down(event) {
+        event.preventDefault();
+        this._isDown = true;
+      }
+
+      get command() {
+        return this._isDown;
+      }
+
+      updateCoordinates(event) {
+        this.x = event.x || event.clientX;
+        this.y = event.y || event.clientY;
+      }
+    }
+
+    class Pointer extends Point {
+      constructor() {
+        super();
+        this._active = false;
+        this._device = null;
+        this._hold = false;
+      }
+
+      get down() {
+        return this._active;
+      }
+
+      get push() {
+        return this._active && !this._hold;
+      }
+
+      setDevice(device) {
+        this._device = device;
+      }
+
+      update() {
+        if (!this._device) {
+          return;
+        }
+
+        this._hold = false;
+        const LAST = this._active;
+        this._active = this._device.command;
+
+        if (this._active && LAST) {
+          this._hold = true;
+        }
+
+        const REAL_X = this._device.x - Quick.offsetLeft;
+        const REAL_Y = this._device.y - Quick.offsetTop;
+        this.x = Math.floor(REAL_X * Quick.width / Quick.realWidth);
+        this.y = Math.floor(REAL_Y * Quick.height / Quick.realHeight);
+      }
+    }
+
+    class Touch extends Point {
+      constructor(event) {
+        super();
+        event.preventDefault();
+        this._isDown = true;
+        this.updateCoordinates(event);
+
+        addEventListener('touchend', (event) => {
+          event.preventDefault();
+          this._isDown = false;
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('touchmove', (event) => {
+          event.preventDefault();
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('touchstart', () => {
+          event.preventDefault();
+          this._isDown = true;
+          this.updateCoordinates(event);
+        }, false);
+      }
+
+      get command() {
+        return this._isDown;
+      }
+
+      updateCoordinates(event) {
+        const TOUCHES = event['changedTouches'];
+        const TOUCH = TOUCHES[0];
+        this.x = TOUCH.pageX;
+        this.y = TOUCH.pageY;
+      }
+    }
+
     function getGamePads() {
       return navigator.getGamepads && navigator.getGamepads() || [];
     }
 
     return Input;
   })();
-
-  class Keyboard {
-    constructor(event) {
-      this._buffer = {};
-      this.onKeyDown(event);
-
-      addEventListener('keydown', (event) => {
-        this.onKeyDown(event);
-      }, false);
-
-      addEventListener('keyup', (event) => {
-        this.onKey(event.keyCode, false);
-      }, false);
-    }
-
-    get commands() {
-      const RESULT = {};
-
-      for (let i in this._buffer) {
-        if (this._buffer.hasOwnProperty(i)) {
-          if (this._buffer[i]) {
-            RESULT[i] = true;
-          }
-        }
-      }
-
-      return RESULT;
-    }
-
-    onKey(keyCode, isDown) {
-      this._buffer[KeyToCommandMap[keyCode]] = isDown;
-    }
-
-    onKeyDown(event) {
-      PassThrough[event.keyCode] || event.preventDefault();
-      this.onKey(event.keyCode, true);
-    }
-  }
 
   class RenderableList {
     constructor() {
@@ -1961,11 +1961,9 @@
     BaseTransition,
     Color,
     Command,
-    Controller,
     FontFamily,
     FontSprite,
     Frame,
-    Mouse,
     Point,
     Quick,
     Rect,
