@@ -1,40 +1,43 @@
 'use strict';
 
+// environment mocks
+global.addEventListener = () => {};
+
+global.document = {
+  getElementById: (id) => {
+    if (id == 'game') {
+      return {
+        focus: () => {},
+
+        getContext: () => {
+          return {};
+        },
+
+        height: 400,
+        offsetLeft: 0,
+        offsetTop: 0,
+        style: {},
+        width: 640,
+      };
+    } else {
+      return {};
+    }
+  }
+};
+
 // imports
 const assert = require('assert');
 const quick = require('../quick.js');
 
-// mocks
-global.addEventListener = () => {};
-
-global.document = {
-  getElementById: () => {
-    return {};
-  }
-};
-
+// additional mocks
 global.localStorage = {};
-
-const deviceMock = {
-  commands: (() => {
-    let result = {};
-
-    for (let key in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(key)) {
-      result[quick.CommandEnum[key]] = true;
-    }
-
-    return result;
-  })()
-};
-
-const event = {
-  preventDefault: () => {}
-}
+global.navigator = {};
+global.window = {};
 
 // run tests
 controllerTest();
-mouseTest();
 pointTest();
+pointerTest();
 quickTest();
 rectTest();
 sceneTest();
@@ -45,8 +48,21 @@ textTest();
 function controllerTest() {
   let controller;
 
+  // mock
+  const deviceMock = {
+    commands: (() => {
+      let result = {};
+
+      for (let key in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(key)) {
+        result[quick.CommandEnum[key]] = true;
+      }
+
+      return result;
+    })()
+  };
+
   // no args constructor
-  controller = new quick.Controller();
+  controller = quick.Quick.getController();
 
   for (let i in quick.CommandEnum) if (quick.CommandEnum.hasOwnProperty(i)) {
     let value = quick.CommandEnum[i];
@@ -72,26 +88,6 @@ function controllerTest() {
   }
 }
 
-function mouseTest() {
-  let mouse;
-
-  // no args constructor
-  mouse = new quick.Mouse(event);
-  assert.equal(0, mouse.x);
-  assert.equal(0, mouse.y);
-  assert.equal(true, mouse.command);
-
-  // updateCoordinates
-  mouse.updateCoordinates({ x: 1, y: 2 });
-  assert.equal(1, mouse.x);
-  assert.equal(2, mouse.y);
-
-  // updateCoordinates on Firefox
-  mouse.updateCoordinates({ clientX: 3, clientY: 4 });
-  assert.equal(3, mouse.x);
-  assert.equal(4, mouse.y);
-}
-
 function pointTest() {
   let subject;
 
@@ -115,6 +111,31 @@ function pointTest() {
   assert.equal(8, subject.x);
   subject.setY(9);
   assert.equal(9, subject.y);
+}
+
+function pointerTest() {
+  let pointer;
+
+  // mock
+  const deviceMock = {
+    command: true,
+    x: 100,
+    y: 200,
+  };
+
+  // without device
+  pointer = quick.Quick.getPointer();
+  pointer.update();
+  assert.equal(0, pointer.x);
+  assert.equal(0, pointer.y);
+  assert.equal(false, pointer.down);
+
+  // with device
+  pointer.setDevice(deviceMock);
+  pointer.update();
+  assert.equal(100, pointer.x);
+  assert.equal(200, pointer.y);
+  assert.equal(true, pointer.down);
 }
 
 function quickTest() {
