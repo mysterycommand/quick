@@ -272,39 +272,536 @@
   PassThrough[Key.F11] = true;
   PassThrough[Key.F12] = true;
 
+  class Point {
+    constructor(x = 0, y = 0) {
+      this.x = x;
+      this.y = y;
+    }
+
+    setX(x) {
+      this.x = x;
+      return this;
+    }
+
+    setY(y) {
+      this.y = y;
+      return this;
+    }
+  }
+
+  const Input = (() => {
+    class Controller {
+      constructor() {
+        this.tolerance = 0;
+        this._active = {};
+        this._device = null;
+        this._hold = {};
+        this._sequence = [];
+        this._tick = 0;
+      }
+
+      didPerform(commands) {
+        for (let i = 1; i <= commands.length; ++i) {
+          if (this._sequence[this._sequence.length - i] != commands[commands.length - i]) {
+            return false;
+          }
+        }
+
+        this._sequence = [];
+        return true;
+      }
+
+      keyDown(command) {
+        return this._active[command];
+      }
+
+      keyPush(command) {
+        return this._active[command] && !this._hold[command];
+      }
+
+      setDevice(device) {
+        this._device = device;
+      }
+
+      update() {
+        if (!this._device) {
+          return;
+        }
+
+        this._hold = {};
+        const LAST = this._active;
+        this._active = this._device.commands;
+
+        for (let i in this._active) {
+          if (this._active.hasOwnProperty(i)) {
+            if (LAST[i]) {
+              this._hold[i] = true;
+            }
+          }
+        }
+
+        if (this.tolerance && ++this._tick > this.tolerance) {
+          this._sequence = [];
+          this._tick = 0;
+        }
+
+        for (let i in Command) {
+          if (Command.hasOwnProperty(i)) {
+            const COMMAND = Command[i];
+
+            if (this.keyPush(COMMAND)) {
+              this._sequence.push(COMMAND);
+              this._tick = 0;
+            }
+          }
+        }
+      }
+    }
+
+    class GamePad {
+      constructor(id = 0) {
+        this._id = id;
+      }
+
+      get commands() {
+        const BUTTONS = Input.getGamePadButtons(this._id);
+        const RESULT = {};
+
+        if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] < - ANALOG_THRESHOLD) {
+          RESULT[Command.UP] = true;
+        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] > ANALOG_THRESHOLD) {
+          RESULT[Command.DOWN] = true;
+        }
+
+        if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] < - ANALOG_THRESHOLD) {
+          RESULT[Command.LEFT] = true;
+        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] > ANALOG_THRESHOLD) {
+          RESULT[Command.RIGHT] = true;
+        }
+
+        for (let i in ButtonToCommandMap) {
+          if (ButtonToCommandMap.hasOwnProperty(i)) {
+            if (BUTTONS[i] && BUTTONS[i]['pressed']) {
+              RESULT[ButtonToCommandMap[i]] = true;
+            }
+          }
+        }
+
+        return RESULT;
+      };
+    }
+
+    class Input {
+      constructor() {
+        this._controllers = [];
+        this._controllerQueue = [];
+        this._controllerRequestQueue = [];
+        this._pointers = [];
+        this._pointerQueue = [];
+        this._pointerRequestQueue = [];
+        this._gamePads = 0;
+
+        const ON_KEY_DOWN = (event) => {
+          removeEventListener('keydown', ON_KEY_DOWN);
+          console.log('Keyboard detected.');
+          this.addController(new Keyboard(event));
+        };
+
+        const ON_MOUSE_MOVE = (event) => {
+          removeEventListener('mousemove', ON_MOUSE_MOVE);
+          console.log('Mouse detected.');
+          this.addPointer(new Mouse(event));
+        };
+
+        const ON_TOUCH_START = (event) => {
+          removeEventListener('touchstart', ON_TOUCH_START);
+          console.log('Touch detected.');
+          this.addPointer(new Touch(event));
+        };
+
+        addEventListener('keydown', ON_KEY_DOWN, false);
+        addEventListener('mousedown', ON_MOUSE_MOVE, false);
+        addEventListener('touchstart', ON_TOUCH_START, false);
+      }
+
+      static getGamePadAxes(id) {
+        if (getGamePads()[id]) {
+          return getGamePads()[id]['axes'];
+        }
+
+        return [];
+      }
+
+      static getGamePadButtons(id) {
+        const GAME_PAD = getGamePads()[id];
+        return GAME_PAD && GAME_PAD.buttons || [];
+      }
+
+      addController(device) {
+        this._controllerQueue.push(device);
+        this.checkControllerQueues();
+      }
+
+      addPointer(device) {
+        this._pointerQueue.push(device);
+        this.checkPointerQueues();
+      }
+
+      checkGamePads() {
+        if (getGamePads()[this._gamePads]) {
+          console.log('Game pad detected.');
+          this.addController(new GamePad(this._gamePads++));
+        }
+      }
+
+      checkControllerQueues() {
+        if (this._controllerRequestQueue.length > 0 && this._controllerQueue.length > 0) {
+          const REQUESTER = this._controllerRequestQueue.shift();
+          const DEVICE = this._controllerQueue.shift();
+          REQUESTER.setDevice(DEVICE);
+        }
+      }
+
+      checkPointerQueues() {
+        if (this._pointerRequestQueue.length > 0 && this._pointerQueue.length > 0) {
+          const REQUESTER = this._pointerRequestQueue.shift();
+          const DEVICE = this._pointerQueue.shift();
+          REQUESTER.setDevice(DEVICE);
+        }
+      }
+
+      getController(id = 0) {
+        if (this._controllers.length < id + 1) {
+          const CONTROLLER = new Controller();
+          this._controllers.push(CONTROLLER);
+          this._controllerRequestQueue.push(CONTROLLER);
+          this.checkControllerQueues();
+        }
+
+        return this._controllers[id];
+      }
+
+      getPointer(id = 0) {
+        if (this._pointers.length < id + 1) {
+          const POINTER = new Pointer();
+          this._pointers.push(POINTER);
+          this._pointerRequestQueue.push(POINTER);
+          this.checkPointerQueues();
+        }
+
+        return this._pointers[id];
+      }
+
+      update() {
+        this.checkGamePads();
+
+        for (let i in this._controllers) {
+          if (this._controllers.hasOwnProperty(i)) {
+            this._controllers[i].update();
+          }
+        }
+
+        for (let j in this._pointers) {
+          if (this._pointers.hasOwnProperty(j)) {
+            this._pointers[j].update();
+          }
+        }
+      }
+    }
+
+    class Keyboard {
+      constructor(event) {
+        this._buffer = {};
+        this.onKeyDown(event);
+
+        addEventListener('keydown', (event) => {
+          this.onKeyDown(event);
+        }, false);
+
+        addEventListener('keyup', (event) => {
+          this.onKey(event.keyCode, false);
+        }, false);
+      }
+
+      get commands() {
+        const RESULT = {};
+
+        for (let i in this._buffer) {
+          if (this._buffer.hasOwnProperty(i)) {
+            if (this._buffer[i]) {
+              RESULT[i] = true;
+            }
+          }
+        }
+
+        return RESULT;
+      }
+
+      onKey(keyCode, isDown) {
+        this._buffer[KeyToCommandMap[keyCode]] = isDown;
+      }
+
+      onKeyDown(event) {
+        PassThrough[event.keyCode] || event.preventDefault();
+        this.onKey(event.keyCode, true);
+      }
+    }
+
+    class Mouse extends Point {
+      constructor(event) {
+        super();
+        this.updateCoordinates(event);
+
+        addEventListener('mousedown', (event) => {
+          event.preventDefault();
+          this._isDown = true;
+        }, false);
+
+        addEventListener('mousemove', (event) => {
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('mouseup', (event) => {
+          event.preventDefault();
+          this._isDown = false;
+        }, false);
+      }
+
+      get command() {
+        return this._isDown;
+      }
+
+      updateCoordinates(event) {
+        event.preventDefault();
+        this.x = event.x || event.clientX;
+        this.y = event.y || event.clientY;
+      }
+    }
+
+    class Pointer extends Point {
+      constructor() {
+        super();
+        this._active = false;
+        this._device = null;
+        this._hold = false;
+      }
+
+      get down() {
+        return this._active;
+      }
+
+      get push() {
+        return this._active && !this._hold;
+      }
+
+      setDevice(device) {
+        this._device = device;
+      }
+
+      update() {
+        if (!this._device) {
+          return;
+        }
+
+        this._hold = false;
+        const LAST = this._active;
+        this._active = this._device.command;
+
+        if (this._active && LAST) {
+          this._hold = true;
+        }
+
+        const REAL_X = this._device.x - Quick.offsetLeft;
+        const REAL_Y = this._device.y - Quick.offsetTop;
+        this.x = Math.floor(REAL_X * Quick.width / Quick.realWidth);
+        this.y = Math.floor(REAL_Y * Quick.height / Quick.realHeight);
+      }
+    }
+
+    class Touch extends Point {
+      constructor(event) {
+        super();
+        event.preventDefault();
+        this._isDown = true;
+        this.updateCoordinates(event);
+
+        addEventListener('touchend', (event) => {
+          event.preventDefault();
+          this._isDown = false;
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('touchmove', (event) => {
+          event.preventDefault();
+          this.updateCoordinates(event);
+        }, false);
+
+        addEventListener('touchstart', () => {
+          event.preventDefault();
+          this._isDown = true;
+          this.updateCoordinates(event);
+        }, false);
+      }
+
+      get command() {
+        return this._isDown;
+      }
+
+      updateCoordinates(event) {
+        const TOUCHES = event['changedTouches'];
+        const TOUCH = TOUCHES[0];
+        this.x = TOUCH.pageX;
+        this.y = TOUCH.pageY;
+      }
+    }
+
+    function getGamePads() {
+      return navigator.getGamepads && navigator.getGamepads() || [];
+    }
+
+    return Input;
+  })();
+
+  class Sound {
+    constructor() {
+      this._isFading = false;
+      this._isMute = false;
+      this._nextThemeName = null;
+      this._queue = {};
+      this._theme = null;
+      this._volume = 100;
+    }
+
+    fadeOut() {
+      if (!this._theme) {
+        return;
+      }
+
+      this._isFading = true;
+      this._volume = 100;
+    }
+
+    mute() {
+      this._isMute = !this._isMute;
+
+      if (!this._isMute) {
+        this._theme.play();
+      } else {
+        this._theme.pause();
+      }
+    }
+
+    pause() {
+      if (this._theme) {
+        this._theme.pause();
+      }
+    }
+
+    play(id) {
+      if (this._isMute) {
+        return;
+      }
+
+      this._queue[id] = true;
+    }
+
+    playTheme(id) {
+      if (this._theme && this._theme.currentTime > 0) {
+        this._nextThemeName = id;
+
+        if (!this._isFading) {
+          this.fadeOut();
+        }
+
+        return;
+      }
+
+      this.stopTheme();
+      this._theme = document.getElementById(id);
+
+      if (this._theme.currentTime > 0) {
+        this._theme.currentTime = 0;
+      }
+
+      if (this._isMute) {
+        return;
+      }
+
+      this._theme.volume = 1;
+      this._theme.play();
+    }
+
+    resume() {
+      if (this._isMute) {
+        return;
+      }
+
+      if (this._theme.paused) {
+        this._theme.play();
+      }
+    }
+
+    stopTheme() {
+      if (this._theme) {
+        this._theme.pause();
+        this._theme.currentTime = 0;
+      }
+    }
+
+    update() {
+      for (let i in this._queue) {
+        if (this._queue.hasOwnProperty(i)) {
+          const SOUND = document.getElementById(i);
+          SOUND.pause();
+
+          if (SOUND.currentTime > 0) {
+            SOUND.currentTime = 0;
+          }
+
+          SOUND.volume = DEFAULT_SOUND_EFFECTS_VOLUME;
+          SOUND.play();
+        }
+      }
+
+      this._queue = {};
+
+      if (this._isFading) {
+        if (--this._volume > 0) {
+          this._theme.volume = this._volume / 100;
+        } else {
+          this._isFading = false;
+          this._theme = null;
+
+          if (this._nextThemeName) {
+            this.playTheme(this._nextThemeName);
+            this._nextThemeName = null;
+          }
+        }
+      }
+    }
+  }
+
   const Quick = (() => {
     let _autoScale = true;
-    let _canvas;
-    let _context;
+    let _canvas = document.getElementById('game') || document.getElementsByTagName('canvas')[0];
+    let _context = _canvas.getContext('2d');
     let _everyOther = true;
     let _frameTime = DEFAULT_FRAME_TIME;
-    let _height;
+    let _height = _canvas.height;
     let _keepAspect = false;
-    let _input;
+    let _input = new Input();
     let _lastRender;
-    let _realHeight = 0;
-    let _realWidth = 0;
+    let _realHeight = _canvas.height;
+    let _realWidth = _canvas.width;
     let _renderableLists = [];
     let _scene;
-    let _sound;
+    let _sound = new Sound();
     let _transition;
-    let _width;
+    let _width = _canvas.width;
 
     class Quick {
-      static init(scene, canvas = null) {
-        _canvas = canvas || document.getElementsByTagName('canvas')[0];
-        _context = _canvas.getContext('2d');
-        _input = new Input();
-        _lastRender = Date.now();
-        _realHeight = _height = _canvas.height;
-        _realWidth = _width = _canvas.width;
-        _sound = new Sound();
+      static init(scene) {
         _scene = scene;
-        addEventListener('blur', focus, false);
-        addEventListener('focus', focus, false);
-        addEventListener('load', focus, false);
-        addEventListener('resize', scale, false);
-        _autoScale && scale();
         boot();
       }
 
@@ -510,8 +1007,14 @@
         }
       }
 
+      addEventListener('blur', focus, false);
+      addEventListener('focus', focus, false);
+      addEventListener('load', focus, false);
+      addEventListener('resize', scale, false);
+      _autoScale && scale();
       focus();
       initScene();
+      _lastRender = Date.now();
       loop();
     }
 
@@ -520,6 +1023,10 @@
     }
 
     function initScene() {
+      if (!_scene) {
+        throw('Could not get the next scene.');
+      }
+
       _scene.height = _height;
       _scene.width = _width;
       _scene.init();
@@ -593,400 +1100,6 @@
     return Quick;
   })();
 
-  class Point {
-    constructor(x = 0, y = 0) {
-      this.x = x;
-      this.y = y;
-    }
-
-    setX(x) {
-      this.x = x;
-      return this;
-    }
-
-    setY(y) {
-      this.y = y;
-      return this;
-    }
-  }
-
-  const Input = (() => {
-    class Controller {
-      constructor() {
-        this.tolerance = 0;
-        this._active = {};
-        this._device = null;
-        this._hold = {};
-        this._sequence = [];
-        this._tick = 0;
-      }
-
-      didPerform(commands) {
-        for (let i = 1; i <= commands.length; ++i) {
-          if (this._sequence[this._sequence.length - i] != commands[commands.length - i]) {
-            return false;
-          }
-        }
-
-        this._sequence = [];
-        return true;
-      }
-
-      keyDown(command) {
-        return this._active[command];
-      }
-
-      keyPush(command) {
-        return this._active[command] && !this._hold[command];
-      }
-
-      setDevice(device) {
-        this._device = device;
-      }
-
-      update() {
-        if (!this._device) {
-          return;
-        }
-
-        this._hold = {};
-        const LAST = this._active;
-        this._active = this._device.commands;
-
-        for (let i in this._active) {
-          if (this._active.hasOwnProperty(i)) {
-            if (LAST[i]) {
-              this._hold[i] = true;
-            }
-          }
-        }
-
-        if (this.tolerance && ++this._tick > this.tolerance) {
-          this._sequence = [];
-          this._tick = 0;
-        }
-
-        for (let i in Command) {
-          if (Command.hasOwnProperty(i)) {
-            const COMMAND = Command[i];
-
-            if (this.keyPush(COMMAND)) {
-              this._sequence.push(COMMAND);
-              this._tick = 0;
-            }
-          }
-        }
-      }
-    }
-
-    class GamePad {
-      constructor(id = 0) {
-        this._id = id;
-      }
-
-      get commands() {
-        const BUTTONS = Input.getGamePadButtons(this._id);
-        const RESULT = {};
-
-        if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] < - ANALOG_THRESHOLD) {
-          RESULT[Command.UP] = true;
-        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_Y] > ANALOG_THRESHOLD) {
-          RESULT[Command.DOWN] = true;
-        }
-
-        if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] < - ANALOG_THRESHOLD) {
-          RESULT[Command.LEFT] = true;
-        } else if (Input.getGamePadAxes(this._id)[Axis.LEFT_X] > ANALOG_THRESHOLD) {
-          RESULT[Command.RIGHT] = true;
-        }
-
-        for (let i in ButtonToCommandMap) {
-          if (ButtonToCommandMap.hasOwnProperty(i)) {
-            if (BUTTONS[i] && BUTTONS[i]['pressed']) {
-              RESULT[ButtonToCommandMap[i]] = true;
-            }
-          }
-        }
-
-        return RESULT;
-      };
-    }
-
-    class Input {
-      constructor() {
-        this._controllers = [];
-        this._controllerQueue = [];
-        this._controllerRequestQueue = [];
-        this._pointers = [];
-        this._pointerQueue = [];
-        this._pointerRequestQueue = [];
-        this._gamePads = 0;
-
-        const ON_KEY_DOWN = (event) => {
-          removeEventListener('keydown', ON_KEY_DOWN);
-          console.log('Keyboard detected.');
-          this.addController(new Keyboard(event));
-        };
-
-        const ON_MOUSE_DOWN = (event) => {
-          removeEventListener('mousedown', ON_MOUSE_DOWN);
-          console.log('Mouse detected.');
-          this.addPointer(new Mouse(event));
-        };
-
-        const ON_TOUCH_START = (event) => {
-          removeEventListener('touchstart', ON_TOUCH_START);
-          console.log('Touch detected.');
-          this.addPointer(new Touch(event));
-        };
-
-        addEventListener('keydown', ON_KEY_DOWN, false);
-        addEventListener('mousedown', ON_MOUSE_DOWN, false);
-        addEventListener('touchstart', ON_TOUCH_START, false);
-      }
-
-      static getGamePadAxes(id) {
-        if (getGamePads()[id]) {
-          return getGamePads()[id]['axes'];
-        }
-
-        return [];
-      }
-
-      static getGamePadButtons(id) {
-        const GAME_PAD = getGamePads()[id];
-        return GAME_PAD && GAME_PAD.buttons || [];
-      }
-
-      addController(device) {
-        this._controllerQueue.push(device);
-        this.checkControllerQueues();
-      }
-
-      addPointer(device) {
-        this._pointerQueue.push(device);
-        this.checkPointerQueues();
-      }
-
-      checkGamePads() {
-        if (getGamePads()[this._gamePads]) {
-          console.log('Game pad detected.');
-          this.addController(new GamePad(this._gamePads++));
-        }
-      }
-
-      checkControllerQueues() {
-        if (this._controllerRequestQueue.length > 0 && this._controllerQueue.length > 0) {
-          const REQUESTER = this._controllerRequestQueue.shift();
-          const DEVICE = this._controllerQueue.shift();
-          REQUESTER.setDevice(DEVICE);
-        }
-      }
-
-      checkPointerQueues() {
-        if (this._pointerRequestQueue.length > 0 && this._pointerQueue.length > 0) {
-          const REQUESTER = this._pointerRequestQueue.shift();
-          const DEVICE = this._pointerQueue.shift();
-          REQUESTER.setDevice(DEVICE);
-        }
-      }
-
-      getController(id = 0) {
-        if (this._controllers.length < id + 1) {
-          const CONTROLLER = new Controller();
-          this._controllers.push(CONTROLLER);
-          this._controllerRequestQueue.push(CONTROLLER);
-          this.checkControllerQueues();
-        }
-
-        return this._controllers[id];
-      }
-
-      getPointer(id = 0) {
-        if (this._pointers.length < id + 1) {
-          const POINTER = new Pointer();
-          this._pointers.push(POINTER);
-          this._pointerRequestQueue.push(POINTER);
-          this.checkPointerQueues();
-        }
-
-        return this._pointers[id];
-      }
-
-      update() {
-        this.checkGamePads();
-
-        for (let i in this._controllers) {
-          if (this._controllers.hasOwnProperty(i)) {
-            this._controllers[i].update();
-          }
-        }
-
-        for (let j in this._pointers) {
-          if (this._pointers.hasOwnProperty(j)) {
-            this._pointers[j].update();
-          }
-        }
-      }
-    }
-
-    class Keyboard {
-      constructor(event) {
-        this._buffer = {};
-        this.onKeyDown(event);
-
-        addEventListener('keydown', (event) => {
-          this.onKeyDown(event);
-        }, false);
-
-        addEventListener('keyup', (event) => {
-          this.onKey(event.keyCode, false);
-        }, false);
-      }
-
-      get commands() {
-        const RESULT = {};
-
-        for (let i in this._buffer) {
-          if (this._buffer.hasOwnProperty(i)) {
-            if (this._buffer[i]) {
-              RESULT[i] = true;
-            }
-          }
-        }
-
-        return RESULT;
-      }
-
-      onKey(keyCode, isDown) {
-        this._buffer[KeyToCommandMap[keyCode]] = isDown;
-      }
-
-      onKeyDown(event) {
-        PassThrough[event.keyCode] || event.preventDefault();
-        this.onKey(event.keyCode, true);
-      }
-    }
-
-    class Mouse extends Point {
-      constructor(event) {
-        super();
-        this.down(event);
-
-        addEventListener('mousedown', (event) => {
-          this.down(event);
-        }, false);
-
-        addEventListener('mousemove', (event) => {
-          event.preventDefault();
-          this.updateCoordinates(event);
-        }, false);
-
-        addEventListener('mouseup', (event) => {
-          event.preventDefault();
-          this._isDown = false;
-        }, false);
-      }
-
-      down(event) {
-        event.preventDefault();
-        this._isDown = true;
-      }
-
-      get command() {
-        return this._isDown;
-      }
-
-      updateCoordinates(event) {
-        this.x = event.x || event.clientX;
-        this.y = event.y || event.clientY;
-      }
-    }
-
-    class Pointer extends Point {
-      constructor() {
-        super();
-        this._active = false;
-        this._device = null;
-        this._hold = false;
-      }
-
-      get down() {
-        return this._active;
-      }
-
-      get push() {
-        return this._active && !this._hold;
-      }
-
-      setDevice(device) {
-        this._device = device;
-      }
-
-      update() {
-        if (!this._device) {
-          return;
-        }
-
-        this._hold = false;
-        const LAST = this._active;
-        this._active = this._device.command;
-
-        if (this._active && LAST) {
-          this._hold = true;
-        }
-
-        const REAL_X = this._device.x - Quick.offsetLeft;
-        const REAL_Y = this._device.y - Quick.offsetTop;
-        this.x = Math.floor(REAL_X * Quick.width / Quick.realWidth);
-        this.y = Math.floor(REAL_Y * Quick.height / Quick.realHeight);
-      }
-    }
-
-    class Touch extends Point {
-      constructor(event) {
-        super();
-        event.preventDefault();
-        this._isDown = true;
-        this.updateCoordinates(event);
-
-        addEventListener('touchend', (event) => {
-          event.preventDefault();
-          this._isDown = false;
-          this.updateCoordinates(event);
-        }, false);
-
-        addEventListener('touchmove', (event) => {
-          event.preventDefault();
-          this.updateCoordinates(event);
-        }, false);
-
-        addEventListener('touchstart', () => {
-          event.preventDefault();
-          this._isDown = true;
-          this.updateCoordinates(event);
-        }, false);
-      }
-
-      get command() {
-        return this._isDown;
-      }
-
-      updateCoordinates(event) {
-        const TOUCHES = event['changedTouches'];
-        const TOUCH = TOUCHES[0];
-        this.x = TOUCH.pageX;
-        this.y = TOUCH.pageY;
-      }
-    }
-
-    function getGamePads() {
-      return navigator.getGamepads && navigator.getGamepads() || [];
-    }
-
-    return Input;
-  })();
-
   class RenderableList {
     constructor() {
       this._elements = [];
@@ -1002,125 +1115,6 @@
       }
 
       this._elements.length = 0;
-    }
-  }
-
-  class Sound {
-    constructor() {
-      this._isFading = false;
-      this._isMute = false;
-      this._nextThemeName = null;
-      this._queue = {};
-      this._theme = null;
-      this._volume = 100;
-    }
-
-    fadeOut() {
-      if (!this._theme) {
-        return;
-      }
-
-      this._isFading = true;
-      this._volume = 100;
-    }
-
-    mute() {
-      this._isMute = !this._isMute;
-
-      if (!this._isMute) {
-        this._theme.play();
-      } else {
-        this._theme.pause();
-      }
-    }
-
-    pause() {
-      if (this._theme) {
-        this._theme.pause();
-      }
-    }
-
-    play(id) {
-      if (this._isMute) {
-        return;
-      }
-
-      this._queue[id] = true;
-    }
-
-    playTheme(id) {
-      if (this._theme && this._theme.currentTime > 0) {
-        this._nextThemeName = id;
-
-        if (!this._isFading) {
-          this.fadeOut();
-        }
-
-        return;
-      }
-
-      this.stopTheme();
-      this._theme = document.getElementById(id);
-
-      if (this._theme.currentTime > 0) {
-        this._theme.currentTime = 0;
-      }
-
-      if (this._isMute) {
-        return;
-      }
-
-      this._theme.volume = 1;
-      this._theme.play();
-    }
-
-    resume() {
-      if (this._isMute) {
-        return;
-      }
-
-      if (this._theme.paused) {
-        this._theme.play();
-      }
-    }
-
-    stopTheme() {
-      if (this._theme) {
-        this._theme.pause();
-        this._theme.currentTime = 0;
-      }
-    }
-
-    update() {
-      for (let i in this._queue) {
-        if (this._queue.hasOwnProperty(i)) {
-          const SOUND = document.getElementById(i);
-          SOUND.pause();
-
-          if (SOUND.currentTime > 0) {
-            SOUND.currentTime = 0;
-          }
-
-          SOUND.volume = DEFAULT_SOUND_EFFECTS_VOLUME;
-          SOUND.play();
-        }
-      }
-
-      this._queue = {};
-
-      if (this._isFading) {
-        if (--this._volume > 0) {
-          this._theme.volume = this._volume / 100;
-        } else {
-          this._isFading = false;
-          this._theme = null;
-
-          if (this._nextThemeName) {
-            this.playTheme(this._nextThemeName);
-            this._nextThemeName = null;
-          }
-        }
-      }
     }
   }
 
@@ -1742,10 +1736,6 @@
       this._sprites = sprites.concat(this._spritesQueue);
       this._spritesQueue = [];
       return Sprite.prototype.sync.call(this);
-    }
-
-    get next() {
-      throw 'Your scene must respond to the next property.'
     }
 
     getObjectsWithTag(tag) {
