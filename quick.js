@@ -1867,7 +1867,6 @@
       if (Sprite.prototype.render.call(this, context)) {
         context.fillStyle = this.fontColor;
         context.font = this._font;
-        console.log(this.text, this.left + this.scene.x, this.bottom + this.scene.y, this.width);
         context.fillText(this.text, this.left + this.scene.x, this.bottom + this.scene.y, this.width);
       }
     }
