@@ -1027,8 +1027,8 @@
         throw('Could not get the next scene.');
       }
 
-      _scene.height = _height;
-      _scene.width = _width;
+      _scene.height = _scene.height || _height;
+      _scene.width = _scene.width || _width;
       _scene.init();
     }
 
@@ -1661,8 +1661,10 @@
   class Scene extends Sprite {
     constructor() {
       super();
+      this.height = Quick.height;
       this.scene = {x: 0, y: 0};
       this.transition = null;
+      this.width = Quick.width;
       this._sprites = [];
       this._spritesQueue = [];
     }
