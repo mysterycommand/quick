@@ -45,10 +45,10 @@ The skeleton is written with classes, keeping your code very clean and organized
 
 This skeleton provide a sample quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [Wiki](https://github.com/quick-developers/quick/wiki) and [demos and plugins](https://github.com/quick-developers) to harness the full potential of the library.
 
-## Input
+# Input
 The input subsystem dynamically attaches physical devices such as gamepads, keyboards, mice and touch screens to virtual devices. Gamepads and keyboards are known to the game as controllers via the Controller class, while mice and touch screens are known to the game as pointers, via the Pointer class. Games can use one or more devices, such as a controller and a pointer to command a more complex game or even multiple controllers for multiplayer games.
 
-### Controllers
+## Controllers
 In order to be accessible and ergonomic to the majority of players without configuration hassles, quick convenes to a common set of commands. which are:
   * Up
   * Down
@@ -63,7 +63,7 @@ In order to be accessible and ergonomic to the majority of players without confi
 
 These commands can be easily referenced to using the [[Command]] enumeration. Physical devices which implement [[Controller]] then map to these commands, as follows:
 
-#### Keyboard
+### Keyboard
 The keyboard mapping allows both left and right handed players to use a comfortable set of keys:
   * Up arrow, E or I - Up
   * Down arrow, D or K - Down
@@ -76,7 +76,7 @@ The keyboard mapping allows both left and right handed players to use a comforta
   * Esc - Select
   * Enter - Start
 
-#### Gamepad
+### Gamepad
 The gamepad mapping allows both digital and analog controls to be properly mapped to a game command:
   * Up (digital / analog) - Up
   * Down (digital / analog) - Down
@@ -89,10 +89,10 @@ The gamepad mapping allows both digital and analog controls to be properly mappe
   * Select - Select
   * Start - Start
 
-### Pointers
+## Pointers
 While mice and touch screens have different capabilities, they share a few common concepts which we can leverage to interact them in an uniform way. Bot can provide clicks and position coordinates.
 
 ## Related projects
-Click [here](https://github.com/quick-developers) for the full list of projects including demos and reusable plugins.
+Click [here](https://github.com/quick-developers) for the full list of projects including reusable assets, demos and plugins.
 
 [![VanillaJS](http://vanilla-js.com/assets/button.png)](http://vanilla-js.com)
