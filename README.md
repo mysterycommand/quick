@@ -10,10 +10,10 @@ Quick includes all requirements for a full-featured game included in a single li
 ![Quick](http://diogoschneider.github.io/assets/quick.png)
 
 ### API
-[Click here for the wiki-based API](https://github.com/diogoschneider/quick/wiki)
+[Click here for the wiki-based API](https://github.com/quick-developers/quick/wiki)
 
 ### Latest release
-[Download or link directly to this file.](https://cdn.rawgit.com/diogoschneider/quick/v6.0.2/quick.js)
+[Download or link directly to this file.](https://cdn.rawgit.com/quick-developers/quick/v6.0.2/quick.js)
 
 ## Advantages
   * Virtual resolution - run your game in any screen size without affecting your development or game logic
@@ -24,7 +24,7 @@ Quick includes all requirements for a full-featured game included in a single li
   * Agnostic - whether you want to write your game with OOP or functional code, the choice is yours
   * Open - free to use, read, and extend it. Enjoy!
 
-Please check the [Wiki](https://github.com/diogoschneider/quick/wiki) for more information and feel free to make a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=diogo%2eschneider%40me%2ecom&lc=US&item_name=Diogo%20Schneider&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted) to this project.
+Please check the [Wiki](https://github.com/quick-developers/quick/wiki) for more information.
 
 ## Games
 These are some games made with Quick (in alphabetical order):
@@ -41,11 +41,11 @@ Please get your games made with Quick listed here!
 ## How to use
 All you need is to add Quick to your HTML file and make sure you have a canvas element somewhere in your page.
 
-For a quick start: first, grab [the latest skeleton project](https://github.com/diogoschneider/quick-demos/tree/master/skel), which will get you productive as soon as possible.
+For a quick start: first, grab [the latest skeleton project](https://github.com/quick-developers/quick-skel), which will get you productive as soon as possible.
 
 The skeleton is written with classes, keeping your code very clean and organized. But you don't need to extend classes if you don't want to, you can just instantiate Quick objects and use delegates if you need.
 
-This skeleton provide a sample Quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [[API]] and [quick-demos](https://github.com/diogoschneider/quick-demos) to harness the full potential of the library.
+This skeleton provide a sample Quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [Wiki](https://github.com/quick-developers/quick/wiki) and [demos and plugins](https://github.com/quick-developers) to harness the full potential of the library.
 
 ## Input
 Quick's input subsystem dynamically attaches physical devices such as gamepads, keyboards, mice and touch screens to virtual devices. Gamepads and keyboards are known to the game as controllers via the Controller class, while mice and touch screens are known to the game as pointers, via the Pointer class. Games can use one or more devices, such as a controller and a pointer to command a more complex game or even multiple controllers for multiplayer games.
@@ -63,7 +63,7 @@ In order to be accessible and ergonomic to the majority of players without confi
   * Select
   * Start
 
-These commands can be easily referenced to using the [CommandEnum](API#commandenum) enumeration. Physical devices which implement [Controller](API#controller) then map to these commands, as follows:
+These commands can be easily referenced to using the [[Command]] enumeration. Physical devices which implement [[Controller]] then map to these commands, as follows:
 
 #### Keyboard
 The keyboard mapping allows both left and right handed players to use a comfortable set of keys:
