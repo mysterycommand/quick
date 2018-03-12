@@ -5,7 +5,7 @@ the open multi-platform game framework
 # About
 quick provides a multi-platform, lightweight, easy-to-use framework for 2D game development, focused in performance, fast development and maintainability. Based on the original engine used in titles that pioneered the HTML5 game scene, it has evolved with the continuous addition of new features and improvements.
 
-All requirements for a full-featured game are included in a single library which runs on any modern JavaScript runtime, from personal computers with gamepads and keyboards to personal digital assistants with touch screens. Write once, run everywhere... now for real.
+All requirements for a full-featured game are included in a single library which runs on any modern JavaScript runtime, from personal computers with gamepads, keyboards and mice to personal digital assistants with touch screens. Write once, run everywhere... now for real.
 
 ## API
 Check [the wiki-based API docs](https://github.com/quick-developers/quick/wiki).
@@ -41,9 +41,7 @@ All you need is to add quick to your HTML file and make sure you have a canvas e
 
 For a quick start: first, grab [the latest skeleton project](https://github.com/quick-developers/quick-skel), which will get you productive as soon as possible.
 
-The skeleton is written with classes, keeping your code very clean and organized. But you don't need to extend classes if you don't want to, you can just instantiate quick objects and use delegates if you need.
-
-This skeleton provide a sample quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [Wiki](https://github.com/quick-developers/quick/wiki) and [demos and plugins](https://github.com/quick-developers) to harness the full potential of the library.
+The skeleton provide a sample quick project with an initial Scene, a black background and a player Sprite with the Controllable plugin, so you can move it with the keyboard or a gamepad. Make sure you check the [Wiki](https://github.com/quick-developers/quick/wiki) and [demos and plugins](https://github.com/quick-developers) to harness the full potential of the library.
 
 # Input
 The input subsystem dynamically attaches physical devices such as gamepads, keyboards, mice and touch screens to virtual devices. Gamepads and keyboards are known to the game as controllers via the Controller class, while mice and touch screens are known to the game as pointers, via the Pointer class. Games can use one or more devices, such as a controller and a pointer to command a more complex game or even multiple controllers for multiplayer games.
