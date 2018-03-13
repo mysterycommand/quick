@@ -401,27 +401,27 @@
         this._pointerRequestQueue = [];
         this._gamePads = 0;
 
-        const ON_KEY_DOWN = (event) => {
-          removeEventListener('keydown', ON_KEY_DOWN);
+        const ON_KEYBOARD = (event) => {
+          removeEventListener('keydown', ON_KEYBOARD);
           console.log('Keyboard detected.');
           this.addController(new Keyboard(event));
         };
 
-        const ON_MOUSE_MOVE = (event) => {
-          removeEventListener('mousemove', ON_MOUSE_MOVE);
+        const ON_MOUSE = (event) => {
+          removeEventListener('mousemove', ON_MOUSE);
           console.log('Mouse detected.');
           this.addPointer(new Mouse(event));
         };
 
-        const ON_TOUCH_START = (event) => {
-          removeEventListener('touchstart', ON_TOUCH_START);
+        const ON_TOUCH = (event) => {
+          removeEventListener('touchstart', ON_TOUCH);
           console.log('Touch detected.');
           this.addPointer(new Touch(event));
         };
 
-        addEventListener('keydown', ON_KEY_DOWN, false);
-        addEventListener('mousedown', ON_MOUSE_MOVE, false);
-        addEventListener('touchstart', ON_TOUCH_START, false);
+        addEventListener('keydown', ON_KEYBOARD, false);
+        addEventListener('mousemove', ON_MOUSE, false);
+        addEventListener('touchstart', ON_TOUCH, false);
       }
 
       static getGamePadAxes(id) {
