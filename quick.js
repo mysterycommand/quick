@@ -1327,6 +1327,7 @@
       super();
       this.accelerationX = 0;
       this.accelerationY = 0;
+      this.boundary = null;
       this.maxSpeedX = 0;
       this.maxSpeedY = 0;
       this.speedX = 0;
@@ -1340,7 +1341,6 @@
       this.visible = true;
       this.scene = null;
       this._animation = null;
-      this._boundary = null;
       this._lastX = this.x;
       this._lastY = this.y;
       this._tags = {};
@@ -1507,7 +1507,7 @@
     }
 
     setBoundary(rect) {
-      this._boundary = rect || this.scene && this.scene.boundary;
+      this.boundary = rect || this.scene && this.scene.boundary;
       return this;
     }
 
@@ -1646,7 +1646,7 @@
       this.x += this.speedX;
       this.y += this.speedY;
 
-      if (this._boundary && !this.hasCollision(this._boundary)) {
+      if (this.boundary && !this.hasCollision(this.boundary)) {
         this.offBoundary();
       }
 
@@ -1679,6 +1679,7 @@
       sprite.init();
       sprite.x -= sprite.speedX;
       sprite.y -= sprite.speedY;
+      return this;
     }
 
     build(map, tileFactory = null, offsetX = 0, offsetY = 0) {
@@ -1705,10 +1706,8 @@
           }
         }
       }
-    }
 
-    get boundary() {
-      return new Rect(0, 0, this.width, this.height);
+      return this;
     }
 
     sync() {
@@ -1756,6 +1755,7 @@
 
     setExpiration(expiration) {
       this.expiration = expiration;
+      return this;
     }
 
     setTransition(transition) {
