@@ -1,4 +1,4 @@
-![quick logo thanks to Fernanda L. Staudt](http://quick-developers.github.io/quick/logo.png)
+![Quick][logo]
 # About
 quick provides a multi-platform, lightweight, easy-to-use framework for 2D game development, focused in performance, fast development and maintainability. Based on the original engine used in titles that pioneered the HTML5 game scene, it has evolved with the continuous addition of new features and improvements.
 
@@ -45,44 +45,44 @@ The input subsystem dynamically attaches physical devices such as gamepads, keyb
 
 ## Controllers
 In order to be accessible and ergonomic to the majority of players without configuration hassles, quick convenes to a common set of commands. which are:
-  * Up
-  * Down
-  * Left
-  * Right
-  * A
-  * B
-  * X
-  * Y
-  * Select
-  * Start
+* Up
+* Down
+* Left
+* Right
+* A
+* B
+* X
+* Y
+* Select
+* Start
 
 These commands can be easily referenced to using the [[Command]] enumeration. Physical devices which implement [[Controller]] then map to these commands, as follows:
 
 ### Keyboard
 The keyboard mapping allows both left and right handed players to use a comfortable set of keys:
-  * Up arrow, E or I - Up
-  * Down arrow, D or K - Down
-  * Left arrow, S or J - Left
-  * Right arrow, F or L - Right
-  * Space - A
-  * Alt - B
-  * Ctrl - X
-  * Shift - Y
-  * Esc - Select
-  * Enter - Start
+* Up arrow, E or I - Up
+* Down arrow, D or K - Down
+* Left arrow, S or J - Left
+* Right arrow, F or L - Right
+* Space - A
+* Alt - B
+* Ctrl - X
+* Shift - Y
+* Esc - Select
+* Enter - Start
 
 ### Gamepad
 The gamepad mapping allows both digital and analog controls to be properly mapped to a game command:
-  * Up (digital / analog) - Up
-  * Down (digital / analog) - Down
-  * Left (digital / analog) - Left
-  * Right (digital / analog) - Right
-  * A or 1 - A
-  * B or 2 - B
-  * X or 3 - X
-  * Y or 4 - Y
-  * Select - Select
-  * Start - Start
+* Up (digital / analog) - Up
+* Down (digital / analog) - Down
+* Left (digital / analog) - Left
+* Right (digital / analog) - Right
+* A or 1 - A
+* B or 2 - B
+* X or 3 - X
+* Y or 4 - Y
+* Select - Select
+* Start - Start
 
 ## Pointers
 While mice and touch screens have different capabilities, they share a few common concepts which we can leverage to interact them in an uniform way. Bot can provide clicks and position coordinates.
@@ -91,3 +91,6 @@ While mice and touch screens have different capabilities, they share a few commo
 Click [here](https://github.com/quick-developers) for the full list of projects including reusable assets, demos and plugins.
 
 [![VanillaJS](http://vanilla-js.com/assets/button.png)](http://vanilla-js.com)
+
+[logo]: http://quick-developers.github.io/quick/logo.png
+        "Quick logo thanks to Fernanda L. Staudt"
