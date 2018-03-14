@@ -1,7 +1,4 @@
-![{ quick }](http://quick-developers.github.io/quick/logo.png)
-
-the open multi-platform game framework
-
+![{ quick }](http://quick-developers.github.io/quick/logo.jpg)
 # About
 quick provides a multi-platform, lightweight, easy-to-use framework for 2D game development, focused in performance, fast development and maintainability. Based on the original engine used in titles that pioneered the HTML5 game scene, it has evolved with the continuous addition of new features and improvements.
 
