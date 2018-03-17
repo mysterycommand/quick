@@ -1323,7 +1323,7 @@
   }
 
   class Sprite extends Rect {
-    constructor(scene) {
+    constructor(scene = null) {
       super();
       this.accelerationX = 0;
       this.accelerationY = 0;
