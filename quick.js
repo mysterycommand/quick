@@ -1323,7 +1323,7 @@
   }
 
   class Sprite extends Rect {
-    constructor() {
+    constructor(scene) {
       super();
       this.accelerationX = 0;
       this.accelerationY = 0;
@@ -1339,7 +1339,7 @@
       this.expired = false;
       this.solid = false;
       this.visible = true;
-      this.scene = null;
+      this.scene = scene;
       this._animation = null;
       this._lastX = this.x;
       this._lastY = this.y;
@@ -1660,10 +1660,8 @@
 
   class Scene extends Sprite {
     constructor() {
-      super();
+      super(new Point(0, 0));
       this.height = Quick.height;
-      this.scene = {x: 0, y: 0};
-      this.transition = null;
       this.width = Quick.width;
       this._sprites = [];
       this._spritesQueue = [];
@@ -1751,11 +1749,6 @@
       }
 
       return RESULT;
-    }
-
-    setExpiration(expiration) {
-      this.expiration = expiration;
-      return this;
     }
 
     setTransition(transition) {
