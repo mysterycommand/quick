@@ -1369,6 +1369,10 @@
       return DIRECTION;
     }
 
+    get image() {
+      return this._animation.image;
+    }
+
     get tick() {
       return this._tick;
     }
@@ -1529,6 +1533,10 @@
     setImage(image) {
       this.setAnimation(new Animation([new Frame(image)]));
       return this;
+    }
+
+    set image(image) {
+      this.setImage(image);
     }
 
     setImageId(id) {
