@@ -8,7 +8,7 @@ All requirements for a full-featured game are included in a single library which
 Check [the wiki-based API docs](https://github.com/quick-developers/quick/wiki).
 
 ## Latest release
-[Download or link directly to this file](https://cdn.rawgit.com/quick-developers/quick/v6.1.0/quick.js).
+[Download or link directly to this file](https://cdn.rawgit.com/quick-developers/quick/v6.1.1/quick.js).
 
 ## Advantages
 * Virtual resolution - run your game in any screen size without affecting your development or game logic
