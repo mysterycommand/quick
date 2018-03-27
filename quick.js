@@ -1511,7 +1511,7 @@
     }
 
     setBoundary(rect) {
-      this.boundary = rect || this.scene && this.scene.boundary;
+      this.boundary = rect || this.scene;
       return this;
     }
 
