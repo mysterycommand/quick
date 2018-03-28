@@ -27,7 +27,7 @@ global.document = {
 
 // imports
 const assert = require('assert');
-const quick = require('../quick.js');
+const quick = require('./quick.js');
 
 // additional mocks
 global.localStorage = {};

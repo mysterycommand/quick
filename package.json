@@ -4,7 +4,7 @@
   "description": "open multi-platform game engine",
   "main": "quick.js",
   "scripts": {
-    "test": "node ./test/quick.js"
+    "test": "node ./test.js"
   },
   "repository": {
     "type": "git",
