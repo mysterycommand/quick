@@ -1859,8 +1859,8 @@
   class TextSprite extends Sprite {
     constructor(text) {
       super();
+      this.fontColor = Color.White;
       this.text = text;
-      this._fontColor = Color.White;
       this._fontFamily = FontFamily.Monospace;
       this._fontSize = 16;
       this._updateFont();
@@ -1868,14 +1868,14 @@
 
     render(context) {
       if (Sprite.prototype.render.call(this, context)) {
-        context.fillStyle = this._fontColor;
+        context.fillStyle = this.fontColor;
         context.font = this._font;
         context.fillText(this.text, this.left + this.scene.x, this.bottom + this.scene.y, this.width);
       }
     }
 
     setFontColor(fontColor) {
-      this._fontColor = fontColor;
+      this.fontColor = fontColor;
       return this;
     }
 
@@ -1896,20 +1896,12 @@
       return this;
     }
 
-    get fontColor() {
-      return this._fontColor;
-    }
-
     get fontFamily() {
       return this._fontFamily;
     }
 
     get fontSize() {
       return this._fontSize;
-    }
-
-    set fontColor(fontColor) {
-      this.setFontColor(fontColor);
     }
 
     set fontFamily(fontFamily) {

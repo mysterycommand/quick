@@ -36,13 +36,13 @@ global.window = {};
 
 // run tests
 controllerTest();
+fontSpriteTest();
 pointTest();
 pointerTest();
 quickTest();
 rectTest();
 sceneTest();
 spriteTest();
-textTest();
 
 // tests
 function controllerTest() {
@@ -86,6 +86,22 @@ function controllerTest() {
     assert.equal(true, controller.keyDown(quick.CommandEnum[k]));
     assert.equal(false, controller.keyPush(quick.CommandEnum[k]));
   }
+}
+
+function fontSpriteTest() {
+  let text;
+
+  // no args constructor
+  new quick.FontSprite();
+
+  // all args constructor
+  text = new quick.FontSprite('whatever');
+
+  // setText
+  text.setText('test');
+
+  // getString
+  assert.equal('test', text.text);
 }
 
 function pointTest() {
@@ -284,7 +300,7 @@ function sceneTest() {
   let subject = new quick.Scene();
 
   // build empty tiles
-  subject.build([["a", "b", "c"], ["d", "e", "f"]], () => { return null; });
+  subject.build([['a', 'b', 'c'], ['d', 'e', 'f']], () => { return null; });
 }
 
 function spriteTest() {
@@ -505,18 +521,22 @@ function spriteTest() {
   assert.equal(false, subject.direction.bottom);
 }
 
-function textTest() {
+function textSpriteTest() {
   let text;
 
   // no args constructor
-  new quick.FontSprite();
+  new quick.TextSprite();
 
   // all args constructor
-  text = new quick.FontSprite("whatever");
+  text = new quick.TextSprite('whatever');
+
+  // setFontColor
+  text.setFontColor(quick.Color.Black);
+  assert.equal(quick.Color.Black, text.fontColor);
 
   // setText
-  text.setText("test");
+  text.setText('test');
 
-  // getString
-  assert.equal("test", text.text);
+  // getText
+  assert.equal('test', text.text);
 }
