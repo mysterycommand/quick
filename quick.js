@@ -1154,22 +1154,6 @@
       this.width = width;
     }
 
-    get bottom() {
-      return this.y + this.height - 1;
-    }
-
-    get center() {
-      return new Point(this.centerX, this.centerY);
-    }
-
-    get centerX() {
-      return this.x + Math.floor(this.width / 2);
-    }
-
-    get centerY() {
-      return this.y + Math.floor(this.height / 2);
-    }
-
     get left() {
       return this.x;
     }
@@ -1182,24 +1166,24 @@
       return this.y;
     }
 
-    setBottom(y) {
-      this.y = y - this.height + 1;
-      return this;
+    get bottom() {
+      return this.y + this.height - 1;
     }
 
-    setCenter(point) {
-      this.setCenterX(point.x);
-      this.setCenterY(point.y);
-      return this;
+    get centerX() {
+      return this.x + Math.floor(this.width / 2);
     }
 
-    setCenterX(x) {
-      this.x = x - Math.floor(this.width / 2);
-      return this;
+    get centerY() {
+      return this.y + Math.floor(this.height / 2);
     }
 
-    setCenterY(y) {
-      this.y = y - Math.floor(this.height / 2);
+    get center() {
+      return new Point(this.centerX, this.centerY);
+    }
+
+    setWidth(width) {
+      this.width = width;
       return this;
     }
 
@@ -1213,9 +1197,17 @@
       return this;
     }
 
+    set left(x) {
+      this.setLeft(x);
+    }
+
     setRight(x) {
       this.x = x - this.width + 1;
       return this;
+    }
+
+    set right(x) {
+      this.setRight(x);
     }
 
     setTop(y) {
@@ -1223,8 +1215,12 @@
       return this;
     }
 
-    setWidth(width) {
-      this.width = width;
+    set top(y) {
+      this.setY(y);
+    }
+
+    setBottom(y) {
+      this.y = y - this.height + 1;
       return this;
     }
 
@@ -1232,28 +1228,32 @@
       this.setBottom(y);
     }
 
-    set center(point) {
-      this.setCenter(point);
+    setCenterX(x) {
+      this.x = x - Math.floor(this.width / 2);
+      return this;
     }
 
     set centerX(x) {
       this.setCenterX(x);
     }
 
+    setCenterY(y) {
+      this.y = y - Math.floor(this.height / 2);
+      return this;
+    }
+
     set centerY(y) {
       this.setCenterY(y);
     }
 
-    set left(x) {
-      this.setLeft(x);
+    setCenter(point) {
+      this.setCenterX(point.x);
+      this.setCenterY(point.y);
+      return this;
     }
 
-    set right(x) {
-      this.setRight(x);
-    }
-
-    set top(y) {
-      this.setY(y);
+    set center(point) {
+      this.setCenter(point);
     }
   }
 
