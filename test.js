@@ -35,8 +35,10 @@ global.navigator = {};
 global.window = {};
 
 // run tests
+animationTest();
 controllerTest();
 fontSpriteTest();
+frameTest();
 pointTest();
 pointerTest();
 quickTest();
@@ -45,6 +47,55 @@ sceneTest();
 spriteTest();
 
 // tests
+function animationTest() {
+  let subject;
+
+  const IMAGE1 = {
+    width: 1,
+    height: 2,
+  };
+
+  const IMAGE2 = {
+    width: 3,
+    height: 4,
+  };
+
+  const FRAMES = [
+    new quick.Frame(IMAGE1, 1),
+    new quick.Frame(IMAGE2, 2),
+  ];
+
+  // constructor
+  subject = new quick.Animation(FRAMES);
+  assert.equal(IMAGE1, subject.image);
+  assert.equal(IMAGE1.width, subject.width);
+  assert.equal(IMAGE1.height, subject.height);
+  assert.equal(false, subject.sync());
+  assert.equal(IMAGE2, subject.image);
+  assert.equal(IMAGE2.width, subject.width);
+  assert.equal(IMAGE2.height, subject.height);
+  assert.equal(false, subject.sync());
+  assert.equal(IMAGE2, subject.image);
+  assert.equal(IMAGE2.width, subject.width);
+  assert.equal(IMAGE2.height, subject.height);
+  assert.equal(true, subject.sync());
+  assert.equal(IMAGE1, subject.image);
+  assert.equal(IMAGE1.width, subject.width);
+  assert.equal(IMAGE1.height, subject.height);
+  assert.equal(false, subject.sync());
+  assert.equal(IMAGE2, subject.image);
+  assert.equal(IMAGE2.width, subject.width);
+  assert.equal(IMAGE2.height, subject.height);
+  assert.equal(false, subject.sync());
+  assert.equal(IMAGE2, subject.image);
+  assert.equal(IMAGE2.width, subject.width);
+  assert.equal(IMAGE2.height, subject.height);
+  assert.equal(true, subject.sync());
+  assert.equal(IMAGE1, subject.image);
+  assert.equal(IMAGE1.width, subject.width);
+  assert.equal(IMAGE1.height, subject.height);
+}
+
 function controllerTest() {
   let controller;
 
@@ -102,6 +153,22 @@ function fontSpriteTest() {
 
   // getString
   assert.equal('test', text.text);
+}
+
+function frameTest() {
+  const IMAGE = {
+    width: 1,
+    height: 2,
+  };
+
+  let subject;
+
+  // constructor
+  subject = new quick.Frame(IMAGE, 1);
+  assert.equal(IMAGE, subject.image);
+  assert.equal(1, subject.duration);
+  assert.equal(IMAGE.width, subject.width);
+  assert.equal(IMAGE.height, subject.height);
 }
 
 function pointTest() {

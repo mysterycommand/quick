@@ -717,7 +717,7 @@
       }
 
       this.stopTheme();
-      this._theme = document.getElementById(id);
+      this._theme = getElement(id);
 
       if (this._theme.currentTime > 0) {
         this._theme.currentTime = 0;
@@ -751,7 +751,7 @@
     update() {
       for (let i in this._queue) {
         if (this._queue.hasOwnProperty(i)) {
-          const SOUND = document.getElementById(i);
+          const SOUND = getElement(i);
           SOUND.pause();
 
           if (SOUND.currentTime > 0) {
@@ -783,7 +783,7 @@
 
   const Quick = (() => {
     let _autoScale = true;
-    let _canvas = document.getElementById('game') || document.getElementsByTagName('canvas')[0];
+    let _canvas = getElement('game') || getElements('canvas')[0];
     let _context = _canvas.getContext('2d');
     let _everyOther = true;
     let _frameTime = DEFAULT_FRAME_TIME;
@@ -994,7 +994,7 @@
     }
 
     function boot() {
-      const IMAGES = Array.from(document.getElementsByTagName('img'));
+      const IMAGES = Array.from(getElements('img'));
 
       for (let i = 0; i < IMAGES.length; ++i) {
         const IMAGE = IMAGES[i];
@@ -1259,44 +1259,68 @@
 
   class Frame {
     constructor(image, duration = 0) {
-      this.duration = duration;
-
       if (typeof(image) == 'string') {
-        this.image = document.getElementById(image);
+        this._image = getElement(image);
       } else {
-        this.image = image;
+        this._image = image;
       }
 
-      this.height = this.image.height;
-      this.width = this.image.width;
+      this._duration = duration;
+    }
+
+    get image() {
+      return this._image;
+    }
+
+    get duration() {
+      return this._duration;
+    }
+
+    get width() {
+      return this._image.width;
+    }
+
+    get height() {
+      return this._image.height;
     }
   }
 
   class Animation {
     constructor(frames) {
       this._frames = frames;
-      this._frame = this._frames[0];
-      this._frameIndex = 0;
+      this._index = 0;
       this._tick = 0;
     }
 
-    get height() {
-      return this._frame.height;
-    }
-
     get image() {
-      return this._frame.image;
+      return this._frames[this._index].image;
     }
 
     get width() {
-      return this._frame.width;
+      return this._frames[this._index].width;
     }
 
-    update() {
+    get height() {
+      return this._frames[this._index].height;
+    }
+
+    setFrameIndex(index) {
+      if (index < this._frames.length) {
+        this._index = index;
+        this._tick = 0;
+      }
+    }
+
+    set frameIndex(index) {
+      this.setFrameIndex(index);
+    }
+
+    sync() {
+      const DURATION = this._frames[this._index].duration;
       let hasLooped = false;
 
-      if (this._frame.duration && ++this._tick > this._frame.duration) {
-        let index = this._frameIndex + 1;
+      if (DURATION && ++this._tick >= DURATION) {
+        let index = this._index + 1;
 
         if (index == this._frames.length) {
           hasLooped = true;
@@ -1307,18 +1331,6 @@
       }
 
       return hasLooped;
-    }
-
-    setFrameIndex(frameIndex) {
-      if (frameIndex < this._frames.length && frameIndex > -1) {
-        this._frameIndex = frameIndex;
-        this._tick = 0;
-        this._frame = this._frames[frameIndex];
-      }
-    }
-
-    set frameIndex(frameIndex) {
-      this.setFrameIndex(frameIndex);
     }
   }
 
@@ -1539,8 +1551,9 @@
       this.setImage(image);
     }
 
+    // deprecated
     setImageId(id) {
-      this.setImage(document.getElementById(id));
+      this.setImage(id);
       return this;
     }
 
@@ -1632,7 +1645,7 @@
         this.expire();
       }
 
-      if (this._animation && this._animation.update()) {
+      if (this._animation && this._animation.sync()) {
         this.onAnimationLoop();
       }
 
@@ -1833,7 +1846,7 @@
           x = 0;
           y += height + SPACING;
         } else {
-          const IMAGE = document.getElementById(character + 'Font');
+          const IMAGE = getElement(character + 'Font');
 
           if (context) {
             context.drawImage(IMAGE, this.x + this.scene.x + x, this.y + this.scene.y + y, IMAGE.width, IMAGE.height);
@@ -1932,6 +1945,14 @@
         }
       }
     }
+  }
+
+  function getElement(id) {
+    return document.getElementById(id);
+  }
+
+  function getElements(name) {
+    return document.getElementsByTagName(name);
   }
 
   function makeSet(array) {
