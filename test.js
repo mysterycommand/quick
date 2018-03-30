@@ -335,55 +335,63 @@ function sceneTest() {
 }
 
 function spriteTest() {
+  const SCENE = new quick.Scene();
   let subject;
   let offBoundaryCalled;
 
   // no args constructor
-  subject = new quick.Sprite();
+  subject = new quick.Sprite(SCENE);
   assert.equal(0, subject.accelerationX);
   assert.equal(0, subject.accelerationY);
-  assert.equal(0, subject.left);
-  assert.equal(0, subject.top);
+  assert.equal(null, subject.boundary);
+  assert.equal(null, subject.color);
+  assert.equal(false, subject.essential);
+  assert.equal(0, subject.expiration);
+  assert.equal(false, subject.expired);
+  assert.equal(0, subject.layerIndex);
+  assert.equal(0, subject.maxSpeedX);
+  assert.equal(0, subject.maxSpeedY);
+  assert.equal(SCENE, subject.scene);
+  assert.equal(false, subject.solid);
   assert.equal(0, subject.speedX);
   assert.equal(0, subject.speedY);
-  assert.equal(0, subject.height);
-  assert.equal(0, subject.width);
-  assert.equal(0, subject.x);
-  assert.equal(0, subject.y);
-  assert.equal(null, subject.color);
-  assert.equal(0, subject.layerIndex);
-  assert.equal(false, subject.essential);
-  assert.equal(false, subject.solid);
   assert.equal(true, subject.visible);
+  assert.equal(0, subject.angle);
+  assert.equal(false, subject.direction.left);
+  assert.equal(false, subject.direction.right);
+  assert.equal(false, subject.direction.top);
+  assert.equal(false, subject.direction.bottom);
+  assert.equal(null, subject.image);
+  assert.equal(0, subject.tick);
 
-  // getters & setters
+  // setters
   subject = new quick.Sprite();
-  subject.setAccelerationX(4);
+  assert.equal(subject, subject.setAccelerationX(4));
   assert.equal(4, subject.accelerationX);
-  subject.setAccelerationY(5);
+  assert.equal(subject, subject.setAccelerationY(5));
   assert.equal(5, subject.accelerationY);
-  subject.setSpeedX(6);
+  assert.equal(subject, subject.setSpeedX(6));
   assert.equal(6, subject.speedX);
-  subject.setSpeedY(7);
+  assert.equal(subject, subject.setSpeedY(7));
   assert.equal(7, subject.speedY);
-  subject.setPosition(new quick.Point(10, 11));
+  assert.equal(subject, subject.setPosition(new quick.Point(8, 9)));
+  assert.equal(8, subject.x);
+  assert.equal(9, subject.y);
+  assert.equal(subject, subject.setPosition(10, 11));
   assert.equal(10, subject.x);
   assert.equal(11, subject.y);
-  subject.setPosition(10, 11);
-  assert.equal(10, subject.x);
-  assert.equal(11, subject.y);
-  subject.setPosition(0, 0);
+  assert.equal(subject, subject.setPosition(0, 0));
   assert.equal(0, subject.x);
   assert.equal(0, subject.y);
-  subject.setSize(19, 19);
-  assert.equal(19, subject.width);
-  assert.equal(19, subject.height);
-  subject.setSize(0, 0);
-  assert.equal(0, subject.width);
-  assert.equal(0, subject.height);
-  subject.setSize(new quick.Rect(0, 0, 20, 21));
+  assert.equal(subject, subject.setSize(new quick.Rect(0, 0, 20, 21)));
   assert.equal(20, subject.width);
   assert.equal(21, subject.height);
+  assert.equal(subject, subject.setSize(19, 19));
+  assert.equal(19, subject.width);
+  assert.equal(19, subject.height);
+  assert.equal(subject, subject.setSize(0, 0));
+  assert.equal(0, subject.width);
+  assert.equal(0, subject.height);
 
   // collision detection
   let subject1 = new quick.Sprite().setWidth(2).setHeight(2);
@@ -409,24 +417,16 @@ function spriteTest() {
   assert.equal(false, offBoundaryCalled);
 
   // off boundary
-  subject = new quick.Sprite();
-  subject.setSize(16, 16);
-  offBoundaryCalled = false;
-
-  subject.offBoundary = () => {
-    offBoundaryCalled = true;
-  };
-
   subject.setBoundary(new quick.Rect(20, 20, 100, 100));
   subject.sync();
   assert.equal(true, offBoundaryCalled);
 
   // expiration
-  subject = new quick.Sprite();
-  subject.setExpiration(5);
+  subject = new quick.Sprite().setExpiration(5);
 
   for (let i = 0; i < 5; ++i) {
     assert.equal(false, subject.expired);
+    assert.equal(i, subject.tick);
     assert.equal(false, subject.sync());
   }
 
@@ -458,6 +458,7 @@ function spriteTest() {
 
   // get angle
   subject = new quick.Sprite();
+  assert.equal(0, subject.angle);
   subject.setSpeedX(1);
   subject.setSpeedY(1);
   assert.equal(45, subject.angle);

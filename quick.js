@@ -1216,7 +1216,7 @@
     }
 
     set top(y) {
-      this.setY(y);
+      this.setTop(y);
     }
 
     setBottom(y) {
@@ -1340,18 +1340,18 @@
       this.accelerationX = 0;
       this.accelerationY = 0;
       this.boundary = null;
+      this.color = null;
+      this.essential = false;
+      this.expiration = 0;
+      this.expired = false;
+      this.layerIndex = 0;
       this.maxSpeedX = 0;
       this.maxSpeedY = 0;
+      this.scene = scene;
+      this.solid = false;
       this.speedX = 0;
       this.speedY = 0;
-      this.color = null;
-      this.expiration = 0;
-      this.layerIndex = 0;
-      this.essential = false;
-      this.expired = false;
-      this.solid = false;
       this.visible = true;
-      this.scene = scene;
       this._animation = null;
       this._lastX = this.x;
       this._lastY = this.y;
@@ -1382,11 +1382,146 @@
     }
 
     get image() {
-      return this._animation.image;
+      return this._animation && this._animation.image;
     }
 
     get tick() {
       return this._tick;
+    }
+
+    setAccelerationX(accelerationX = 0) {
+      this.accelerationX = accelerationX;
+      return this;
+    }
+
+    setAccelerationY(accelerationY = 0) {
+      this.accelerationY = accelerationY;
+      return this;
+    }
+
+    setBoundary(rect = null) {
+      this.boundary = rect || this.scene;
+      return this;
+    }
+
+    setColor(color) {
+      this.color = color;
+      return this;
+    }
+
+    setEssential(isEssential = true) {
+      this.essential = isEssential;
+      return this;
+    }
+
+    setExpiration(expiration = 0) {
+      this.expiration = expiration;
+      return this;
+    }
+
+    setExpired(isExpired = true) {
+      this.expired = isExpired;
+      return this;
+    }
+
+    setLayerIndex(layerIndex = 0) {
+      this.layerIndex = layerIndex;
+      return this;
+    }
+
+    setMaxSpeedX(maxSpeedX = 0) {
+      this.maxSpeedX = maxSpeedX;
+      return this;
+    }
+
+    setMaxSpeedY(maxSpeedY = 0) {
+      this.maxSpeedY = maxSpeedY;
+      return this;
+    }
+
+    setSolid(isSolid = true) {
+      this.solid = isSolid;
+      return this;
+    }
+
+    setSpeedX(speedX = 0) {
+      this.speedX = speedX;
+      return this;
+    }
+
+    setSpeedY(speedY = 0) {
+      this.speedY = speedY;
+      return this;
+    }
+
+    setVisible(isVisible = true) {
+      this.visible = isVisible;
+      return this;
+    }
+
+    setAnimation(animation) {
+      if (this._animation == animation) {
+        return this;
+      }
+
+      this._animation = animation;
+      this._animation.setFrameIndex(0);
+      this.height = this._animation.height;
+      this.width = this._animation.width;
+      return this;
+    }
+
+    setImage(image) {
+      this.setAnimation(new Animation([new Frame(image)]));
+      return this;
+    }
+
+    set image(image) {
+      this.setImage(image);
+    }
+
+    // deprecated
+    setImageId(id) {
+      this.setImage(id);
+      return this;
+    }
+
+    setPosition(pointOrX, y) {
+      if (y != null) {
+        this.x = pointOrX;
+        this.y = y;
+      } else {
+        this.x = pointOrX.x;
+        this.y = pointOrX.y;
+      }
+
+      return this;
+    }
+
+    setSize(rectOrWidth, height) {
+      if (height != null) {
+        this.setWidth(rectOrWidth);
+        this.setHeight(height);
+      } else {
+        this.setWidth(rectOrWidth.width);
+        this.setHeight(rectOrWidth.height);
+      }
+
+      return this;
+    }
+
+    setSpeedToAngle(speed, degrees) {
+      const RADIANS = toRadians(degrees);
+      this.setSpeedX(speed * Math.cos(RADIANS));
+      this.setSpeedY(speed * Math.sin(RADIANS));
+      return this;
+    }
+
+    setSpeedToPoint(speed, point) {
+      const SQUARE_DISTANCE = Math.abs(this.centerX - point.x) + Math.abs(this.centerY - point.y);
+      this.setSpeedX((point.x - this.centerX) * speed / SQUARE_DISTANCE);
+      this.setSpeedY((point.y - this.centerY) * speed / SQUARE_DISTANCE);
+      return this;
     }
 
     addTag(tag) {
@@ -1418,6 +1553,7 @@
       return this;
     }
 
+    // deprecated
     expire() {
       this.expired = true;
       return this;
@@ -1498,136 +1634,6 @@
       }
 
       return true;
-    }
-
-    setAccelerationX(accelerationX = 0) {
-      this.accelerationX = accelerationX;
-      return this;
-    }
-
-    setAccelerationY(accelerationY = 0) {
-      this.accelerationY = accelerationY;
-      return this;
-    }
-
-    setAnimation(animation) {
-      if (this._animation == animation) {
-        return this;
-      }
-
-      this._animation = animation;
-      this._animation.setFrameIndex(0);
-      this.height = this._animation.height;
-      this.width = this._animation.width;
-      return this;
-    }
-
-    setBoundary(rect) {
-      this.boundary = rect || this.scene;
-      return this;
-    }
-
-    setColor(color) {
-      this.color = color;
-      return this;
-    }
-
-    setEssential(isEssential = true) {
-      this.essential = isEssential;
-      return this;
-    }
-
-    setExpiration(expiration = 0) {
-      this.expiration = expiration;
-      return this;
-    }
-
-    setImage(image) {
-      this.setAnimation(new Animation([new Frame(image)]));
-      return this;
-    }
-
-    set image(image) {
-      this.setImage(image);
-    }
-
-    // deprecated
-    setImageId(id) {
-      this.setImage(id);
-      return this;
-    }
-
-    setLayerIndex(layerIndex = 0) {
-      this.layerIndex = layerIndex;
-      return this;
-    }
-
-    setMaxSpeedX(maxSpeedX = 0) {
-      this.maxSpeedX = maxSpeedX;
-      return this;
-    }
-
-    setMaxSpeedY(maxSpeedY = 0) {
-      this.maxSpeedY = maxSpeedY;
-      return this;
-    }
-
-    setPosition(pointOrX, y) {
-      if (y != null) {
-        this.x = pointOrX;
-        this.y = y;
-      } else {
-        this.x = pointOrX.x;
-        this.y = pointOrX.y;
-      }
-
-      return this;
-    }
-
-    setSize(rectOrWidth, height) {
-      if (height != null) {
-        this.setWidth(rectOrWidth);
-        this.setHeight(height);
-      } else {
-        this.setWidth(rectOrWidth.width);
-        this.setHeight(rectOrWidth.height);
-      }
-
-      return this;
-    }
-
-    setSolid(isSolid = true) {
-      this.solid = isSolid;
-      return this;
-    }
-
-    setSpeedToAngle(speed, degrees) {
-      const RADIANS = toRadians(degrees);
-      this.setSpeedX(speed * Math.cos(RADIANS));
-      this.setSpeedY(speed * Math.sin(RADIANS));
-      return this;
-    }
-
-    setSpeedToPoint(speed, point) {
-      const SQUARE_DISTANCE = Math.abs(this.centerX - point.x) + Math.abs(this.centerY - point.y);
-      this.setSpeedX((point.x - this.centerX) * speed / SQUARE_DISTANCE);
-      this.setSpeedY((point.y - this.centerY) * speed / SQUARE_DISTANCE);
-      return this;
-    }
-
-    setSpeedX(speedX = 0) {
-      this.speedX = speedX;
-      return this;
-    }
-
-    setSpeedY(speedY = 0) {
-      this.speedY = speedY;
-      return this;
-    }
-
-    setVisible(isVisible = true) {
-      this.visible = isVisible;
-      return this;
     }
 
     stop() {
