@@ -1,6 +1,6 @@
 {
   "name": "quick",
-  "version": "6.1.2",
+  "version": "6.2.0",
   "description": "open multi-platform game engine",
   "main": "quick.js",
   "scripts": {
