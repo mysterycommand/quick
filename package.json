@@ -1,14 +1,14 @@
 {
-  "name": "quick",
+  "name": "quick-game",
   "version": "6.2.0",
-  "description": "open multi-platform game engine",
+  "description": "JS game framework",
   "main": "quick.js",
   "scripts": {
     "test": "node ./test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diogoschneider/quick.git"
+    "url": "git+https://github.com/quick-developers/quick"
   },
   "keywords": [
     "engine",
@@ -19,7 +19,7 @@
   "author": "Diogo Schneider",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/diogoschneider/quick/issues"
+    "url": "https://github.com/quick-developers/quick/issues"
   },
-  "homepage": "https://github.com/diogoschneider/quick#readme"
+  "homepage": "https://quick-developers.github.io/quick/"
 }
