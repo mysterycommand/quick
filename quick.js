@@ -1335,7 +1335,7 @@
   }
 
   class Sprite extends Rect {
-    constructor(scene = null) {
+    constructor(scene) {
       super();
       this.accelerationX = 0;
       this.accelerationY = 0;
@@ -1352,6 +1352,7 @@
       this.speedX = 0;
       this.speedY = 0;
       this.visible = true;
+      this.zoomSpeed = 0;
       this._animation = null;
       this._lastX = this.x;
       this._lastY = this.y;
@@ -1456,6 +1457,11 @@
 
     setVisible(isVisible = true) {
       this.visible = isVisible;
+      return this;
+    }
+
+    setZoomSpeed(zoomSpeed = 0) {
+      this.zoomSpeed = zoomSpeed;
       return this;
     }
 
@@ -1605,7 +1611,7 @@
     }
 
     offBoundary() {
-      this.expire();
+      this.setExpired();
     }
 
     onAnimationLoop() {
@@ -1639,6 +1645,7 @@
     stop() {
       this.speedX = 0;
       this.speedY = 0;
+      this.zoomSpeed = 0;
       return this;
     }
 
@@ -1648,7 +1655,7 @@
       }
 
       if (++this._tick == this.expiration) {
-        this.expire();
+        this.setExpired();
       }
 
       if (this._animation && this._animation.sync()) {
@@ -1657,6 +1664,10 @@
 
       this.speedX += this.accelerationX;
       this.speedY += this.accelerationY;
+
+      if (this.zoomSpeed != 0) {
+        this.zoom(this.zoomSpeed);
+      }
 
       if (this.maxSpeedX && Math.abs(this.speedX) > this.maxSpeedX) {
         const SIGNAL = this.speedX / Math.abs(this.speedX);
@@ -1682,6 +1693,15 @@
 
     update() {
       // no default behavior
+    }
+
+    zoom(width) {
+      this.width += width;
+      this.x -= width / 2;
+      const RATIO = this.height / this.width;
+      this.height += width * RATIO;
+      this.y -= width * RATIO / 2;
+      return this;
     }
   }
 
@@ -1746,7 +1766,7 @@
 
         if (SPRITE.sync()) {
           if (SPRITE.essential) {
-            this.expire();
+            this.setExpired();
           }
         } else {
           if (SPRITE.solid) {
