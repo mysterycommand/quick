@@ -23,7 +23,7 @@ Please check the [Wiki](https://github.com/quick-developers/quick/wiki) for more
 
 # Games
 These are some games made with quick (in alphabetical order):
-* [Alpha](http://diogoschneider.github.io/games/alpha/)
+* [Alpha](https://diogoschneider.github.io/alpha/)
 * [Cityscape](https://www.kongregate.com/games/diogoschneider/cityscape/)
 * [Colda Kasar's Domain](http://coldmass.com.br/coldakasar/)
 * [Cucurbita's Halloween](http://www.kongregate.com/games/bbastudios/cucurbitas-halloween)
