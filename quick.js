@@ -933,18 +933,20 @@
       }
 
       static rotate(image, degrees) {
+        const ORIGINAL = getImage(image);
+
         if (degrees % 360 == 0 ) {
-          return image;
+          return ORIGINAL;
         }
 
         const RADIANS = toRadians(degrees);
         const IMAGE = document.createElement('canvas');
-        let sideA = image.width;
-        let sideB = image.height;
+        let sideA = ORIGINAL.width;
+        let sideB = ORIGINAL.height;
 
         if (degrees == 90 || degrees == 270) {
-          sideA = image.height;
-          sideB = image.width;
+          sideA = ORIGINAL.height;
+          sideB = ORIGINAL.width;
         }
 
         IMAGE.width = sideA;
@@ -952,7 +954,7 @@
         const CONTEXT = IMAGE.getContext('2d');
         CONTEXT.translate(IMAGE.width / 2, IMAGE.height / 2);
         CONTEXT.rotate(RADIANS);
-        CONTEXT.drawImage(image, -image.width / 2, -image.height / 2);
+        CONTEXT.drawImage(ORIGINAL, -ORIGINAL.width / 2, -ORIGINAL.height / 2);
         return IMAGE;
       }
 
@@ -1033,13 +1035,14 @@
     }
 
     function invert(image, isMirror, isFlip) {
+      const ORIGINAL = getImage(image);
       const IMAGE = document.createElement('canvas');
-      IMAGE.width = image.width;
-      IMAGE.height = image.height;
+      IMAGE.width = ORIGINAL.width;
+      IMAGE.height = ORIGINAL.height;
       const CONTEXT = IMAGE.getContext('2d');
       CONTEXT.translate(isMirror ? IMAGE.width : 0, isFlip ? IMAGE.height : 0);
       CONTEXT.scale(isMirror ? -1 : 1, isFlip ? - 1 : 1);
-      CONTEXT.drawImage(image, 0, 0);
+      CONTEXT.drawImage(ORIGINAL, 0, 0);
       return IMAGE;
     }
 
@@ -1266,12 +1269,7 @@
 
   class Frame {
     constructor(image, duration = 0) {
-      if (typeof(image) == 'string') {
-        this._image = getElement(image);
-      } else {
-        this._image = image;
-      }
-
+      this._image = getImage(image);
       this._duration = duration;
     }
 
@@ -1986,6 +1984,14 @@
 
   function getElements(name) {
     return document.getElementsByTagName(name);
+  }
+
+  function getImage(image) {
+    if (typeof(image) == 'string') {
+      return getElement(image);
+    }
+
+    return image;
   }
 
   function makeEnum(array) {
