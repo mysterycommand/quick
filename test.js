@@ -325,6 +325,15 @@ function rectTest() {
   subject = new quick.Rect(0, 0, 6, 6);
   assert.equal(3, subject.centerX);
   assert.equal(3, subject.centerY);
+
+  // union
+  const RECT1 = new quick.Rect(10, 20, 30, 40);
+  const RECT2 = new quick.Rect(50, 60, 70, 80);
+  subject = RECT1.union(RECT2);
+  assert.equal(RECT1.left, subject.left);
+  assert.equal(RECT1.top, subject.top);
+  assert.equal(RECT2.right, subject.right);
+  assert.equal(RECT2.bottom, subject.bottom);
 }
 
 function sceneTest() {

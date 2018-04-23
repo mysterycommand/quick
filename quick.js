@@ -1255,6 +1255,13 @@
     set center(point) {
       this.setCenter(point);
     }
+
+    union(rect) {
+      const RECT = new Rect(Math.min(this.x, rect.x), Math.min(this.y, rect.y));
+      RECT.width = Math.max(this.right, rect.right) - RECT.x + 1;
+      RECT.height = Math.max(this.bottom, rect.bottom) - RECT.y + 1;
+      return RECT;
+    }
   }
 
   class Frame {
