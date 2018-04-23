@@ -13,33 +13,33 @@
   const DEFAULT_FRAME_TIME = 16;
   const DEFAULT_SOUND_EFFECTS_VOLUME = 0.3;
 
-  const Axis = {
-    LEFT_X: 0,
-    LEFT_Y: 1,
-    RIGHT_X: 2,
-    RIGHT_Y: 3
-  };
+  const Axis = makeEnum([
+    'LEFT_X',
+    'LEFT_Y',
+    'RIGHT_X',
+    'RIGHT_Y',
+  ]);
 
-  const Button = {
-    A: 0,
-    B: 1,
-    X: 2,
-    Y: 3,
-    L1: 4,
-    R1: 5,
-    L2: 6,
-    R2: 7,
-    SELECT: 8,
-    START: 9,
-    L3: 10,
-    R3: 11,
-    UP: 12,
-    DOWN: 13,
-    LEFT: 14,
-    RIGHT: 15
-  };
+  const Button = makeEnum([
+    'A',
+    'B',
+    'X',
+    'Y',
+    'L1',
+    'R1',
+    'L2',
+    'R2',
+    'SELECT',
+    'START',
+    'L3',
+    'R3',
+    'UP',
+    'DOWN',
+    'LEFT',
+    'RIGHT',
+  ]);
 
-  const Color = makeSet([
+  const Color = makeHash([
     'AliceBlue',
     'AntiqueWhite',
     'Aqua',
@@ -190,18 +190,18 @@
     'YellowGreen',
   ]);
 
-  const Command = {
-    UP: 0,
-    DOWN: 1,
-    LEFT: 2,
-    RIGHT: 3,
-    A: 4,
-    B: 5,
-    X: 6,
-    Y: 7,
-    SELECT: 8,
-    START: 9,
-  };
+  const Command = makeEnum([
+    'UP',
+    'DOWN',
+    'LEFT',
+    'RIGHT',
+    'A',
+    'B',
+    'X',
+    'Y',
+    'SELECT',
+    'START',
+  ]);
 
   const FontFamily = {
     Cursive: 'cursive',
@@ -1981,12 +1981,16 @@
     return document.getElementsByTagName(name);
   }
 
-  function makeSet(array) {
+  function makeEnum(array) {
+    return makeHash(array, true);
+  }
+
+  function makeHash(array, indexed) {
     const RESULT = {};
 
     for (let i = 0; i < array.length; ++i) {
       const VALUE = array[i];
-      RESULT[VALUE] = VALUE;
+      RESULT[VALUE] = indexed ? i : VALUE;
     }
 
     return RESULT;
