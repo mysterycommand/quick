@@ -1,6 +1,6 @@
 {
   "name": "quick-game",
-  "version": "6.2.0",
+  "version": "6.3.0",
   "description": "JS game framework",
   "main": "quick.js",
   "scripts": {
